@@ -65,7 +65,7 @@ El siguiente fragmento muestra la implementación del endpoint de autenticación
         if not conn:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
-                detail="Error de conexión a la base de datos"
+                detail="Error de conexion a la base de datos"
             )
     
         cursor = conn.cursor()
@@ -82,7 +82,7 @@ El siguiente fragmento muestra la implementación del endpoint de autenticación
             if not user:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Usuario o contraseña incorrectos"
+                    detail="Usuario o contrasena incorrectos"
                 )
     
             id_usuario, contrasena_cifrada, nombre, tipo_usuario, id_estatus = user
@@ -96,7 +96,7 @@ El siguiente fragmento muestra la implementación del endpoint de autenticación
             if not verify_password(credentials.password, contrasena_cifrada):
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Usuario o contraseña incorrectos"
+                    detail="Usuario o contrasena incorrectos"
                 )
     
             token_payload = {
@@ -108,7 +108,7 @@ El siguiente fragmento muestra la implementación del endpoint de autenticación
             token = create_access_token(token_payload)
     
             return {
-                "message": "Inicio de sesión exitoso",
+                "message": "Inicio de sesion exitoso",
                 "token": token
             }
     

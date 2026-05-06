@@ -7,3 +7,4 @@
 *.lot
 *.bbl
 *.blg
+*.fdb_latexmk
