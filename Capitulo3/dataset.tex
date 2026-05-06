@@ -1,0 +1,159 @@
+\subsection{Criterios de selección de dataset}
+
+En este apartado se presenta el análisis de los datasets necesarios para el entrenamiento y validación del módulo de reconocimiento óptico de caracteres (OCR). Dado que el sistema está orientado a la escritura manuscrita en letra de molde de estudiantes de tercer y cuarto grado de educación primaria, la selección de datos de entrenamiento representa un factor determinante en la precisión final del modelo. Por ello, se establecen criterios de selección, se evalúan los conjuntos de datos públicamente disponibles y se identifican las brechas que deberán atenderse en la fase de diseño.
+
+\subsubsection{Determinación de criterios de selección del dataset}
+
+Para garantizar que los datos de entrenamiento sean adecuados al contexto del sistema, se establecieron criterios de selección a partir de los requerimientos funcionales y no funcionales definidos en la sección 3.7. Estos criterios permiten evaluar de manera objetiva la pertinencia de cada dataset disponible y fundamentar las decisiones de selección.
+
+En la Tabla \ref{tab:criterios_dataset} se presentan los criterios definidos para la evaluación de datasets, junto con su justificación y el nivel de prioridad asignado.
+
+\begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}m{1.5cm}|>{\centering\arraybackslash}m{3.5cm}|Y|>{\centering\arraybackslash}m{2cm}|}
+\caption{Criterios de selección del dataset.}
+\label{tab:criterios_dataset} \\
+
+\hline
+\textbf{ID} & \textbf{Criterio} & \textbf{Descripción} & \textbf{Prioridad} \\
+\hline
+\endfirsthead
+
+\hline
+\textbf{ID} & \textbf{Criterio} & \textbf{Descripción} & \textbf{Prioridad} \\
+\hline
+\endhead
+
+\hline
+\endfoot
+
+% CR-01
+CR-01 & 
+Licencia de uso académico & 
+El dataset debe contar con una licencia que permita su uso sin restricciones para investigación y desarrollo académico no comercial. & 
+Alta \\ \hline
+
+% CR-02
+CR-02 & 
+Soporte de caracteres en español & 
+El dataset debe incluir los 27 caracteres del alfabeto español, incluyendo la letra ñ y las cinco vocales con tilde (á, é, í, ó, u). & 
+Alta \\ \hline
+
+% CR-03
+CR-03 & 
+Tipo de escritura & 
+Las muestras deben corresponder a letra de molde (imprenta), ya que el sistema excluye explícitamente la escritura cursiva (véase sección 3.1.2). & 
+Alta \\ \hline
+
+% CR-04
+CR-04 & 
+Volumen de muestras & 
+El dataset debe aportar un número suficiente de muestras por clase para garantizar variabilidad estadística. Se establece un mínimo de 1,000 imágenes por carácter. & 
+Alta \\ \hline
+
+% CR-05
+CR-05 & 
+Formato de imagen compatible & 
+Las imágenes deben estar disponibles en formato PNG o JPEG, compatibles con el módulo de preprocesamiento descrito en los requerimientos no funcionales (RNF-04). & 
+Media \\ \hline
+
+% CR-06
+CR-06 & 
+Disponibilidad de etiquetas & 
+El dataset debe incluir anotaciones que permitan la correspondencia entre imagen y carácter o palabra reconocida, para facilitar el entrenamiento supervisado. & 
+Alta \\ \hline
+
+% CR-07
+CR-07 & 
+Escritura infantil & 
+Se prioriza que las muestras provengan de escritura infantil o, en su defecto, que incluyan irregularidades propias de este tipo de escritura (trazos variables, tamaños inconsistentes). & 
+Media \\ \hline
+
+% CR-08
+CR-08 & 
+Accesibilidad y descarga pública & 
+El dataset debe estar disponible para su descarga directa, sin requerir acuerdos institucionales formales que puedan retrasar el desarrollo del proyecto. & 
+Media \\ \hline
+
+\end{tabularx}
+
+\subsubsection{Análisis de datasets disponibles}
+A partir de los criterios definidos, se realizó una revisión de los principales conjuntos de datos disponibles públicamente que han sido utilizados en tareas de reconocimiento de escritura manuscrita. En la Tabla \ref{tab:evaluacion_datasets} se comparan estos datasets en función de los criterios establecidos, indicando mediante una escala de cumplimiento si cada criterio es satisfecho de forma completa ($\checkmark$), parcial ($\Delta$) o no satisfecho ($\times$).
+
+\begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}m{2.8cm}|*{8}{>{\centering\arraybackslash\hspace{0pt}}X|}}
+\caption{Evaluación de datasets según los criterios de selección.}
+\label{tab:evaluacion_datasets} \\
+
+\hline
+\textbf{Dataset} & 
+\textbf{\footnotesize CR-01}\newline \scriptsize Licencia & 
+\textbf{\footnotesize CR-02}\newline \scriptsize Español & 
+\textbf{\footnotesize CR-03}\newline \scriptsize Molde & 
+\textbf{\footnotesize CR-04}\newline \scriptsize Vo\-lu\-men & 
+\textbf{\footnotesize CR-05}\newline \scriptsize For\-ma\-to & 
+\textbf{\footnotesize CR-06}\newline \scriptsize Eti\-que\-tas & 
+\textbf{\footnotesize CR-07}\newline \scriptsize In\-fan\-til & 
+\textbf{\footnotesize CR-08}\newline \scriptsize Acceso \\ \hline
+\endfirsthead
+
+\hline
+\textbf{Dataset} & 
+\textbf{\footnotesize CR-01}\newline \scriptsize Licencia & 
+\textbf{\footnotesize CR-02}\newline \scriptsize Español & 
+\textbf{\footnotesize CR-03}\newline \scriptsize Molde & 
+\textbf{\footnotesize CR-04}\newline \scriptsize Vo\-lu\-men & 
+\textbf{\footnotesize CR-05}\newline \scriptsize For\-ma\-to & 
+\textbf{\footnotesize CR-06}\newline \scriptsize Eti\-que\-tas & 
+\textbf{\footnotesize CR-07}\newline \scriptsize In\-fan\-til & 
+\textbf{\footnotesize CR-08}\newline \scriptsize Acceso \\ \hline
+\endhead
+
+\hline
+\endfoot
+
+% Fila 1
+\small Letras Alfabeto Español (Kaggle, Herrera, 2023) \cite{refx7} & 
+$\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\times$ & $\checkmark$ \\ \hline
+
+% Fila 2
+\small EMNIST Balanced (Cohen et al., 2017) \cite{refx8} & 
+$\checkmark$ & $\times$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\times$ & $\checkmark$ \\ \hline
+
+% Fila 3
+\small IAM Handwriting Database (Marti \& Bunke, 2002) \cite{refx9} & 
+$\Delta$ & $\times$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\times$ & $\Delta$ \\ \hline
+
+% Fila 4
+\small Tesseract spa.traineddata (Google, Tesseract OCR) \cite{refx11} & 
+$\checkmark$ & $\checkmark$ & $\checkmark$ & $-$ & $-$ & $-$ & $\times$ & $\checkmark$ \\ \hline
+
+% Nota
+\multicolumn{9}{|p{\dimexpr\textwidth-2\tabcolsep-2\arrayrulewidth\relax}|}{\scriptsize Nota: El dataset Tesseract spa.traineddata es un modelo preentrenado y no un conjunto de imágenes. Se incluye en la comparativa dado que representa una alternativa de punto de partida para el reconocimiento de texto en español, aplicable mediante técnicas de fine-tuning. El volumen y formato no aplican en este caso, ya que el acceso es a pesos del modelo y no a imágenes crudas.} \\ \hline
+
+\end{tabularx}
+
+A continuación, se describen los hallazgos más relevantes de cada dataset evaluado:
+
+\begin{enumerate}
+    \item Letras Alfabeto Español (Kaggle – Herrera, 2023). Este dataset contiene imágenes de los 27 caracteres del alfabeto español en forma aislada, lo que lo convierte en el único conjunto identificado con soporte nativo de la letra ñ y las vocales acentuadas, atendiendo directamente el criterio CR-02. Cada subcarpeta contiene entre 972 y 1,221 imágenes de 350×350 píxeles en letra de molde manuscrita, satisfaciendo los criterios de volumen (CR-04), formato (CR-05) y tipo de escritura (CR-03). El límite inferior de 972 imágenes en algunas clases se considera estadísticamente aceptable dado que la mayoría supera el umbral de 1,000 establecido, y puede complementarse mediante técnicas de aumentación de datos durante la fase de diseño. Dado que las muestras corresponden a escritura adulta, el criterio CR-07 no es satisfecho.
+    \item EMNIST Balanced. Este dataset, derivado del NIST Special Database 19, contiene 131,600 imágenes de caracteres manuscritos distribuidos en 47 clases balanceadas, con una escala suficiente para garantizar variabilidad estadística (CR-04). Su limitación principal para el presente proyecto radica en que el conjunto de caracteres corresponde al alfabeto latino básico (A–Z, a–z, 0–9) sin incluir caracteres específicos del español (CR-02), lo que genera una brecha directa con los requerimientos del sistema definidos en OE-01.
+    \item IAM Handwriting Database. Contiene formularios completos de texto manuscrito en inglés, etiquetados a nivel de línea y palabra. Si bien su volumen y calidad de etiquetado son considerables, su licencia requiere registro institucional (CR-01 parcial) y su contenido está en inglés (CR-02 no satisfecho), lo que limita su aplicabilidad directa en el presente proyecto.
+    \item Tesseract spa.traineddata. El modelo preentrenado de Tesseract para español, disponible de forma abierta bajo licencia Apache 2.0, ofrece una capacidad base de reconocimiento de texto en español. Su fortaleza principal radica en el soporte completo de caracteres en español (CR-02) y su accesibilidad directa (CR-08). No obstante, este modelo está optimizado para texto impreso o tipografiado, mostrando una precisión reducida ante la variabilidad propia de la escritura manuscrita infantil (CR-07).
+\end{enumerate}
+
+\subsubsection{Identificación de brechas y justificación de selección}
+
+El análisis comparativo revela que ningún dataset disponible cumple la totalidad de los criterios establecidos de forma individual. En particular, se identifican tres brechas críticas que deben ser atendidas en el diseño del sistema:
+\begin{enumerate}
+    \item Ausencia de caracteres españoles en datasets de alto volumen. El dataset con mayor volumen y variabilidad (EMNIST) no incluye los caracteres propios del español. Esta brecha implica que dicho dataset solo puede utilizarse como complemento para los caracteres del alfabeto latino compartido (A–Z, a–z), y no puede resolver por sí solo el objetivo OE-01.
+    \item Cobertura parcial del alfabeto español en datasets accesibles. El único dataset identificado con soporte de caracteres específicos del español es el de Kaggle (Herrera, 2023), cuya cobertura de muestras por carácter es limitada. Esto implica la necesidad de complementar este dataset con técnicas de aumentación de datos para garantizar la variabilidad necesaria para el entrenamiento y validación del modelo OCR.
+    \item Inexistencia de datasets públicos de escritura infantil en español en letra de molde. Ninguno de los datasets identificados proviene de escritura infantil, lo que representa la brecha más significativa respecto al contexto de uso del sistema. Esta condición es inherente al dominio del proyecto, dado que la escritura infantil presenta irregularidades específicas (variabilidad en tamaño, inclinación y espaciado) que los modelos entrenados exclusivamente con escritura adulta pueden no capturar con suficiente precisión, tal como se señaló en la sección 1.3 del marco teórico.
+\end{enumerate}
+
+Debido a lo anterior, la estrategia de dataset adoptada para el proyecto se basa en la combinación de los siguientes componentes:
+
+\begin{itemize}
+    \item Dataset primario: Letras Alfabeto Español (Kaggle – Herrera, 2023), por ser el único conjunto con soporte nativo de los caracteres específicos del español requeridos por el sistema.
+    \item Dataset complementario: EMNIST Balanced, como fuente de variabilidad adicional para los caracteres del alfabeto latino compartido con el español (A–Z, a–z, 0–9).
+    \item Punto de partida del modelo: Tesseract spa.traineddata, como modelo base sobre el cual aplicar técnicas de ajuste fino (fine-tuning) con los datos recopilados.
+\end{itemize}
+
+La estrategia detallada de combinación, preprocesamiento y aumentación de datos será descrita en el Capítulo 4, en el contexto del diseño del módulo OCR. Asimismo, las muestras recopiladas durante la prueba piloto con 25 alumnos (descrita en el Capítulo 1) constituirán un conjunto de validación con escritura infantil real, permitiendo evaluar el desempeño del modelo en condiciones representativas del entorno de uso previsto.

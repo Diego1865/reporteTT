@@ -1,0 +1,146 @@
+%------------------ CAPÍTULO 1 ------------------
+\newpage
+\section{Capítulo 1: Problemática}
+
+En este capítulo presentamos el contexto que da origen al desarrollo de una aplicación web orientada
+al fortalecimiento de la escritura en educación primaria. Se describe la situación actual relacionada
+con las dificultades en ortografía y calidad del trazo manuscrito en tercer y cuarto grado, así como la
+necesidad de incorporar herramientas tecnológicas que apoyen el proceso de retroalimentación
+académica. Además, se establecen los objetivos del proyecto y se revisan antecedentes que permiten
+comprender el panorama educativo y tecnológico en el que se enmarca la propuesta.
+
+\subsection{Planteamiento del problema}
+
+La adquisición y consolidación de habilidades de escritura durante la educación primaria constituye
+un elemento determinante en el desarrollo académico posterior de los estudiantes. La alfabetización
+temprana no solo impacta el desempeño en el área de lenguaje, sino que influye transversalmente en
+otras disciplinas escolares \cite{unesco2022tech}. Sin embargo, diversos informes educativos han señalado que persisten
+dificultades en competencias relacionadas con redacción y ortografía en niveles básicos de educación
+\cite{mejoredu2022indicadores}.
+
+En el contexto nacional, los indicadores de logro educativo han evidenciado áreas de oportunidad en
+producción escrita y comunicación, particularmente en educación primaria \cite{worldbank2023reimagining}. Estas dificultades
+pueden manifestarse en errores ortográficos recurrentes y problemas en la legibilidad del trazo
+manuscrito, lo que afecta la claridad de los textos producidos por los alumnos.
+
+La evaluación de estos aspectos depende principalmente de la revisión manual realizada por el docente. Aunque esta intervención es esencial, en grupos numerosos puede limitarse la frecuencia y profundidad de la retroalimentación individualizada. La literatura pedagógica ha destacado que la retroalimentación oportuna y continua es un factor clave para la mejora del aprendizaje \cite{berninger2010teaching}.
+
+Paralelamente, la incorporación de tecnologías digitales en el ámbito educativo ha crecido de manera significativa en los últimos años; no obstante, muchas herramientas se centran en ejercicios mecanografiados y no abordan directamente la práctica y análisis de la escritura manuscrita \cite{pedregosa2011scikit}. Esta situación genera una brecha entre el avance tecnológico y la necesidad de fortalecer habilidades tradicionales mediante enfoques innovadores.
+
+Ante este panorama, surge la necesidad de explorar alternativas que permitan analizar textos manuscritos y ofrecer retroalimentación automatizada en un entorno educativo supervisado. En consecuencia, el problema central que da origen al presente trabajo se formula de la siguiente manera:
+
+\textbf{¿Cómo apoyar el fortalecimiento de la escritura en letra de molde en alumnos de tercer y cuarto grado de primaria mediante una herramienta tecnológica que permita la detección automatizada de errores ortográficos y la evaluación básica de la calidad del trazo?
+}
+
+\subsection{Propuesta de solución}
+Para atender la problemática identificada, se propone el desarrollo e implementación de una aplicación web orientada al fortalecimiento de la escritura en letra de molde en alumnos de tercer y cuarto grado de educación primaria. La solución integra herramientas tecnológicas que permiten analizar textos manuscritos y generar retroalimentación automatizada dentro de un entorno educativo supervisado.
+
+La aplicación permitirá la captura de ejercicios mediante escritura directa en pantalla o carga de imágenes digitalizadas. Posteriormente, se emplearán técnicas de OCR para convertir el texto manuscrito en formato digital, y herramientas de NLP para detectar posibles errores ortográficos y sugerir correcciones.
+
+Asimismo, se evaluarán parámetros básicos relacionados con la calidad del trazo, alineación, tamaño, espaciado e inclinación. La aplicación será desplegada en un servidor funcional y validado mediante una prueba piloto, con el fin de analizar su impacto preliminar en el fortalecimiento de la escritura.
+
+\subsection{Justificación}
+La práctica de las habilidades de escritura en educación primaria representa una necesidad prioritaria dentro del proceso formativo, debido a su impacto directo en el desempeño académico y en el desarrollo integral del estudiante. La alfabetización efectiva en etapas tempranas se asocia con mejores resultados educativos a largo plazo y mayor capacidad de aprendizaje en distintas áreas del conocimiento \cite{worldbank2018promise}.
+
+En el contexto nacional, los reportes recientes sobre el estado de la educación han señalado la importancia de implementar estrategias que apoyen el desarrollo de competencias comunicativas desde los primeros grados escolares \cite{mejoredu2023retos}. La detección temprana de errores ortográficos y dificultades en la escritura permite intervenir oportunamente, evitando que dichas problemáticas se consoliden en niveles educativos posteriores.
+
+Desde el ámbito tecnológico, el uso de herramientas basadas en inteligencia artificial en entornos educativos ha demostrado potencial para mejorar procesos de retroalimentación y seguimiento académico cuando se emplean como apoyo complementario al docente \cite{unesco2021ai}. La posibilidad de automatizar ciertos procesos de análisis no busca sustituir la labor pedagógica, sino fortalecerla mediante información adicional que facilite la toma de decisiones educativas.
+
+Asimismo, el proyecto resulta viable desde el punto de vista técnico, al apoyarse en tecnologías consolidadas como el reconocimiento de patrones y el análisis lingüístico automatizado, las cuales han mostrado niveles adecuados de precisión en distintos contextos \cite{goodfellow2016deep}. Su implementación en un entorno controlado mediante una prueba piloto permite evaluar su funcionamiento real y analizar su impacto preliminar.
+
+Por lo anterior, el desarrollo de la aplicación propuesta se justifica por su pertinencia educativa, su aporte tecnológico y su potencial contribución al fortalecimiento de habilidades fundamentales en educación básica.
+
+%---- OBJETIVOS
+
+\subsection{Objetivos}
+
+\subsubsection{Objetivo general}
+
+Desarrollar una aplicación web interactiva para la práctica de la escritura manuscrita en estudiantes de tercer y cuarto grado de primaria, que integre captura digital, reconocimiento automático de texto, análisis caligráfico y retroalimentación ortográfica, utilizando técnicas de visión por computadora y procesamiento de lenguaje natural.
+
+\subsubsection{Objetivos específicos}
+
+Los objetivos específicos del proyecto se centran en:
+
+\begin{itemize}
+    \item OE-01. Seleccionar y adaptar datasets existentes de escritura manuscrita con letra de molde, incorporando muestras con caracteres acentuados para garantizar la variabilidad necesaria en el entrenamiento y validación de los modelos.
+    \item OE-02. Desarrollar el módulo de captura digital de escritura manuscrita con letra de molde, con validaciones de calidad de imagen en el cliente.
+    \item OE-03. Desarrollar un sistema de OCR especializado en escritura infantil, que alcance una precisión mínima del 85\% en un conjunto de validación representativo.
+    \item OE-04. Desarrollar un módulo de extracción de métricas caligráficas (alineación, tamaño, espaciado e inclinación) que permita evaluar la calidad de la escritura con criterios cuantificables.
+    \item OE-05. Implementar un módulo de análisis ortográfico basado en NLP que identifique errores y genere sugerencias de corrección con una tasa de detección mayor o igual al 85\% en pruebas controladas.
+    \item OE-06. Diseñar e implementar un módulo de ejercicios correctivos que asigne actividades de refuerzo a partir de las métricas caligráficas y el análisis ortográfico.
+    \item OE-07. Desarrollar el Front-End interactivo y responsivo, adecuado al nivel cognitivo de estudiantes de primaria y compatible con distintos dispositivos.
+    \item OE-08. Desarrollar el Back-End y la Base de Datos del sistema, incluyendo autenticación y gestión de usuarios.
+    \item OE-09. Integrar todos los módulos desarrollados y realizar pruebas de aceptación con estudiantes reales de tercer y cuarto grado.
+\end{itemize}
+
+
+\subsection{Estado del arte}
+Para comprender el panorama actual de las herramientas de asistencia a la escritura y el reconocimiento de texto, se realizó un estado del arte que permitió identificar soluciones existentes con funcionalidades similares a las propuestas en este proyecto. A continuación, se presenta la Tabla \ref{tab:herramientas} que compara aplicaciones comerciales y herramientas de código abierto detallando su descripción, características y un costo aproximado de su desarrollo.
+
+\begin{longtable}{|p{3cm}|p{3.5cm}|p{4cm}|p{3.5cm}|}
+\caption{Herramientas de asistencia a la escritura y el reconocimiento de texto.}
+\label{tab:herramientas} \\
+
+\hline
+\centering\textbf{Proyecto} & 
+\centering\textbf{Descripción} & 
+\centering\textbf{Características} & 
+\centering\arraybackslash\textbf{Precio Aproximado} \\
+\hline
+\endfirsthead
+
+\hline
+\centering\textbf{Proyecto} & 
+\centering\textbf{Descripción} & 
+\centering\textbf{Características} & 
+\centering\arraybackslash\textbf{Precio Aproximado} \\
+\hline
+\endhead
+
+\hline
+\endfoot
+
+% Fila 1
+\centering Google Handwriting Input \cite{google2024handwriting} &
+\centering Aplicación para escribir a mano en dispositivos Android y convertir la escritura a texto. &
+\centering -Compatible con Android. -Soporta múltiples idiomas. -Escribe en cualquier campo de texto. -Reconocimiento en tiempo real. &
+\centering\arraybackslash El costo de desarrollo de una app similar sería de \$20,000 a \$50,000 USD. \\
+\hline
+
+% Fila 2
+\centering Tesseract OCR \cite{smith2007overview} &
+\centering Motor OCR de código abierto que convierte imágenes de texto manuscrito o tipografiado en texto editable. &
+\centering - Soporta más de 100 idiomas. - Compatible con imágenes escaneadas o fotos. - Usado para entrenar modelos de OCR. - Requiere configuraciones para mejorar precisión en manuscritos. &
+\centering\arraybackslash Proyecto similar costaría entre \$50,000 a \$150,000 USD dependiendo de la personalización. \\
+\hline
+
+% Fila 3
+\centering Grammarly \cite{grammarly2024} &
+\centering Plataforma de corrección gramatical y ortográfica basada en inteligencia artificial, disponible como extensión o en la web. &
+\centering - Corrección gramatical y ortográfica. - Recomendaciones de estilo. - Compatible con múltiples plataformas (navegadores, MS Word, Google Docs). - Versión gratuita con funciones limitadas. &
+\centering\arraybackslash \$12 USD/mes (versión premium). Desarrollo similar podría costar \$500,000 USD. \\
+\hline
+
+% Fila 4
+\centering Calligrapher \cite{calligraphr2024} &
+\centering Aplicación para mejorar la caligrafía, proporcionando retroalimentación en tiempo real sobre la calidad de la letra. &
+\centering - Evaluación en tiempo real de escritura. - Enfoque en caligrafía y legibilidad. - Compatible con dispositivos móviles y tabletas. - Ofrece ejercicios estructurados y personalizados. &
+\centering\arraybackslash \$30,000 a \$100,000 USD para desarrollo de plataforma similar. \\
+\hline
+
+% Fila 5
+\centering WriteApp \cite{writeapp2024} &
+\centering Plataforma educativa gamificada que mejora la escritura manual, ofreciendo retroalimentación sobre ortografía y calidad de letra. &
+\centering - Juego interactivo para mejorar la escritura. - Seguimiento de la calidad de letra y puntuación. - Genera informes para padres y maestros. - Personalización de ejercicios para cada usuario. &
+\centering\arraybackslash \$50,000 a \$200,000 USD para desarrollo de plataforma similar. \\
+\hline
+
+% Fila 6
+\centering Aplicación Web para la práctica de escritura manual y detección automática de errores ortográficos &
+\centering Aplicación educativa enfocada en la mejora de la escritura manual y la corrección ortográfica para estudiantes de primaria, con retroalimentación automática y evaluación de la calidad de la letra. &
+\centering - Integración de módulos de escritura manual, OCR y NLP. - Evaluación de calidad de letra (legibilidad, tamaño, alineación). - Detección de errores ortográficos. - Aplicación web interactiva. - Uso en dispositivos de escritorio y móviles. &
+\centering\arraybackslash En desarrollo. \\
+\hline
+
+\end{longtable}

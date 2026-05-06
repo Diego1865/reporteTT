@@ -1,0 +1,285 @@
+\documentclass[12pt]{article}
+
+%------------------ PAQUETES ------------------
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage[hyphens]{url}
+\usepackage[hidelinks]{hyperref}
+\usepackage{titlesec}
+\usepackage{setspace}
+\usepackage{parskip}
+\usepackage{placeins}
+\usepackage{seqsplit}
+\usepackage{float}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{amssymb}
+
+% --- Tablas largas ajustables (reemplaza longtable+tabularx) ---
+\usepackage{array}
+\usepackage{ltablex}
+\keepXColumns
+
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+%------------------ CONFIGURACIÓN ------------------
+\geometry{a4paper, margin=2.5cm}
+\lstset{
+    backgroundcolor=\color{gray!10},
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single
+}
+
+\colorlet{punct}{red!60!black}
+\definecolor{delim}{RGB}{20,105,176}
+\colorlet{numb}{magenta!60!black}
+
+\lstdefinelanguage{JSON}{
+    basicstyle=\normalfont\ttfamily\small,
+    numbers=left,
+    numberstyle=\scriptsize,
+    stepnumber=1,
+    numbersep=8pt,
+    showstringspaces=false,
+    breaklines=true,
+    frame=lines,
+    backgroundcolor=\color{gray!10},
+    literate=
+     *{0}{{{\color{numb}0}}}{1}
+      {1}{{{\color{numb}1}}}{1}
+      {2}{{{\color{numb}2}}}{1}
+      {3}{{{\color{numb}3}}}{1}
+      {4}{{{\color{numb}4}}}{1}
+      {5}{{{\color{numb}5}}}{1}
+      {6}{{{\color{numb}6}}}{1}
+      {7}{{{\color{numb}7}}}{1}
+      {8}{{{\color{numb}8}}}{1}
+      {9}{{{\color{numb}9}}}{1}
+      {:}{{{\color{punct}{:}}}}{1}
+      {,}{{{\color{punct}{,}}}}{1}
+      {\{}{{{\color{delim}{\{}}}}{1}
+      {\}}{{{\color{delim}{\}}}}}{1}
+      {[}{{{\color{delim}{[}}}}{1}
+      {]}{{{\color{delim}{]}}}}{1},
+}
+
+\lstset{
+    language=SQL,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color{gray}\itshape,
+    stringstyle=\color{red},
+    morekeywords={GO, USE, IDENTITY, NVARCHAR},
+    breaklines=true,
+    frame=single
+}
+% Formato de secciones igual que en Word
+\titleformat{\section}
+    {\large\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}
+    {\normalsize\bfseries}{\thesubsection.}{1em}{}
+    
+\titleformat{\subsubsection}
+    {\normalsize\itshape}{\thesubsubsection.}{1em}{}
+
+% Espaciado entre párrafos
+\setlength{\parskip}{6pt}
+\setlength{\parindent}{0pt}
+
+% 
+
+\addto\captionsspanish{
+    \renewcommand{\tablename}{Tabla}
+}
+\captionsetup[longtable]{name=Tabla}
+
+\AtBeginDocument{
+    % Define la numeración como Sección.Número (ej. 5.1)
+    \renewcommand{\thelstlisting}{\thesection.\arabic{lstlisting}}
+}
+
+\renewcommand{\lstlistingname}{Código}
+
+%------------------ DOCUMENTO ------------------
+\begin{document}
+\onehalfspacing
+
+%------------------ PORTADA ------------------
+\begin{titlepage}
+    \centering
+
+    \begin{minipage}[c]{0.18\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{Imagenes/ipn.png}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[c]{0.58\textwidth}
+        \centering
+        {\large\bfseries INSTITUTO POLITÉCNICO NACIONAL}\\[0.3em]
+        {\large\itshape ESCUELA SUPERIOR DE CÓMPUTO}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[c]{0.18\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{Imagenes/escom.png}
+    \end{minipage}
+
+    \vspace{4cm}
+
+    {\large\itshape Trabajo Terminal}\\[0.8em]
+
+    {\large\bfseries
+        ``Aplicación Web para la práctica de escritura a mano y\\
+        detección automática de errores ortográficos con IA en tercer y\\
+        cuarto grado de educación primaria.''
+    }
+
+    \vspace{4cm}
+
+    {\large\itshape Presentan}\\[0.5em]
+    {\large
+        Ayala Chacón David\\[0.2em]
+        Barragán Osorio Diego José María\\[0.2em]
+        Giles Macias Alexis
+    }
+
+    \vspace{2.5cm}
+
+    {\large\itshape Director}\\[0.5em]
+    {\large Enrique Torres González}
+
+    \vfill
+
+    {\large CDMX a \today}
+
+\end{titlepage}
+
+\pagenumbering{roman}
+
+%------------------ RESUMEN ------------------
+\newpage
+\vspace*{3cm}
+\section*{Resumen}
+
+Escribir de forma legible y ortográficamente correcta es una habilidad fundamental para los alumnos
+de educación primaria y en general para cualquier estudiante. Como pilar del desarrollo escolar debe
+ser reforzado de manera continua para evitar errores y fortalecer conceptos que debilitan sus
+habilidades, como lo son errores ortográficos que se repiten o trazos que no terminan de definirse.
+Estos vicios se arrastran por el resto de la vida académica hasta que el problema se ataca de manera
+tardía.
+
+Frente a este problema buscamos brindar una aplicación web donde los alumnos de tercer y cuarto
+grado (un momento esencial en el desarrollo escolar) puedan reforzar los conocimientos y practicar
+recibiendo retroalimentación adecuada al momento; tarea que para el profesor es complicada ya que
+no puede dar atención personalizada a cada alumno en una clase.
+
+La aplicación permitirá al alumno ingresar su escritura de dos formas: de forma digital o cargando
+una foto de su trabajo en papel. Una vez capturado el texto, el sistema utilizará técnicas de
+Reconocimiento Óptico de Caracteres (Optical Character Recognition, OCR por sus siglas en inglés)
+para poder realizar un análisis de calidad de letra con diferentes métricas específicas, como
+legibilidad, el tamaño de las letras, la alineación y el espaciado; y después convertirlo en texto digital
+para su posterior análisis con herramientas de Procesamiento de Lenguaje Natural (Natural Language
+Processing, NLP por sus siglas en inglés) que buscan detectar errores ortográficos y ofrecer
+sugerencias de corrección en el momento.
+
+Para comprobar que la herramienta será validada mediante una prueba piloto con 25 alumnos durante
+un mes. Se registrará el desempeño al inicio y al final del periodo para medir si hubo mejora
+sustancial.
+
+%------------------ ÍNDICE ------------------
+\newpage
+\renewcommand{\contentsname}{Índice de contenido}
+\tableofcontents
+
+%----------------- ÍNDICE DE TABLAS
+\newpage
+\renewcommand{\listtablename}{Índice de tablas}
+\listoftables
+
+%----------------- ÍDICE DE FIGURAS
+\newpage
+\renewcommand{\listfigurename}{Índice de figuras}
+\listoffigures
+
+%------------------ GLOSARIO ------------------
+\newpage
+\section*{Glosario}
+
+\begin{description}
+    \item[API REST (Representational State Transfer Application Programming Interface):] Interfaz de programación que permite la comunicación y el intercambio de datos entre diferentes aplicaciones de software a través del protocolo HTTP, siguiendo una arquitectura sin estado.
+    \item[Back-end:] Capa lógica y de acceso a datos de una aplicación web. Se encarga de procesar las peticiones del usuario, interactuar con la base de datos y ejecutar la lógica de negocio en el servidor.
+    \item[Base64:] Sistema de codificación que traduce datos binarios (como imágenes) a una cadena de texto basada en caracteres ASCII. Facilita la transmisión de medios a través de redes y su almacenamiento en bases de datos.
+    \item[Canvas (Lienzo digital):] Elemento estandarizado de HTML5 que permite la renderización dinámica de gráficos 2D y mapas de bits mediante el uso de JavaScript. En este proyecto, sirve como la superficie interactiva donde el alumno realiza el trazo manuscrito.
+    \item[CNN (Convolutional Neural Network / Red Neuronal Convolucional):] Arquitectura de aprendizaje profundo especializado en el procesamiento de datos con estructura de cuadrícula, como las imágenes, siendo fundamental para la extracción de características visuales en modelos OCR.
+    \item[Endpoint:] Punto final de comunicación en una API web. Representa una URL específica mediante la cual un cliente (front-end) puede acceder a los recursos o funciones del servidor (por ejemplo, guardar un intento o consultar métricas).
+    \item[Front-end:] Capa de presentación o interfaz gráfica de usuario de una aplicación. Es la parte visual con la que interactúan directamente los alumnos y tutores desde sus navegadores web.
+    \item[JSON (JavaScript Object Notation):] Formato de texto ligero y estructurado utilizado para el intercambio de datos entre el cliente y el servidor, caracterizado por ser legible tanto para humanos como para máquinas.
+    \item[JWT (JSON Web Token):] Estándar de la industria utilizado para la creación de tokens de acceso que permiten la autenticación segura y el intercambio de información verificable entre el cliente y el servidor, evitando la necesidad de mantener sesiones en memoria.
+    \item[MVC (Model-View-Controller / Modelo-Vista-Controlador):] Patrón de arquitectura de software que organiza el código separando la representación de la información (Modelo), la interfaz de usuario (Vista) y la lógica que maneja las interacciones (Controlador).
+    \item[NLP (Natural Language Processing / Procesamiento de Lenguaje Natural):] Rama de la inteligencia artificial que permite a las computadoras interpretar, analizar y manipular el lenguaje humano. En el sistema, se utiliza para evaluar la ortografía y coherencia de las palabras detectadas.
+    \item[OCR (Optical Character Recognition / Reconocimiento Óptico de Caracteres):] Tecnología de visión computacional que permite convertir imágenes que contienen texto (manuscrito, impreso o tipografiado) en formatos de texto digital procesables por un equipo informático.
+    \item[Otsu (Método de Otsu):] Algoritmo utilizado en el procesamiento de imágenes para realizar una binarización automática. Calcula el umbral óptimo para separar los píxeles de primer plano (el trazo) de los del fondo, eliminando ruido visual.
+    \item[Pangrama:] Frase o texto breve que utiliza todas (o la gran mayoría) de las letras del alfabeto de un idioma. Se emplea didácticamente para practicar el trazo general de la caligrafía.
+    \item[Payload (Carga útil):] Conjunto de datos reales y esenciales que se transmiten en el cuerpo de una petición o respuesta de red entre el cliente y el servidor, excluyendo las cabeceras de protocolo.
+    \item[Tokenización:] Proceso analítico utilizado en NLP que consiste en dividir una cadena de texto continuo en unidades semánticas más pequeñas llamadas ``tokens'' (que pueden ser palabras, caracteres o sílabas) para facilitar su evaluación sintáctica y ortográfica.
+\end{description}
+
+
+%------------------ INTRODUCCIÓN ------------------
+\newpage
+\pagenumbering{arabic}
+\section*{Introducción}
+\addcontentsline{toc}{section}{Introducción}
+
+La escritura es una actividad compleja que demanda al estudiante no solo habilidades motrices sino
+cognitivas y lingüísticas por igual. En su etapa formativa implica comprender, organizar y representar
+ideas para comunicarse de manera efectiva. Cuando un estudiante consolida sus reglas ortográficas,
+afina su trazo o comprende una estructura gramatical, está construyendo una base que sostendrá gran
+parte de su escolaridad \cite{unesco2020global}. Por lo que, entonces, las dificultades en estas habilidades persisten latentes
+repercutiendo en el rendimiento académico, y también erosionan la confianza del estudiante en sus
+propias capacidades \cite{berninger2010teaching}.
+
+Hoy, las aulas no pueden ignorar la presencia de la tecnología, pero tampoco pueden rendirse ante
+ella. El verdadero desafío no es elegir entre lo digital y lo pedagógico, sino encontrar y fortalecer los
+mutuamente al otro. En esa dirección, organismos internacionales han señalado que integrar
+herramientas digitales al proceso de enseñanza, particularmente en competencias como la escritura,
+es una necesidad real y no una moda pasajera \cite{unesco2022tech}.
+
+En paralelo, los avances en inteligencia artificial han abierto posibilidades que hace una década
+parecían lejanas. El OCR ha madurado hasta el punto de interpretar con gran precisión la escritura
+manuscrita, mientras que el NLP permite analizar textos de formas cada vez más sofisticadas \cite{smith2007overview}\cite{jurafsky2023speech}.
+Sin embargo, su aplicación concreta en el fortalecimiento de la escritura dentro de la educación básica
+sigue siendo un terreno poco explorado, lo que representa tanto una brecha como una oportunidad.
+
+Es precisamente desde esa brecha que surge este trabajo. La idea central es desarrollar e implementar
+una aplicación web que ayude a niños de tercero y cuarto grado de primaria a mejorar su escritura en
+letra de molde, combinando reconocimiento de texto manuscrito con análisis ortográfico
+automatizado. Todo esto dentro de un entorno controlado y supervisado, con el propósito de evaluar
+su funcionamiento real mediante una prueba piloto que permita medir, ajustar y aprender.
+
+\include{Capitulo1}
+\include{Capitulo2}
+\include{Capitulo3}
+\include{Capitulo4}
+\include{Capitulo5}
+
+%------------------ REFERENCIAS ------------------
+
+\newpage
+
+\renewcommand{\refname}{Referencias}
+\addcontentsline{toc}{section}{Referencias}
+
+
+\sloppy
+\bibliographystyle{IEEEtran}
+\bibliography{referencias}
+
+
+\end{document}

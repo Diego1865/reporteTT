@@ -1,0 +1,75 @@
+\subsection{Factibilidad Legal}
+
+La implementación del sistema requiere observar un conjunto de disposiciones jurídicas del ordenamiento mexicano que regulan directamente tres ámbitos: la protección de datos personales de menores de edad, los derechos de niñas, niños y adolescentes en entornos tecnológicos, y la propiedad intelectual del software académico. A continuación se analiza cada uno de estos marcos normativos y su aplicación concreta al sistema propuesto.
+
+\subsubsection*{A. Protección de datos personales de menores de edad}
+El tratamiento de los datos generados por el sistema — incluyendo muestras de escritura manuscrita, credenciales de acceso, resultados de análisis y métricas de desempeño — constituye tratamiento de datos personales en los términos de la Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP), publicada originalmente en el Diario Oficial de la Federación el 5 de julio de 2010 y actualizada mediante la versión publicada el 20 de marzo de 2025, vigente a partir del 21 de marzo de 2025 \cite{refL1}.
+
+Dado que los usuarios finales son estudiantes de tercer y cuarto grado de educación primaria (entre 8 y 10 años de edad), se trata de datos personales de menores de edad, categoría que la ley somete a un régimen reforzado de protección. Los artículos específicos del ordenamiento que aplican al presente sistema son los siguientes:
+
+\textbf{Artículo 7 (Consentimiento para menores de edad).} \\
+La LFPDPPP establece que en el tratamiento de datos personales de menores de edad se deberá privilegiar el interés superior de la niña, el niño y el adolescente \cite{refL1}. En concordancia con ello, la reforma de 2025 obliga expresamente a que el consentimiento para tratar datos de menores sea otorgado por padres, madres o tutores legales \cite{refL2}. El sistema atiende este requerimiento mediante la figura del Tutor como actor principal del registro: únicamente el tutor autenticado puede dar de alta alumnos en la plataforma (RN-02), vinculando cada alumno a un responsable legal que actúa como representante en el tratamiento de sus datos (RN-03). Esto satisface el requisito de consentimiento informado, específico y libre exigido por la ley.
+
+\textbf{Artículo 19 y 20 (Medidas de seguridad técnica, administrativa y física).} \\
+La LFPDPPP obliga al responsable del tratamiento a implementar medidas de seguridad administrativas, técnicas y físicas que protejan los datos personales contra daño, pérdida, alteración, destrucción o acceso no autorizado \cite{refL3}. El sistema da cumplimiento a este requerimiento mediante tres mecanismos: (1) autenticación basada en tokens JWT que impiden el acceso no autorizado a los datos de cada usuario según su rol; (2) almacenamiento de contraseñas mediante algoritmos de hash BCrypt (campo \texttt{contrasena\_cifrada} de tipo VARCHAR(255) en la tabla Usuarios); y (3) una arquitectura de separación de roles que garantiza que un alumno solo puede visualizar sus propios resultados (RN-25) y que únicamente el tutor responsable puede consultar y modificar los resultados de sus alumnos (RN-24).
+
+\textbf{Derechos ARCO (Artículos 28--37).} \\
+La ley reconoce a los titulares los derechos de Acceso, Rectificación, Cancelación y Oposición (ARCO) respecto de sus datos personales \cite{refL1}. Para el ejercicio de estos derechos por parte de menores de edad, la ley dispone que deberá realizarse a través de su representante legal \cite{refL1}. En el sistema, el tutor puede modificar los resultados de ejercicios de sus alumnos (RU-18) y el diseño contempla bajas lógicas en lugar de eliminación física de registros (RN-09), lo que permite la cancelación de datos sin comprometer la integridad referencial del sistema.
+
+\textbf{Aviso de privacidad.} \\
+El sistema deberá incorporar un aviso de privacidad accesible dentro de la interfaz, con lenguaje claro y adaptado al nivel educativo de los usuarios, informando sobre el responsable del tratamiento, las finalidades del uso de los datos, los mecanismos para el ejercicio de los derechos ARCO y el periodo de conservación de la información, en cumplimiento de los principios de licitud, información y proporcionalidad establecidos en la LFPDPPP \cite{refL1}.
+
+\subsubsection*{B. Derechos de niñas, niños y adolescentes en entornos tecnológicos}
+La Ley General de los Derechos de Niñas, Niños y Adolescentes (LGDNNA), publicada en el Diario Oficial de la Federación el 4 de diciembre de 2014 y reformada por última vez el 27 de mayo de 2024, establece un catálogo de 20 derechos fundamentales aplicables a todas las personas menores de 18 años en territorio mexicano \cite{refL4}.
+
+Dos artículos de esta ley resultan directamente relevantes para el presente proyecto:
+
+\textbf{Artículo 13, fracción XX (Derecho de acceso a las Tecnologías de la Información y Comunicación).} \\
+La LGDNNA reconoce expresamente el derecho de niñas, niños y adolescentes al acceso a las tecnologías de la información y comunicación, así como a los servicios de radiodifusión y telecomunicaciones, incluido el de banda ancha e internet, sin discriminación de ningún tipo o condición \cite{refL4}. El presente sistema se alinea con este derecho al constituir una herramienta educativa digital orientada a fortalecer competencias de escritura, ampliando las posibilidades de acceso a recursos tecnológicos dentro del entorno escolar de educación básica.
+
+\textbf{Artículo 18 (Interés superior de la niñez como principio rector).} \\
+La ley establece que en todas las medidas concernientes a niñas, niños y adolescentes se tomará en cuenta como consideración primordial su interés superior \cite{refL4}. Este principio se materializa en el diseño pedagógico del sistema: los ejercicios están basados en los programas de estudio de la SEP para tercer y cuarto grado, la retroalimentación automatizada es constructiva y no punitiva, y la interfaz está diseñada para minimizar la carga cognitiva y la frustración del estudiante.
+
+\subsubsection*{C. Propiedad intelectual y licencias de software}
+El desarrollo del sistema se enmarca en el régimen de Trabajo Terminal de la Escuela Superior de Cómputo (ESCOM) del Instituto Politécnico Nacional, cuyas normativas institucionales establecen que los derechos patrimoniales de los productos académicos generados corresponden a la institución, mientras que los autores conservan sus derechos morales \cite{refL5}.
+
+Respecto al uso de herramientas de terceros, todas las tecnologías seleccionadas para el desarrollo cuentan con licencias compatibles con fines académicos y no comerciales:
+
+\begin{itemize}
+    \item \textbf{Tesseract OCR:} Licencia Apache 2.0, que permite uso, modificación y distribución sin restricciones para fines académicos.
+    \item \textbf{FastAPI:} Licencia MIT, de uso libre sin condiciones.
+    \item \textbf{React:} Licencia MIT.
+    \item \textbf{Dataset Letras Alfabeto Español (Kaggle – Herrera, 2023):} Publicado bajo licencia Creative Commons, compatible con uso académico.
+    \item \textbf{EMNIST:} Publicado por el NIST como dataset de acceso público para investigación.
+\end{itemize}
+
+El uso de estos componentes bajo sus respectivas licencias no genera obligaciones comerciales ni conflictos de propiedad intelectual con el marco institucional del proyecto.
+
+\subsubsection*{D. Normatividad educativa}
+El contenido pedagógico de los ejercicios y el análisis ortográfico del sistema se fundamentan en los programas de estudio de la Secretaría de Educación Pública (SEP) para educación básica — específicamente en los libros \textit{Nuestros Saberes} de tercer y cuarto grado (ciclo escolar 2025–2026) — lo que valida legalmente su pertinencia curricular dentro del sistema educativo nacional.
+
+\subsubsection*{E. Síntesis de cumplimiento normativo}
+En la Tabla \ref{tab:cumplimiento_normativo} se presenta un resumen del cumplimiento normativo del sistema respecto a las disposiciones legales identificadas como aplicables.
+
+\begin{table}[H]
+\centering
+\caption{Síntesis de cumplimiento normativo del sistema.}
+\label{tab:cumplimiento_normativo}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{|>{\centering\arraybackslash}m{3.5cm}|>{\centering\arraybackslash}m{4.5cm}|>{\centering\arraybackslash}m{7cm}|}
+\hline
+\textbf{Marco normativo} & \textbf{Artículo(s) aplicable(s)} & \textbf{Mecanismo de cumplimiento en el sistema} \\ \hline
+LFPDPPP (2025) & Art. 7 --- Consentimiento de menores & Registro de alumnos exclusivamente por el tutor responsable (RN-02, RN-03) \\ \hline
+LFPDPPP (2025) & Arts. 19--20 --- Seguridad técnica & JWT, BCrypt, separación de roles (RN-24, RN-25) \\ \hline
+LFPDPPP (2025) & Arts. 28--37 --- Derechos ARCO & Modificación de resultados por tutor (RU-18), baja lógica (RN-09) \\ \hline
+LGDNNA (2024) & Art. 13 fracc. XX --- Acceso a TIC & Herramienta digital educativa de acceso supervisado \\ \hline
+LGDNNA (2024) & Art. 18 --- Interés superior & Diseño pedagógico basado en programas SEP, retroalimentación constructiva \\ \hline
+Reglamento ESCOM-IPN & Propiedad intelectual académica & Derechos patrimoniales al IPN, derechos morales a los autores \\ \hline
+Licencias de software de terceros & Apache 2.0, MIT, CC & Uso académico sin restricciones en todos los componentes \\ \hline
+Programas SEP 3.$^{\circ}$ y 4.$^{\circ}$ grado & Plan de Estudios 2017 / Nuestros Saberes 2024 & Ejercicios diseñados con base en contenidos curriculares oficiales \\ \hline
+\end{tabular}
+\end{table}
+
+En razón de lo anterior, el proyecto se considera legalmente factible. El diseño del sistema contempla de forma explícita los requerimientos normativos vigentes en materia de protección de datos de menores, derechos digitales de la infancia y propiedad intelectual académica, sin que ninguna disposición identificada represente un impedimento para su desarrollo o despliegue en un entorno educativo supervisado.
+
+\clearpage % Para asegurar que la tabla no se desborde a la siguiente sección

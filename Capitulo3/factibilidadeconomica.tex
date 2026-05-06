@@ -1,0 +1,76 @@
+\subsection{Factibilidad económica}
+
+Para fundamentar cuantitativamente la viabilidad económica del proyecto, se aplicó el modelo COCOMO I Básico (Constructive Cost Model), ampliamente utilizado en la estimación de proyectos de software a partir del tamaño del código fuente. Este modelo permite determinar el esfuerzo requerido, el tiempo de desarrollo y el costo comercial equivalente del sistema, proporcionando una base objetiva para evaluar si el proyecto es ejecutable con los recursos disponibles.
+
+\subsubsection{Clasificación del proyecto}
+
+De acuerdo con la taxonomía de COCOMO I, los proyectos se clasifican en tres modos según la complejidad del equipo y del entorno de desarrollo: orgánico, semiacoplado e integrado. El presente proyecto se clasifica como orgánico, dado que el equipo de desarrollo es pequeño (tres integrantes), existe familiaridad previa con las tecnologías utilizadas, y los requerimientos no presentan rigidez crítica. Este modo corresponde a sistemas de tamaño moderado desarrollados en entornos académicos o de investigación.
+
+\subsubsection{Estimación de líneas de código}
+
+Como entrada principal del modelo, se realizó una estimación de las Líneas de Código Fuente (LOC) por módulo del sistema. La estimación se elaboró con base en la arquitectura y los requerimientos funcionales definidos en las secciones 3.4, 3.5 y 3.7, considerando el stack tecnológico seleccionado (React, FastAPI, SQL Server). Los resultados se presentan en la Tabla \ref{tab:estimacion_loc}.
+\clearpage
+
+\begin{table}[H]
+\centering
+\caption{Estimación de líneas de código por módulo del sistema.}
+\label{tab:estimacion_loc}
+\renewcommand{\arraystretch}{1.5} 
+\begin{tabular}{|>{\centering\arraybackslash}m{4.5cm}|>{\centering\arraybackslash}m{7cm}|>{\centering\arraybackslash}m{3.5cm}|}
+\hline
+\textbf{Módulo} & \textbf{Componentes principales} & \textbf{LOC estimadas} \\ \hline
+Front-End (React) & Autenticación, panel tutor, panel alumno, lienzo digital, visualización de resultados & 3,500 \\ \hline
+Back-End (FastAPI) & Endpoints REST, lógica de negocio, integración OCR/NLP, seguridad JWT & 3,000 \\ \hline
+Módulo OCR & Preprocesamiento de imagen, integración del modelo, extracción de métricas caligráficas & 1,500 \\ \hline
+Módulo NLP & Tokenización, análisis ortográfico, generación de sugerencias & 1,200 \\ \hline
+Base de datos (SQL Server) & DDL (tablas, relaciones, restricciones), procedimientos almacenados & 800 \\ \hline
+\multicolumn{2}{|c|}{\textbf{Total}} & 10,000 \\ \hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Aplicación del modelo COCOMO I Básico}
+
+A partir del total estimado de 10 KLOC, se aplicaron las fórmulas del modelo COCOMO I en modo orgánico para calcular el esfuerzo, el tiempo de desarrollo y el número de personas requeridas.
+Las fórmulas utilizadas son las siguientes:
+
+Las fórmulas utilizadas son las siguientes:
+
+\begin{itemize}
+    \item[a)] Esfuerzo (E):
+    \[ E = 2.4 \times (KLOC)^{1.05} \]
+    
+    \item[b)] Tiempo de desarrollo (D):
+    \[ D = 2.5 \times (E)^{0.38} \]
+    
+    \item[c)] Personas requeridas (P):
+    \[ P = \frac{E}{D} \]
+\end{itemize}
+
+Los resultados de la aplicación del modelo se presentan en la Tabla \ref{tab:cocomo_resultados}.
+
+\begin{table}[H]
+\centering
+\caption{Resultados del modelo COCOMO I Básico aplicado al sistema.}
+\label{tab:cocomo_resultados}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{|>{\centering\arraybackslash}m{4.5cm}|>{\centering\arraybackslash}m{4.5cm}|>{\centering\arraybackslash}m{4.5cm}|}
+\hline
+\textbf{Parámetro} & \textbf{Fórmula aplicada} & \textbf{Resultado} \\ \hline
+Tamaño del proyecto & --- & 10 KLOC \\ \hline
+Esfuerzo (E) & $2.4 \times (10)^{1.05}$ & 26.93 personas-mes \\ \hline
+Tiempo de desarrollo (D) & $2.5 \times (26.93)^{0.38}$ & 8.74 meses \\ \hline
+Personas requeridas (P) & $\displaystyle \frac{26.93}{8.74}$ & $3.08 \approx 3$ personas \\ \hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Estimación del costo comercial equivalente}
+
+Para determinar el costo que representaría el desarrollo del sistema en un entorno comercial, se utilizó como referencia el salario promedio mensual de un desarrollador de software de nivel junior a intermedio en México para el año 2025, estimado en \$20,000 MXN según datos del mercado laboral nacional \cite{refx12}.
+
+El costo comercial equivalente se calcula de la siguiente manera:
+
+\[ Costo_{comercial} = E \times Salario_{mensual} = 26.93 \times \$20,000 = \$538,000 \ MXN \]
+
+Este valor representa el costo hipotético de contratar a un equipo de desarrolladores externos para construir un sistema equivalente, y sirve como referencia para evaluar el ahorro generado por el desarrollo académico.
+
+En un escenario de despliegue productivo futuro, mediante contenedores Docker en plataformas como Google Cloud Platform o Amazon Web Services, el costo de infraestructura mensual estimado oscilaría entre $50 y $100 USD según el nivel de tráfico, lo que no compromete la factibilidad del presente proyecto dado que la prueba piloto se mantiene dentro del tier gratuito disponible. \cite{refx13} \cite{refx14}

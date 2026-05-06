@@ -1,0 +1,229 @@
+% ─────────────────────────────────────────────────────────────────────────────
+%  Sección 4.X  Arquitectura del Módulo de Gestión de Ejercicios
+%  Insertar en el Capítulo 4: Diseño, después del módulo de Autenticación
+%  y antes del módulo OCR/NLP.
+% ─────────────────────────────────────────────────────────────────────────────
+
+\subsection{Arquitectura del Módulo de Gestión de Ejercicios}
+
+El módulo de gestión de ejercicios administra el ciclo de vida completo
+de las actividades de escritura dentro de la plataforma. Su diseño contempla
+dos actores con responsabilidades distintas: el tutor, que selecciona
+ejercicios del catálogo y los asigna a sus alumnos con una vigencia
+determinada; y el alumno, que consulta los ejercicios disponibles
+clasificados por su estado. El módulo también incorpora un proceso
+automatizado que cierra los ejercicios cuya fecha de vencimiento ha
+sido alcanzada, garantizando la coherencia del estado del sistema sin
+intervención manual.
+
+La arquitectura del módulo se divide en tres componentes principales:
+
+\begin{enumerate}
+    \item \textbf{Capa de Presentación (Front-End):} Compuesta por los
+    componentes \texttt{TabEjercicios.jsx} (vista del tutor para gestionar
+    asignaciones), \texttt{TabProximos.jsx}, \texttt{TabCompletados.jsx}
+    y \texttt{TabVencidos.jsx} (vistas del alumno que clasifican los
+    ejercicios según su estado). Cada componente consulta su endpoint
+    correspondiente y renderiza la información sin lógica de negocio
+    propia.
+
+    \item \textbf{Capa de Lógica de Negocio (Back-End):} Implementada
+    en el controlador \texttt{ejercicios.py} mediante FastAPI. Gestiona
+    la consulta del catálogo, la activación y desactivación de ejercicios
+    por parte del tutor, y la consulta de ejercicios en sus tres estados
+    posibles desde la perspectiva del alumno. Adicionalmente, el proceso
+    \texttt{cerrar\_ejercicio.py} implementa un scheduler que verifica
+    y cierra automáticamente los ejercicios vencidos cada hora.
+
+    \item \textbf{Capa de Persistencia (Base de Datos):} El módulo opera
+    sobre dos tablas principales: \texttt{Ejercicios}, que actúa como
+    catálogo inmutable de actividades disponibles en la plataforma, y
+    \texttt{Ejercicios\_Tutor}, que representa la asignación de un
+    ejercicio del catálogo a un tutor específico, con su propio ciclo de
+    vida controlado por el campo \texttt{id\_estatus} y la fecha
+    \texttt{fecha\_desactivacion}.
+\end{enumerate}
+
+% ─────────────────────────────────────────────────────────
+\subsubsection{Diseño del Ciclo de Vida de un Ejercicio}
+
+Un ejercicio atraviesa los siguientes estados a lo largo de su ciclo de
+vida dentro del sistema:
+
+\begin{enumerate}
+    \item \textbf{Disponible en catálogo:} el ejercicio existe en la tabla
+    \texttt{Ejercicios} con \texttt{id\_estatus = 1} y puede ser
+    seleccionado por cualquier tutor para su asignación.
+
+    \item \textbf{Activo:} el tutor ha creado un registro en
+    \texttt{Ejercicios\_Tutor} con \texttt{id\_estatus = 1}. A partir de
+    este momento, el ejercicio es visible para los alumnos del tutor en
+    su panel de ejercicios próximos.
+
+    \item \textbf{Vencido:} el ejercicio transiciona a
+    \texttt{id\_estatus = 2} por uno de dos mecanismos: desactivación
+    manual por parte del tutor mediante el endpoint de eliminación, o
+    cierre automático por el scheduler cuando la fecha
+    \texttt{fecha\_desactivacion} es anterior a la fecha y hora actuales
+    del servidor. Un ejercicio vencido deja de aparecer en la lista de
+    próximos del alumno y pasa a la lista de vencidos si no fue entregado,
+    o permanece en completados si el alumno ya realizó un intento.
+\end{enumerate}
+
+\noindent \textit{Nota de diseño}: el sistema no elimina físicamente los
+registros de \texttt{Ejercicios\_Tutor}. La transición entre estados se
+gestiona exclusivamente mediante el campo \texttt{id\_estatus}, lo que
+preserva la trazabilidad histórica de las asignaciones y permite al tutor
+consultar ejercicios previamente activos sin pérdida de información.
+
+% ─────────────────────────────────────────────────────────
+\subsubsection{Diseño del Flujo de Interacción}
+
+El módulo contempla tres flujos principales de interacción.
+
+\textbf{Flujo de Asignación de Ejercicio (Tutor):}
+\begin{enumerate}
+    \item El tutor accede a su panel y solicita el catálogo de ejercicios
+    disponibles mediante una petición \texttt{GET} al endpoint público
+    \texttt{/api/ejercicios/}.
+    \item El tutor selecciona un ejercicio y establece opcionalmente una
+    fecha de vencimiento. El Front-End envía una petición \texttt{POST}
+    al endpoint \texttt{/api/ejercicios/tutor} con el identificador del
+    ejercicio y la fecha de cierre.
+    \item El Back-End verifica mediante JWT que el \texttt{id\_usuario}
+    del token coincide con el \texttt{id\_usuario} del payload, evitando
+    que un tutor active ejercicios en nombre de otro.
+    \item Se verifica que el tutor no tenga ya activo el mismo ejercicio.
+    En caso de duplicado, se retorna \texttt{400 Bad Request}.
+    \item Se inserta un nuevo registro en \texttt{Ejercicios\_Tutor} con
+    \texttt{id\_estatus = 1}. El ejercicio queda inmediatamente disponible
+    para los alumnos del tutor.
+\end{enumerate}
+
+\textbf{Flujo de Consulta de Ejercicios (Alumno):}
+
+Desde la perspectiva del alumno, los ejercicios se presentan clasificados
+en tres pestañas. La lógica de clasificación reside íntegramente en el
+Back-End mediante tres consultas SQL independientes:
+
+\begin{itemize}
+    \item \textbf{Próximos:} ejercicios activos (\texttt{id\_estatus = 1})
+    asignados por el tutor del alumno que aún no tienen un intento
+    registrado por ese alumno. Se excluyen mediante una subconsulta
+    \texttt{NOT IN} sobre la tabla \texttt{Intentos}.
+
+    \item \textbf{Completados:} ejercicios que tienen al menos un intento
+    registrado por el alumno. Se retorna únicamente el intento más reciente
+    por ejercicio, determinado mediante la función de ventana
+    \texttt{ROW\_NUMBER() OVER (PARTITION BY id\_ejercicio\_tutor ORDER BY
+    fecha\_envio DESC)}, incluyendo la calificación y retroalimentación
+    del tutor si ya fueron registradas.
+
+    \item \textbf{Vencidos:} ejercicios con \texttt{id\_estatus = 2} que
+    no tienen ningún intento registrado por el alumno, es decir, los que
+    el alumno no alcanzó a entregar antes del cierre.
+\end{itemize}
+
+\paragraph{Flujo de Cierre Automático (Scheduler):}
+\begin{enumerate}
+    \item Al iniciar el servidor, el evento \texttt{startup} de FastAPI
+    invoca \texttt{iniciar\_scheduler()}, que registra una tarea periódica
+    con una frecuencia de ejecución de una hora mediante la biblioteca
+    APScheduler.
+    \item Cada hora, la tarea \texttt{cerrar\_ejercicios\_vencidos()}
+    ejecuta un \texttt{UPDATE} sobre la tabla \texttt{Ejercicios\_Tutor},
+    transitando a \texttt{id\_estatus = 2} todos los registros cuya
+    \texttt{fecha\_desactivacion} sea distinta de nulo y anterior a la
+    fecha y hora actuales del servidor (\texttt{GETDATE()}).
+    \item La operación es idempotente: ejecutarla múltiples veces sobre
+    los mismos datos no produce efectos secundarios, ya que la condición
+    \texttt{id\_estatus = 1} del filtro impide modificar registros ya
+    cerrados.
+\end{enumerate}
+
+% ─────────────────────────────────────────────────────────
+\subsubsection{Diseño de APIs}
+
+Para soportar los flujos descritos, el diseño de la API contempla los
+siguientes endpoints en el controlador \texttt{ejercicios.py}:
+
+\textbf{Endpoint 1:} Consulta del Catálogo
+
+El endpoint \texttt{/api/ejercicios/} opera mediante el método \texttt{GET}
+y no requiere autenticación. Retorna todos los ejercicios con
+\texttt{id\_estatus = 1} disponibles en la tabla \texttt{Ejercicios}.
+
+\textbf{Endpoint 2:} Consulta de Ejercicios Activos del Tutor
+
+El endpoint \texttt{/api/ejercicios/tutor/\{id\_usuario\}} opera mediante
+el método \texttt{GET} y requiere autenticación JWT con rol de tutor.
+Retorna los ejercicios que el tutor ha activado y que se encuentran
+actualmente con \texttt{id\_estatus = 1}.
+
+\textbf{Endpoint 3:} Activación de Ejercicio
+
+El endpoint \texttt{/api/ejercicios/tutor} opera mediante el método
+\texttt{POST} y requiere autenticación JWT con rol de tutor. Recibe el
+identificador del ejercicio del catálogo y una fecha de vencimiento
+opcional.
+
+\begin{lstlisting}[language=json, caption={Payload de solicitud del endpoint de activación de ejercicio}, label={lst:ejercicio-create}]
+/* Solicitud */
+{
+  "id_ejercicio": <integer>,
+  "id_usuario":   <integer>,
+  "fecha_fin":    "datetime | null"
+}
+
+/* Respuesta 201 Created */
+{
+  "message": "Ejercicio activado correctamente"
+}
+\end{lstlisting}
+
+\textbf{Endpoint 4:} Desactivación Manual de Ejercicio
+
+El endpoint \texttt{/api/ejercicios/tutor/\{id\_usuario\}/\{id\_ejercicio\}}
+opera mediante el método \texttt{DELETE} y requiere autenticación JWT con
+rol de tutor. Actualiza el campo \texttt{id\_estatus} a 2 en el registro
+correspondiente de \texttt{Ejercicios\_Tutor}, sin eliminar el registro
+físicamente.
+
+\textbf{Endpoints 5, 6 y 7:} Consulta de Ejercicios del Alumno
+
+Los endpoints \texttt{/api/ejercicios/alumno/\{id\_alumno\}/proximos},
+\texttt{/api/ejercicios/alumno/\{id\_alumno\}/completados} y
+\texttt{/api/ejercicios/alumno/\{id\_alumno\}/vencidos} operan mediante
+el método \texttt{GET} y requieren autenticación JWT con rol de alumno.
+En los tres casos, el Back-End verifica que el \texttt{id\_alumno} de la
+ruta coincida con el \texttt{id\_usuario} del token, retornando
+\texttt{403 Forbidden} en caso de discrepancia.
+
+La Tabla~\ref{tab:endpoints-ejercicios} resume los endpoints del módulo
+con su método y nivel de acceso correspondiente.
+
+\begin{table}[H]
+\centering
+\caption{Endpoints del módulo de gestión de ejercicios}
+\label{tab:endpoints-ejercicios}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Endpoint} & \textbf{Método} & \textbf{Acceso requerido} \\
+\hline
+\texttt{/api/ejercicios/}
+    & GET    & Público \\
+\texttt{/api/ejercicios/tutor/\{id\_usuario\}}
+    & GET    & Tutor (JWT) \\
+\texttt{/api/ejercicios/tutor}
+    & POST   & Tutor (JWT) \\
+\texttt{/api/ejercicios/tutor/\{id\_usuario\}/\{id\_ejercicio\}}
+    & DELETE & Tutor (JWT) \\
+\texttt{/api/ejercicios/alumno/\{id\_alumno\}/proximos}
+    & GET    & Alumno (JWT) \\
+\texttt{/api/ejercicios/alumno/\{id\_alumno\}/completados}
+    & GET    & Alumno (JWT) \\
+\texttt{/api/ejercicios/alumno/\{id\_alumno\}/vencidos}
+    & GET    & Alumno (JWT) \\
+\hline
+\end{tabular}
+\end{table}

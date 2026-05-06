@@ -1,0 +1,278 @@
+\section{Capítulo 4: Diseño}
+
+En este capítulo se presenta la fase de diseño técnico y arquitectónico de la plataforma web, tomando como base los requerimientos funcionales, no funcionales y las reglas de negocio definidos en el capítulo anterior. A lo largo de esta sección se detallará la estructuración general del sistema, el diseño del flujo de interacción de los usuarios, la especificación de las interfaces de programación (API REST) y el modelado de la base de datos. El propósito principal de esta fase es establecer un modelo sólido que garantice la integración eficiente, la escalabilidad y el correcto funcionamiento de los módulos de captura, OCR y NLP.
+
+\input{Capitulo4/Auth}
+\input{Capitulo4/ocrnlp}
+
+
+
+
+\subsection{Arquitectura del Módulo de Captura y Registro de Intentos}
+
+El diseño del módulo de captura sigue el patrón arquitectónico MVC establecido para el sistema. Este módulo gestiona el flujo completo desde que el alumno genera una muestra de escritura (ya sea mediante fotografía o lienzo digital) hasta que dicha muestra es almacenada de forma segura y puesta a disposición del tutor a través del panel de seguimiento.
+La arquitectura de este proceso se divide en tres componentes principales:
+\begin{enumerate}
+    \item Capa de Presentación (Front-End): Compuesta por los componentes React (\texttt{CapturaEscritura} y \texttt{LienzoDigital}). Esta capa es responsable de la validación inicial de los archivos (tipo MIME y tamaño), la renderización del canvas nativo de HTML5 y la conversión de la imagen final a una cadena codificada en formato Base64.
+    \item Capa de Lógica de Negocio (Back-End): Implementada mediante FastAPI. Recibe las peticiones HTTP con la carga útil (payload) que contiene la imagen codificada. Se encarga de validar la autenticación del usuario mediante tokens JWT y gestionar las transacciones con la base de datos.
+    \item Capa de Persistencia (Base de Datos): Basada en SQL Server, utiliza la tabla Intentos para almacenar la información de la actividad. El diseño de la base de datos contempla el almacenamiento de la imagen directamente como una cadena Base64 en el campo imagen\_codificada (tipo VARCHAR(MAX)), asegurando la trazabilidad entre el alumno, el ejercicio asignado por el tutor y los resultados posteriores de los algoritmos OCR y NLP.
+\end{enumerate}
+
+\subsubsection{Diseño de Flujo de Interacción}
+El registro y consulta de intentos se rige por el siguiente flujo secuencial:
+
+\textbf{Flujo de Registro de Intento (Alumno):}
+\begin{enumerate}
+    \item El alumno accede al ejercicio activo y genera su respuesta mediante carga de imagen o trazado en el lienzo digital.
+    \item El cliente Front-End codifica la muestra en formato Base64.
+    \item Se envía una petición POST al endpoint protegido del Back-End con los datos: id\_alumno, id\_ejercicio\_tutor e imagen\_codificada.
+    \item El Back-End verifica el token JWT del alumno (dependencia require\_alumno).
+    \item Se inserta un nuevo registro en la tabla Intentos. En este punto, los campos texto\_detectado\_ocr y métricas asociadas quedan con valores nulos, pendientes del procesamiento posterior diferido de las IA.
+    \item El sistema retorna una confirmación de éxito al Front-End.
+\end{enumerate}
+
+\textbf{Flujo de Consulta de Intentos (Tutor):}
+\begin{enumerate}
+    \item El tutor inicia sesión y accede al panel de seguimiento de sus alumnos.
+    \item El cliente Front-End envía una petición GET al endpoint del Back-End solicitando los intentos vinculados a su identificador.
+    \item El Back-End verifica el token JWT del tutor (dependencia require\_tutor).
+    \item Mediante una consulta SQL que relaciona las tablas Intentos, Usuario y Ejercicios\_Tutor, se extrae el historial de entregas.
+    \item Los datos (incluyendo la imagen en Base64) son retornados al cliente y renderizados en la vista del profesor para su evaluación manual o revisión de resultados automáticos.
+\end{enumerate}
+
+\subsubsection{Diseño APIs}
+Para soportar las operaciones descritas, el diseño de la API contempla la implementación de los siguientes endpoints en el controlador intentos.py:
+
+\textbf{Endpoint 1}: Registro de Intento
+
+El endpoint \texttt{/api/intentos/registra}r opera mediante el método POST y requiere autenticación obligatoria con rol de alumno a través de un Bearer Token JWT. Su función principal es recibir un payload en formato JSON, compuesto por un id\_ejercicio\_tutor (entero) y una imagen\_codificada (cadena en Base64), para registrar la información del intento en la base de datos.
+\begin{lstlisting}[language=JSON, caption={Estructura del payload JSON esperado por el Back-end}, label={lst:api/intentos}]
+{
+  "id_ejercicio_tutor": "integer",
+  "imagen_codificada": "string (Base64)"
+}
+\end{lstlisting}
+Como parte de su lógica interna de seguridad, el sistema extrae el id\_alumno directamente del token decodificado para prevenir cualquier suplantación de identidad, y finaliza el proceso ejecutando la sentencia \texttt{INSERT INTO Intentos (id\_alumno, id\_ejercicio\_tutor, imagen\_codificada) VALUES (...).}
+
+\textbf{Endpoint 2:} Consulta de Intentos por Tutor
+
+El endpoint \texttt{/api/intentos/tutor/{id\_tutor}} utiliza el método GET y exige autenticación mediante un Bearer Token JWT con rol de tutor. Su propósito es recuperar una lista de todos los intentos realizados por los alumnos asignados a un tutor específico. Dentro de su lógica principal, el sistema valida que el id\_tutor proporcionado en la ruta coincida con el identificador extraído del token; en caso de discrepancia, la petición es rechazada retornando un error 403 Forbidden. Una vez superada esta validación de seguridad, la operación se concreta ejecutando una consulta \textit{SELECT} que relaciona las tablas Intentos, Ejercicios\_Tutor y Usuario mediante cláusulas \textit{INNER JOIN}, aplicando el filtro correspondiente al id\_tutor solicitado para extraer y devolver la información.
+
+
+\subsection{Diseño de la base de datos}
+
+\subsubsection{Diagrama entidad-relación}
+El diagrama entidad–relación constituye un elemento fundamental dentro del diseño de la aplicación web, ya que permite estructurar de manera formal la organización, almacenamiento y relación de los datos involucrados en el proceso de captura, procesamiento y evaluación de la escritura manuscrita.
+
+La aplicación web propuesta gestiona el proceso de aprendizaje y evaluación de la escritura en alumnos de educación primaria. En este contexto, un tutor es responsable de supervisar a múltiples alumnos, asignándoles ejercicios orientados al desarrollo de habilidades de escritura.
+
+El núcleo del sistema se encuentra en la entidad Intento, la cual representa cada ejecución de un ejercicio por parte del alumno. A partir de este intento, se procesa una imagen mediante OCR para obtener el texto digital, el cual es posteriormente analizado mediante NLP para evaluar la ortografía. De forma complementaria, se realiza un análisis caligráfico basado en características del trazo manuscrito.
+
+Los resultados de estos análisis permiten generar recomendaciones personalizadas y actualizar el progreso del alumno, facilitando el seguimiento continuo de su desempeño.
+
+En la Figura \ref{fig:er} se presenta el diagrama entidad–relación, el cual describe la estructura de datos y las relaciones entre las entidades involucradas en el proceso de evaluación de la escritura.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[angle=90,width=0.56\textheight]{Imagenes/Diagrama-entidad-relacion.png}
+    \caption{Diagrama entidad–relación propuesto}
+    \label{fig:er}
+\end{figure}
+
+\subsubsection{Diccionario de entidades}
+
+\textbf{A. Gestión de usuarios}
+
+En la Tabla \ref{tab:entidades_usuarios} se describen las entidades correspondientes a la gestión de usuarios.
+
+\begin{longtable}{|p{3.5cm}|p{7cm}|p{5cm}|}
+\caption{Entidades de gestión de usuarios.}
+\label{tab:entidades_usuarios} \\ \hline
+
+\textbf{Entidad} & \textbf{Descripción} & \textbf{Atributos clave} \\ \hline
+\endfirsthead
+
+\hline
+\textbf{Entidad} & \textbf{Descripción} & \textbf{Atributos clave} \\ \hline
+\endhead
+
+Estatus & Entidad que permite indicar el estado de un registro, facilitando su control sin eliminación física. &
+id\_estatus, descripcion \\ \hline
+
+Usuario & Entidad base para el acceso a la aplicación web. &
+id\_usuario, nombre, tipo\_usuario, fecha\_registro, FK id\_estatus \\ \hline
+
+Tutor & Usuario con permisos para registrar alumnos y asignar ejercicios. &
+correo \\ \hline
+
+Alumno & Usuario final que realiza los ejercicios de escritura. &
+id\_alumno, grado, grupo \\ \hline
+
+\end{longtable}
+
+Las entidades presentadas permiten gestionar el acceso y la organización de los usuarios dentro del sistema.
+
+\textbf{B. Proceso de evaluación}
+
+En la Tabla \ref{tab:entidades_evaluacion} se presentan las entidades relacionadas con el proceso de evaluación de la escritura.
+
+\begin{longtable}{|p{3.5cm}|p{7cm}|p{5cm}|}
+\caption{Entidades del proceso de evaluación del sistema}
+\label{tab:entidades_evaluacion} \\ \hline
+
+\textbf{Entidad} & \textbf{Descripción} & \textbf{Atributos clave} \\ \hline
+\endfirsthead
+
+\hline
+\textbf{Entidad} & \textbf{Descripción} & \textbf{Atributos clave} \\ \hline
+\endhead
+
+Ejercicio & Catalogo de ejercicios. &
+id\_ejercicio, titulo, contenido\_base, tipo \\ \hline
+
+Ejercicio\_Tutor & Ejercicios asignados por el tutor. & id\_ejercicio\_tutor, FK id\_tutor, FK id\_ejercicio, fecha\_inicio y fecha\_fin, FK id\_estatus\\ \hline
+
+Intento & Ejecución de un ejercicio por parte del alumno. &
+id\_intento, FK id\_alumno, FK id\_ejercicio\_tutor, imagen, texto\_detectado\_ocr, fecha\_envio \\ \hline
+
+Analisis\_ortografico & Resultado del procesamiento NLP. &
+id\_analisis\_ortografico, cantidad\_errores, ortografia\_score \\ \hline
+
+sugerencia\_ortogra-
+fica & Errores detetctados del procesamiento NLP, en conjunto con su sugerencia. &
+id\_sugerencia\_ortografica, palabra\_incorrecta, posicion, sugerencia, contexto \\ \hline
+
+Analisis\_caligrafico & Resultado del análisis del trazo manuscrito. &
+id\_analisis\_caligrafico, inclinacion\_score, espaciado\_score, tamano\_letra\_score \\ \hline
+
+\end{longtable}
+
+Estas entidades representan el núcleo del procesamiento de la información dentro de la aplicación web.
+
+\textbf{C. Seguimiento y retroalimentación}
+
+En la Tabla \ref{tab:entidades_SR} se describen las entidades asociadas al seguimiento y retroalimentación del alumno.
+
+\begin{longtable}{|p{3.5cm}|p{7cm}|p{5cm}|}
+\caption{Entidades del proceso de evaluación del sistema}
+\label{tab:entidades_SR} \\ \hline
+
+\textbf{Entidad} & \textbf{Descripción} & \textbf{Atributos clave} \\ \hline
+\endfirsthead
+
+\hline
+\textbf{Entidad} & \textbf{Descripción} & \textbf{Atributos clave} \\ \hline
+\endhead
+
+Recomendación & Sugerencia generada automáticamente. &
+id\_recomendación, FK Id\_intento, FK Actividad\_sugerida, fecha\_generación, estado, prioridad. \\ \hline
+
+Actividad\_sugerida & Catalogo de ejercicios propuestos para corregir errores. & id\_actividad, descripcion, tipo\_error, tipo\_ejercicio, contenido, FK id\_estatus \\ \hline
+
+Progreso\_alumno & Indicadores acumulados del desempeño. &
+id\_progreso\_alumno,FK id\_alumno,promedio\_orto-
+grafia, promedio\_caligrafia \\ \hline
+
+\end{longtable}
+
+Estas entidades permiten el seguimiento del desempeño y la generación de retroalimentación personalizada.
+
+
+
+\subsubsection{Análisis de relaciones}
+
+El modelo entidad--relación define las interacciones entre las entidades del sistema mediante relaciones con cardinalidades específicas, las cuales permiten representar la forma en que los datos se asocian dentro del proceso de evaluación de la escritura.
+
+A continuación, se describen las principales relaciones identificadas en el modelo:
+
+\begin{itemize}
+    \item \textbf{Herencia (Usuario $\rightarrow$ Tutor / Alumno)}
+\end{itemize}
+
+Se establece una relación de especialización en la cual la entidad Usuario actúa como entidad base, de la que derivan los roles de Tutor y Alumno. Esta estructura permite reutilizar atributos comunes, como nombre y fecha de registro, y asignar funcionalidades específicas según el tipo de usuario.
+
+\begin{itemize}
+    \item \textbf{Tutor -- Alumno (1:N)}
+\end{itemize}
+
+Un tutor puede supervisar a muchos alumnos, mientras que cada alumno está asociado a un único tutor responsable.
+
+\begin{itemize}
+    \item \textbf{Tutor -- Ejercicio (M:N)}
+\end{itemize}
+
+Un tutor puede asignar múltiples ejercicios del catálogo, y un mismo 
+ejercicio del catálogo puede ser asignado por múltiples tutores. Esta 
+relación se en la entidad de asociación \textit{Ejercicio\_Tutor}.
+
+\begin{itemize}
+    \item \textbf{Alumno -- Intento (1:N)}
+\end{itemize}
+
+Un alumno puede realizar múltiples intentos a lo largo del tiempo, ya que cada intento representa una ejecución individual de un ejercicio. Esta relación permite almacenar el historial de participación del alumno.
+
+\begin{itemize}
+    \item \textbf{Intento -- Análisis ortográfico (1:1)}
+\end{itemize}
+
+Cada intento genera exactamente un análisis ortográfico, el cual contiene la evaluación del texto detectado mediante NLP, incluyendo errores y sugerencias.
+
+\begin{itemize}
+    \item \textbf{Intento -- Análisis caligráfico (1:1)}
+\end{itemize}
+
+Cada intento genera un único análisis caligráfico, el cual evalúa características del trazo manuscrito como alineación, tamaño y espaciado.
+
+\begin{itemize}
+    \item \textbf{Intento -- Recomendación (1:N)}
+\end{itemize}
+
+Un intento puede generar múltiples recomendaciones, dependiendo de la cantidad y tipo de errores detectados en los análisis realizados.
+
+\begin{itemize}
+    \item \textbf{Alumno -- Progreso\_alumno (1:1)}
+\end{itemize}
+
+Cada alumno cuenta con un único registro en la entidad Progreso\_alumno, el cual almacena indicadores acumulados de su desempeño, como promedios de ortografía y caligrafía.
+
+Esta relación nos permite obtener un promedio global para el análisis ortográfico y caligráfico, facilitando la calsificación de los alumnos.
+
+\subsubsection{Diagrama relacional}
+
+En la Figura \ref{fig:rel} se presenta el diagrama relacional de la aplicación web, donde se definen las tablas, sus atributos, así como las relaciones mediante llaves primarias y foráneas.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[angle=90,width=0.4\textheight]{Imagenes/DiagramaRelaiconal-2.png}
+    \caption{Diagrama relacional propuesto}
+    \label{fig:rel}
+\end{figure}
+
+\subsubsection{Decisiones de diseño de base de datos}
+
+\paragraph{Gestión del texto detectado (OCR)}
+
+El atributo texto\_detectado\_ocr en la entidad Intento representa un elemento crítico dentro de la aplicación web, ya que corresponde a la salida generada por el módulo de reconocimiento óptico de caracteres (OCR). Este dato constituye la entrada principal para el procesamiento mediante técnicas de procesamiento de lenguaje natural (NLP), por lo que su correcta generación y almacenamiento es fundamental para garantizar la calidad del análisis ortográfico.
+
+El uso de este formato proporciona flexibilidad y evita la rigidez de un esquema relacional estrictamente normalizado, facilitando futuras ampliaciones del sistema.
+
+\paragraph{Cálculo del progreso del alumno}
+
+La entidad \textit{Progreso\_alumno} funciona como una tabla de agregación que almacena indicadores globales del desempeño del estudiante. Su actualización se realiza mediante triggers a nivel de base de datos, los cuales recalculan automáticamente los promedios de ortografía y caligrafía al registrar un nuevo inteno.
+
+Este enfoque se justifica por las siguientes razones:
+
+\begin{itemize}
+    \item \textbf{Atomicidad:} el trigger se ejecuta dentro de la misma transacción que el INSERT del intento, garantizando que \textit{Progreso\_alumno} siempre refleje el estado actualizado sin depender de una llamada adicional desde el controlador.
+
+    \item \textbf{Consistencia:} se elimina el riesgo de inconsistencia de datos ante un fallo del backend posterior a la inserción del intento pero previo a la actualización del progreso.
+
+    \item \textbf{Separación de responsabilidades:} el controlador no requiere conocer la lógica de cálculo de promedios, delegando esa responsabilidad a la base de datos, lo cual es coherente con el patrón de diseño MVC adoptado en el sistema.
+
+\end{itemize}
+
+\paragraph{Gestión del historial y trazabilidad}
+
+La vista \textit{vw\_historial\_alumno} permite mantener un registro cronológico de los resultados obtenidos por el alumno en cada intento, sin comprometer la normalización del modelo de datos. A diferencia de una tabla adicional, la vista consolida la información existente en las entidades Intento, Analisis\_ortografico y Analisis\_caligrafico mediante una consulta predefinida, evitando la redundancia de datos. 
+
+\input{Capitulo4/ejercicios}

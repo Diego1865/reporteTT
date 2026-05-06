@@ -1,0 +1,1274 @@
+\subsubsection{Requerimientos funcionales}
+
+% =========================
+% Tabla de Requerimientos Funcionales
+% =========================
+\begin{longtable}{|c|p{10cm}|c|}
+\caption{Tabla de requerimientos funcionales del sistema}
+\label{tab:requerimientos_funcionales} \\
+\hline
+\textbf{ID} & \textbf{Nombre} & \textbf{Módulo} \\
+\hline
+\endfirsthead
+\hline
+\textbf{ID} & \textbf{Nombre} & \textbf{Módulo} \\
+\hline
+\endhead
+\hline
+\endfoot
+
+% MÓDULO 1: Autenticación y Registro
+RF-01 & Registro de tutor & \multirow{6}{*}{\shortstack{Autenticación \\ y Registro}} \\
+\cline{1-2}
+RF-02 & Validación de correo único & \\
+\cline{1-2}
+RF-03 & Registro de alumnos & \\
+\cline{1-2}
+RF-04 & Inicio de sesión & \\
+\cline{1-2}
+RF-05 & Control de acceso por rol & \\
+\cline{1-2}
+RF-06 & Notificación de credenciales incorrectas & \\
+\hline
+
+% MÓDULO 2: Gestión de Alumnos
+RF-07 & Clasificación de desempeño de alumnos & \multirow{3}{*}{\shortstack{Gestión de \\ Alumnos}} \\
+\cline{1-2}
+RF-08 & Gráfico de distribución de desempeño & \\
+\cline{1-2}
+RF-09 & Historial de actividades por alumno & \\
+\hline
+
+% MÓDULO 3: Gestión de Ejercicios
+RF-10 & Catálogo de ejercicios & \multirow{8}{*}{\shortstack{Gestión de \\ Ejercicios}} \\
+\cline{1-2}
+RF-11 & Asignación de ejercicios & \\
+\cline{1-2}
+RF-12 & Ejercicios asignados por tutor & \\
+\cline{1-2}
+RF-13 & Ejercicios pendientes del alumno & \\
+\cline{1-2}
+RF-14 & Ejercicios vencidos& \\
+\cline{1-2}
+RF-15 & Extensión de fecha límite & \\
+\cline{1-2}
+RF-16 & Historial de ejercicios completados & \\
+\hline
+
+% MÓDULO 4: Captura de Escritura
+RF-17 & Acceso a vista de captura & \multirow{9}{*}{\shortstack{Captura de \\ Escritura}} \\
+\cline{1-2}
+RF-18 & Captura Multimodal & \\
+\cline{1-2}
+RF-19 & Captura mediante cámara & \\
+\cline{1-2}
+RF-20 & Formatos soportados & \\
+\cline{1-2}
+RF-21 & Herramientas de pre-edición de imagen & \\
+\cline{1-2}
+RF-22 & Gestión de estado de captura & \\
+\cline{1-2}
+RF-23 & Herramientas del lienzo digital & \\
+\cline{1-2}
+RF-24 & Previsualización y confirmación & \\
+\cline{1-2}
+RF-25 & Validación de envío vacío & \\
+\hline
+
+% MÓDULO 5: Seguimiento y Retroalimentación
+RF-26 & Análisis OCR & \multirow{5}{*}{\shortstack{Seguimiento y \\ Retroalimentación}} \\
+\cline{1-2}
+RF-27 & Anaálisis NLP & \\
+\cline{1-2}
+RF-28 & Notificación de fallo en análisis & \\
+\cline{1-2}
+RF-29 & Modificación de resultados & \\
+\cline{1-2}
+RF-30 & Actividades sugeridas & \\
+\cline{1-2}
+RF-31 & Realización de actividades sugeridas & \\
+\hline
+
+\end{longtable}
+
+%----- Especificación de requerimientos
+\subsubsection{Especificación de requerimientos funcionales}
+
+\begin{table}[H]
+\caption{Especificación de requerimiento RF-01}
+\centering
+\renewcommand{\arraystretch}{1.3}
+\setlength{\tabcolsep}{6pt}
+
+\begin{tabular}{|p{7cm}|p{8cm}|}
+\hline
+
+\multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web permitirá el registro del tutor.} \\ \hline
+
+\textbf{Identificador:} RF-01 &
+\textbf{Nombre:} Registro de tutor. \\ \cline{1-1}
+
+\textbf{Prioridad de desarrollo:} Alta &
+\multicolumn{1}{p{8cm}|}{} \\ \hline
+\textbf{Entrada:} El usuario llena el formulario de registro con Nombre, Apellido Paterno, correo, nombre de usuario y contraseña. &
+\textbf{Salida:} Confirmación de perfil registrado. \\ \hline
+
+\multicolumn{2}{|p{15cm}|}{
+\textbf{Descripción:} Permite que los tutores puedan registrarse en la aplicación web.
+
+\vspace{0.2cm}
+
+\textbf{Precondición:} El correo y nombre de usuario no deben estar previamente registrados en la aplicación web.
+
+\vspace{0.2cm}
+
+\textbf{Postcondición:} Los datos quedan almacenados y disponibles.
+} \\ \hline
+
+\end{tabular}
+
+\label{tab:rf2}
+
+\end{table}
+
+\begin{table}[H]
+\caption{Especificación de requerimiento RF-02}
+\centering
+\renewcommand{\arraystretch}{1.3}
+\setlength{\tabcolsep}{6pt}
+
+\begin{tabular}{|p{7cm}|p{8cm}|}
+\hline
+
+\multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web notificará al usuario si el correo ya no esta disponible.} \\ \hline
+
+\textbf{Identificador:} RF-02 &
+\textbf{Nombre:} Validación de correo único. \\ \cline{1-1}
+
+\textbf{Prioridad de desarrollo:} Alta &
+\multicolumn{1}{p{8cm}|}{} \\ \hline
+\textbf{Entrada:} La aplicación web recibe el correo del formulario de registro. &
+\textbf{Salida:} Notificación de que el correo ya existe. \\ \hline
+
+\multicolumn{2}{|p{15cm}|}{
+\textbf{Descripción:} Notifica al usuario que el correo ya no esta disponible para el registro.
+
+\vspace{0.2cm}
+
+\textbf{Precondición:} El usuario ha ingresado un correo electrónico en el formulario de registro o actualización de perfil.
+
+\vspace{0.2cm}
+
+\textbf{Postcondición:} La aplicación confirma que el correo no existe en la base de datos y permite continuar con el registro/actualización ó rechaza el correo y muestra un mensaje como “El correo ya se encuentra registrado”.
+} \\ \hline
+
+\end{tabular}
+
+\label{tab:rf3}
+
+\end{table}
+
+\begin{table}[H]
+\caption{Especificación de requerimiento RF-03}
+\centering
+\renewcommand{\arraystretch}{1.3}
+\setlength{\tabcolsep}{6pt}
+
+\begin{tabular}{|p{7cm}|p{8cm}|}
+\hline
+
+\multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web permitirá al tutor el registro de los alumnos.} \\ \hline
+
+\textbf{Identificador:} RF-03 &
+\textbf{Nombre:} Registro de alumnos. \\ \cline{1-1}
+
+\textbf{Prioridad de desarrollo:} Alta &
+\multicolumn{1}{p{8cm}|}{} \\ \hline
+\textbf{Entrada:} El tutor llena el formulario de ''Alta de alumno'' con los datos del alumno, nombre, apellido paterno, apellido materno (si lo requiere el tutor), contraseña temporal, grado y grupo. &
+\textbf{Salida:} Confirmación de alumno registrado. \\ \hline
+
+\multicolumn{2}{|p{15cm}|}{
+\textbf{Descripción:} Permite que los tutores puedan registrar a sus alumnos en la aplicación web. Los alumnos deben tener únicamente un tutor.
+
+\vspace{0.2cm}
+
+\textbf{Precondición:} El tutor ingreso los datos del alumno en el formulario ''Alta de alumno'', la aplicación web válida que el alumno no haya sido registrado anteriormente.
+
+\vspace{0.2cm}
+
+\textbf{Postcondición:} La aplicación confirma el registro del alumno ó notificá que ya ha sido registrado.
+} \\ \hline
+
+\end{tabular}
+
+\label{tab:rf4}
+
+\end{table}
+
+
+% =========================
+% RF-04: Inicio de sesión
+% =========================
+\begin{table}[H]
+\caption{Especificación de requerimiento RF-04}
+\centering
+\renewcommand{\arraystretch}{1.3}
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{|p{7cm}|p{8cm}|}
+\hline
+\multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web permitirá a tutores y alumnos autenticarse mediante nombre de usuario y contraseña para acceder a sus funcionalidades.} \\ \hline
+\textbf{Identificador:} RF-04 &
+\textbf{Nombre:} Inicio de sesión. \\ \cline{1-1}
+\textbf{Prioridad de desarrollo:} Alta &
+\multicolumn{1}{p{8cm}|}{} \\ \hline
+\textbf{Entrada:} El usuario ingresa su correo electrónico y contraseña en el formulario de inicio de sesión. &
+\textbf{Salida:} Redirección a la vista correspondiente según el rol del usuario autenticado. \\ \hline
+\multicolumn{2}{|p{15cm}|}{
+\textbf{Descripción:} Permite que tutores y alumnos inicien sesión en la aplicación web ingresando sus credenciales registradas, identificando su rol y redirigiendo a la vista adecuada para cada uno.
+
+\vspace{0.2cm}
+\textbf{Precondición:} El usuario debe tener una cuenta registrada en la aplicación web con correo electrónico y contraseña válidos.
+
+\vspace{0.2cm}
+\textbf{Postcondición:} El usuario queda autenticado y accede a las funcionalidades correspondientes a su rol dentro de la aplicación.
+} \\ \hline
+\end{tabular}
+\label{tab:rf04}
+\end{table}
+
+% =========================
+% RF-05: Control de acceso por rol
+% =========================
+\begin{table}[H]
+\caption{Especificación de requerimiento RF-05}
+\centering
+\renewcommand{\arraystretch}{1.3}
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{|p{7cm}|p{8cm}|}
+\hline
+\multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web restringirá el acceso a las funcionalidades según el rol del usuario autenticado, diferenciando las vistas y acciones disponibles para tutor y alumno.} \\ \hline
+\textbf{Identificador:} RF-05 &
+\textbf{Nombre:} Control de acceso por rol. \\ \cline{1-1}
+\textbf{Prioridad de desarrollo:} Alta &
+\multicolumn{1}{p{8cm}|}{} \\ \hline
+\textbf{Entrada:} Rol del usuario identificado durante el inicio de sesión. &
+\textbf{Salida:} Acceso habilitado únicamente a las vistas y acciones correspondientes al rol del usuario autenticado. \\ \hline
+\multicolumn{2}{|p{15cm}|}{
+\textbf{Descripción:} La aplicación web diferencia las funcionalidades disponibles para cada tipo de usuario. El tutor tiene acceso a la gestión de alumnos, ejercicios y resultados, mientras que el alumno accede únicamente a sus ejercicios, capturas y retroalimentación.
+
+\vspace{0.2cm}
+
+\textbf{Precondición:} El usuario debe estar autenticado con un rol asignado (tutor o alumno).
+
+
+\vspace{0.2cm}
+
+\textbf{Postcondición:} El usuario accede exclusivamente a las funcionalidades habilitadas para su rol, sin posibilidad de acceder a las del otro.
+} \\ \hline
+\end{tabular}
+\label{tab:rf05}
+\end{table}
+
+% =========================
+% RF-06: Notificación de credenciales incorrectas
+% =========================
+\begin{longtable}{|p{7cm}|p{8cm}|}
+\caption{Especificación de requerimiento RF-06}
+\label{tab:rf06}\\
+\hline
+
+\multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web notificará al usuario cuando las credenciales ingresadas durante el inicio de sesión sean incorrectas.} \\ \hline
+
+\textbf{Identificador:} RF-06 &
+\textbf{Nombre:} Notificación de credenciales incorrectas. \\ \cline{1-1}
+
+\textbf{Prioridad de desarrollo:} Media &
+\\ \hline
+
+\textbf{Entrada:} Nombre de usuario y/o contraseña incorrectos ingresados por el usuario en el formulario de inicio de sesión. &
+\textbf{Salida:} Mensaje de error indicando que las credenciales son incorrectas. \\ \hline
+
+\multicolumn{2}{|p{15cm}|}{
+\textbf{Descripción:} Cuando un usuario ingresa credenciales que no coinciden con ninguna cuenta registrada, la aplicación web muestra un mensaje de error.
+
+\vspace{0.2cm}
+
+\textbf{Precondición:} El usuario debe haber ingresado credenciales inválidas.
+
+\vspace{0.2cm}
+
+\textbf{Postcondición:} El acceso es denegado.
+} \\ \hline
+
+\end{longtable}
+
+% =========================
+% RF-07: Clasificación de desempeño de alumnos
+% =========================
+\begin{table}[H]
+\caption{Especificación de requerimiento RF-07}
+\centering
+\renewcommand{\arraystretch}{1.3}
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{|p{7cm}|p{8cm}|}
+\hline
+\multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web permitirá al tutor visualizar el estado de desempeño de sus alumnos, clasificándolos en tres categorías: bajo desempeño, desempeño regular y desempeño de excelencia.} \\ \hline
+\textbf{Identificador:} RF-07 &
+\textbf{Nombre:} Clasificación de desempeño de alumnos. \\ \cline{1-1}
+\textbf{Prioridad de desarrollo:} Alta &
+\multicolumn{1}{p{8cm}|}{} \\ \hline
+\textbf{Entrada:} Solicitud del tutor para consultar el estado de desempeño de sus alumnos. &
+\textbf{Salida:} Lista de alumnos agrupados por categoría de desempeño: bajo desempeño, desempeño regular y desempeño de excelencia. \\ \hline
+\multicolumn{2}{|p{15cm}|}{
+\textbf{Descripción:} Permite al tutor identificar el nivel de progreso de cada alumno mediante una clasificación basada en los resultados de los análisis ortográficos y caligráficos obtenidos en los ejercicios completados.
+
+\vspace{0.2cm}
+\textbf{Precondición:} El tutor debe estar autenticado y tener alumnos registrados con al menos un ejercicio analizado.
+
+\vspace{0.2cm}
+\textbf{Postcondición:} El tutor visualiza a sus alumnos agrupados por categoría de desempeño, con la información actualizada conforme se registren nuevas evaluaciones.
+} \\ \hline
+\end{tabular}
+\label{tab:rf07}
+\end{table}
+
+% =========================
+% RF-08: Gráfico de distribución de desempeño
+% =========================
+\begin{longtable}{|p{7cm}|p{8cm}|}
+\caption{Especificación de requerimiento RF-08}
+\label{rf08} \\ \hline
+
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15cm}|}{
+\textbf{Requerimiento:} La aplicación web presentará al tutor un gráfico que muestre la distribución de alumnos según su nivel de desempeño, actualizándose automáticamente al registrar nuevas evaluaciones.
+} \\ \hline
+
+\textbf{Identificador:} RF-08 &
+\textbf{Nombre:} Gráfico de distribución de desempeño. \\ \cline{1-1}
+
+\textbf{Prioridad de desarrollo:} Media &
+\multicolumn{1}{p{8cm}|}{} \\ \hline
+
+\textbf{Entrada:} Datos de clasificación de desempeño de los alumnos del tutor autenticado. &
+\textbf{Salida:} Gráfico con la cantidad de alumnos en cada categoría de desempeño (bajo, regular y excelencia). \\ \hline
+
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15cm}|}{
+\textbf{Descripción:} La aplicación web genera y muestra al tutor un gráfico con la distribución de sus alumnos según su nivel de desempeño, permitiéndole tener una visión general del grupo de forma visual e intuitiva.
+
+\vspace{0.2cm}
+
+\textbf{Precondición:} El tutor debe estar autenticado y tener alumnos con resultados de análisis disponibles.
+
+\vspace{0.2cm}
+
+\textbf{Postcondición:} El gráfico se muestra actualizado con la información más reciente y se actualiza automáticamente al registrar nuevas evaluaciones.
+} \\ \hline
+
+\end{longtable}
+
+% =========================
+% RF-09: Historial de actividades por alumno
+% =========================
+\begin{table}[H]
+\caption{Especificación de requerimiento RF-09}
+\centering
+\renewcommand{\arraystretch}{1.3}
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{|p{7cm}|p{8cm}|}
+\hline
+\multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web permitirá al tutor visualizar las actividades realizadas por cada alumno, incluyendo los resultados del análisis ortográfico y caligráfico obtenidos.} \\ \hline
+\textbf{Identificador:} RF-09 &
+\textbf{Nombre:} Historial de actividades por alumno. \\ \cline{1-1}
+\textbf{Prioridad de desarrollo:} Alta &
+\multicolumn{1}{p{8cm}|}{} \\ \hline
+\textbf{Entrada:} Selección del alumno a consultar por parte del tutor autenticado. &
+\textbf{Salida:} Historial de ejercicios completados por el alumno seleccionado, con sus resultados de análisis ortográfico y caligráfico. \\ \hline
+\multicolumn{2}{|p{15cm}|}{
+\textbf{Descripción:} Permite al tutor consultar el historial de actividades de cada uno de sus alumnos, visualizando los ejercicios que han completado junto con los resultados del análisis de escritura correspondientes a cada intento.
+
+\vspace{0.2cm}
+\textbf{Precondición:} El tutor debe estar autenticado y seleccionar un alumno vinculado a su cuenta que tenga al menos un ejercicio completado.
+
+\vspace{0.2cm}
+\textbf{Postcondición:} El tutor visualiza el historial completo de actividades del alumno seleccionado con sus resultados de análisis disponibles.
+} \\ \hline
+\end{tabular}
+\label{tab:rf09}
+\end{table}
+
+% =========================
+% RF-10: Catálogo de ejercicios
+% =========================
+\begin{table}[H]
+\caption{Especificación de requerimiento RF-10}
+\centering
+\renewcommand{\arraystretch}{1.3}
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{|p{7cm}|p{8cm}|}
+\hline
+\multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web mostrará al tutor el catálogo completo de ejercicios disponibles proporcionados por la plataforma.} \\ \hline
+\textbf{Identificador:} RF-10 &
+\textbf{Nombre:} Catálogo de ejercicios. \\ \cline{1-1}
+\textbf{Prioridad de desarrollo:} Alta &
+\multicolumn{1}{p{8cm}|}{} \\ \hline
+\textbf{Entrada:} Solicitud del tutor para acceder al catálogo de ejercicios desde su panel de gestión. &
+\textbf{Salida:} Lista de ejercicios disponibles con nombre, descripción y nivel de dificultad. \\ \hline
+\multicolumn{2}{|p{15cm}|}{
+\textbf{Descripción:} Permite al tutor explorar todos los ejercicios disponibles en la plataforma para conocer las actividades que puede asignar a sus alumnos. El tutor no crea ejercicios, únicamente los consulta y selecciona para asignarlos.
+
+\vspace{0.2cm}
+\textbf{Precondición:} El tutor debe estar autenticado.
+
+\vspace{0.2cm}
+\textbf{Postcondición:} El tutor visualiza el catálogo completo de ejercicios y puede proceder a asignar los que considere pertinentes para sus alumnos.
+} \\ \hline
+\end{tabular}
+\label{tab:rf10}
+\end{table}
+
+% =========================
+% RF-11: Asignación de ejercicios
+% =========================
+\begin{table}[H]
+\caption{Especificación de requerimiento RF-11}
+\centering
+\renewcommand{\arraystretch}{1.3}
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{|p{7cm}|p{8cm}|}
+\hline
+\multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web permitirá al tutor asignar ejercicios a sus alumnos, con la opción de establecer una fecha límite de entrega.} \\ \hline
+\textbf{Identificador:} RF-11 &
+\textbf{Nombre:} Asignación de ejercicios. \\ \cline{1-1}
+\textbf{Prioridad de desarrollo:} Alta &
+\multicolumn{1}{p{8cm}|}{} \\ \hline
+\textbf{Entrada:} Ejercicio seleccionado del catálogo y fecha límite de entrega (opcional) ingresada por el tutor. &
+\textbf{Salida:} Confirmación de asignación y disponibilidad del ejercicio en la lista de pendientes del alumno. \\ \hline
+\multicolumn{2}{|p{15cm}|}{
+\textbf{Descripción:} Permite al tutor seleccionar uno o más ejercicios del catálogo y asignarlos a sus alumnos. El tutor puede opcionalmente establecer una fecha límite de entrega; si no lo hace, el ejercicio permanece activo indefinidamente.
+
+\vspace{0.2cm}
+\textbf{Precondición:} El tutor debe estar autenticado y haber consultado el catálogo de ejercicios (RF-10).
+
+\vspace{0.2cm}
+\textbf{Postcondición:} El ejercicio queda registrado como asignado y aparece en la lista de pendientes de los alumnos correspondientes al tutor.
+} \\ \hline
+\end{tabular}
+\label{tab:rf11}
+\end{table}
+
+% =========================
+% RF-12: Ejercicios asignados por tutor
+% =========================
+\begin{table}[H]
+\caption{Especificación de requerimiento RF-12}
+\centering
+\renewcommand{\arraystretch}{1.3}
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{|p{7cm}|p{8cm}|}
+\hline
+\multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web mostrará al tutor la lista de ejercicios que ha asignado previamente, indicando para cada uno su fecha límite de entrega si fue establecida.} \\ \hline
+\textbf{Identificador:} RF-12 &
+\textbf{Nombre:} Ejercicios asignados por tutor. \\ \cline{1-1}
+\textbf{Prioridad de desarrollo:} Alta &
+\multicolumn{1}{p{8cm}|}{} \\ \hline
+\textbf{Entrada:} Solicitud del tutor para consultar los ejercicios que ha asignado a sus alumnos. &
+\textbf{Salida:} Lista de ejercicios asignados con nombre del ejercicio y fecha límite de entrega correspondiente. \\ \hline
+\multicolumn{2}{|p{15cm}|}{
+\textbf{Descripción:} Permite al tutor consultar únicamente los ejercicios que ha asignado a sus alumnos, con la información de la fecha límite de entrega de cada uno. Debe distinguirse visualmente si un ejercicio tiene o no fecha límite asignada.
+
+\vspace{0.2cm}
+\textbf{Precondición:} El tutor debe estar autenticado y haber asignado al menos un ejercicio previamente (RF-11).
+
+\vspace{0.2cm}
+\textbf{Postcondición:} El tutor visualiza la lista de ejercicios asignados con su estado y fecha límite correspondiente.
+} \\ \hline
+\end{tabular}
+\label{tab:rf12}
+\end{table}
+
+%----- RF-013
+
+\begin{longtable}{|p{7cm}|p{8cm}|}
+\caption{Especificación de requerimiento RF-13}
+\label{tab:rf13} \\ \hline
+
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15cm}|}{
+\textbf{Requerimiento:} La aplicación web mostrará al alumno los ejercicios pendientes asignados por su tutor, ordenados por fecha límite de entrega y con indicador visual de proximidad de vencimiento.
+} \\ \hline
+
+\textbf{Identificador:} RF-13 &
+\textbf{Nombre:} Ejercicios pendientes del alumno. \\ \cline{1-1}
+
+\textbf{Prioridad de desarrollo:} Alta &
+\multicolumn{1}{p{8cm}|}{} \\ \hline
+
+\textbf{Entrada:} Solicitud del alumno para consultar sus ejercicios pendientes desde su panel principal. &
+\textbf{Salida:} Lista de ejercicios pendientes asignados por el tutor, ordenados por fecha límite, con indicador visual de proximidad de vencimiento o vencidos. \\ \hline
+
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15cm}|}{
+\textbf{Descripción:} Permite al alumno visualizar los ejercicios que su tutor ha asignado y que aún no ha completado, junto con su fecha límite de entrega, para organizar sus actividades a tiempo. Solo se muestran ejercicios activos asignados al alumno autenticado.
+
+\vspace{0.2cm}
+
+\textbf{Precondición:} El alumno debe estar autenticado y tener ejercicios asignados por su tutor que no hayan sido completados.
+
+\vspace{0.2cm}
+
+\textbf{Postcondición:} El alumno visualiza sus ejercicios pendientes ordenados por fecha límite, con indicadores visuales que le permiten identificar los próximos a vencer o ya vencidos.
+} \\ \hline
+
+\end{longtable}
+
+% =========================
+% RF-14: Ejercicios vencidos
+% =========================
+\begin{longtable}{|p{7cm}|p{8cm}|}
+\caption{Especificación de requerimiento RF-14}
+\label{tab:rf14} \\ \hline
+
+\multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web permitirá a tutores y alumnos consultar los ejercicios cuya fecha límite de entrega ha expirado.} \\ \hline
+
+\textbf{Identificador:} RF-14 &
+\textbf{Nombre:} Ejercicios vencidos. \\ \cline{1-1}
+
+\textbf{Prioridad de desarrollo:} Media &
+\multicolumn{1}{p{8cm}|}{} \\ \hline
+
+\textbf{Entrada:} Solicitud del usuario (tutor o alumno) para consultar los ejercicios con fecha límite expirada. &
+\textbf{Salida:} Lista de ejercicios vencidos con nombre, fecha límite original y estado de entrega. \\ \hline
+
+\multicolumn{2}{|p{15cm}|}{
+\textbf{Descripción:} Permite a tutores y alumnos visualizar los ejercicios cuya fecha límite ha expirado. El tutor los consulta para decidir si extiende el plazo de entrega, mientras que el alumno los consulta para conocer su estado y verificar si el tutor ha habilitado una extensión. Debe distinguirse visualmente si un ejercicio vencido fue entregado o no.
+
+\vspace{0.2cm}
+\textbf{Precondición:} El usuario debe estar autenticado y existir ejercicios con fecha límite expirada asociados a su cuenta.
+
+\vspace{0.2cm}
+\textbf{Postcondición:} El usuario visualiza la lista de ejercicios vencidos con su estado correspondiente. Solo el tutor puede proceder a extender el plazo de entrega (RF-15).
+} \\ \hline
+
+\end{longtable}
+
+% =========================
+% RF-15: Extensión de fecha límite
+% =========================
+\begin{table}[H]
+\caption{Especificación de requerimiento RF-15}
+\centering
+\renewcommand{\arraystretch}{1.3}
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{|p{7cm}|p{8cm}|}
+\hline
+\multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web permitirá al tutor extender la fecha límite de entrega de un ejercicio vencido, reactivándolo en la lista de pendientes del alumno.} \\ \hline
+\textbf{Identificador:} RF-15 &
+\textbf{Nombre:} Extensión de fecha límite. \\ \cline{1-1}
+\textbf{Prioridad de desarrollo:} Media &
+\multicolumn{1}{p{8cm}|}{} \\ \hline
+\textbf{Entrada:} Ejercicio vencido seleccionado y nueva fecha límite de entrega ingresada por el tutor. &
+\textbf{Salida:} Confirmación de actualización de fecha límite y reactivación del ejercicio en la lista de pendientes del alumno. \\ \hline
+\multicolumn{2}{|p{15cm}|}{
+\textbf{Descripción:} Cuando un ejercicio ha superado su fecha límite, el tutor puede extender el plazo estableciendo una nueva fecha, lo que reactiva el ejercicio y lo vuelve a mostrar como pendiente para los alumnos que no lo han completado.
+
+\vspace{0.2cm}
+\textbf{Precondición:} El tutor debe estar autenticado, haber consultado los ejercicios vencidos (RF-14) y la nueva fecha debe ser posterior a la fecha actual.
+
+\vspace{0.2cm}
+\textbf{Postcondición:} El ejercicio queda actualizado con la nueva fecha límite y reaparece en la lista de ejercicios pendientes del alumno.
+} \\ \hline
+\end{tabular}
+\label{tab:rf15}
+\end{table}
+
+%---- RF-16s
+
+\begin{longtable}{|p{7cm}|p{8cm}|}
+\caption{Especificación de requerimiento RF-16}
+\label{tab:rf16} \\ \hline
+
+\multicolumn{2}{|p{15cm}|}{
+\textbf{Requerimiento:} La aplicación web permitirá al alumno consultar el historial de ejercicios que ha completado y enviado, junto con los resultados del análisis de escritura obtenidos en cada uno.
+} \\ \hline
+
+\textbf{Identificador:} RF-16 &
+\textbf{Nombre:} Historial de ejercicios completados. \\ \cline{1-1}
+
+\textbf{Prioridad de desarrollo:} Alta &
+\multicolumn{1}{p{8cm}|}{} \\ \hline
+
+\textbf{Entrada:} Solicitud del alumno para consultar su historial de ejercicios completados desde su panel principal. &
+\textbf{Salida:} Lista de ejercicios completados con nombre, fecha de entrega y resultados del análisis ortográfico y caligráfico. \\ \hline
+
+\multicolumn{2}{|p{15cm}|}{
+\textbf{Descripción:} Permite al alumno revisar los ejercicios que ha enviado previamente, visualizando los resultados del análisis de escritura generados para cada uno. Los resultados estarán disponibles una vez que se haya procesado el análisis correspondiente.
+
+\vspace{0.2cm}
+
+\textbf{Precondición:} El alumno debe estar autenticado y haber enviado al menos un ejercicio con resultados de análisis disponibles.
+
+\vspace{0.2cm}
+
+\textbf{Postcondición:} El alumno visualiza su historial de ejercicios completados con los resultados de análisis ortográfico y caligráfico correspondientes a cada intento.
+}
+\\ \hline
+
+\end{longtable}
+
+% =========================
+% RF-17: Acceso a vista de captura
+% =========================
+\begin{table}[H]
+\caption{Especificación de requerimiento RF-17}
+\centering
+\renewcommand{\arraystretch}{1.3}
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{|p{7cm}|p{8cm}|}
+\hline
+\multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web permitirá al alumno acceder a la vista de captura de escritura al seleccionar un ejercicio pendiente para realizarlo.} \\ \hline
+\textbf{Identificador:} RF-17 &
+\textbf{Nombre:} Acceso a vista de captura. \\ \cline{1-1}
+\textbf{Prioridad de desarrollo:} Alta &
+\multicolumn{1}{p{8cm}|}{} \\ \hline
+\textbf{Entrada:} Selección de un ejercicio pendiente por parte del alumno desde su lista de pendientes. &
+\textbf{Salida:} Carga de la vista de captura de escritura con las herramientas habilitadas para realizar el ejercicio. \\ \hline
+\multicolumn{2}{|p{15cm}|}{
+\textbf{Descripción:} Cuando el alumno selecciona un ejercicio pendiente, la aplicación web carga la vista de captura de escritura, habilitando las opciones disponibles para completar el ejercicio: escritura en lienzo digital o carga de imagen.
+
+\vspace{0.2cm}
+\textbf{Precondición:} El alumno debe estar autenticado y seleccionar un ejercicio dentro del plazo vigente o con extensión habilitada por el tutor.
+
+\vspace{0.2cm}
+\textbf{Postcondición:} La vista de captura queda cargada y el alumno puede proceder a realizar el ejercicio mediante las opciones de captura disponibles (RF-18).
+} \\ \hline
+\end{tabular}
+\label{tab:rf17}
+\end{table}
+
+%------ RF-18
+
+\begin{longtable}{|p{7cm}|p{8cm}|}
+\caption{Especificación de requerimiento RF-18}
+\label{tab:rf18} \\ \hline
+
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15cm}|}{
+\textbf{Requerimiento:} La aplicación web permitirá la captura de texto manuscrito mediante dos modalidades: carga de archivos de imagen y un lienzo digital integrado para escritura.
+} \\ \hline
+
+\textbf{Identificador:} RF-18 &
+\textbf{Nombre:} Captura Multimodal. \\ \cline{1-1}
+
+\textbf{Prioridad de desarrollo:} Alta &
+\multicolumn{1}{p{8cm}|}{} \\ \hline
+
+\textbf{Entrada:} Selección de la modalidad de captura por parte del alumno: carga de archivo de imagen o escritura en lienzo digital. &
+\textbf{Salida:} Habilitación de la modalidad seleccionada dentro de la vista de captura para que el alumno complete el ejercicio. \\ \hline
+
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15cm}|}{
+\textbf{Descripción:} La aplicación web ofrece al alumno dos modalidades de captura de escritura manuscrita dentro de la misma vista, accesibles mediante pestañas:
+
+a) carga de un archivo de imagen con la escritura en papel.
+
+b) escritura directa sobre un lienzo digital integrado.
+
+El alumno utiliza únicamente una de las dos modalidades por intento.
+
+\vspace{0.2cm}
+
+\textbf{Precondición:} El alumno debe haber accedido a la vista de captura de escritura (RF-17).
+
+\vspace{0.2cm}
+
+\textbf{Postcondición:} La modalidad seleccionada queda habilitada y el alumno puede proceder a capturar su escritura manuscrita para enviarla a revisión.
+} \\ \hline
+
+\end{longtable}
+
+% =========================
+% RF-19: Captura mediante cámara
+% =========================
+\begin{table}[H]
+\caption{Especificación de requerimiento RF-19}
+\centering
+\renewcommand{\arraystretch}{1.3}
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{|p{7cm}|p{8cm}|}
+\hline
+\multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web permitirá al alumno tomar una fotografía directamente con la cámara de su dispositivo como método alternativo de captura de escritura.} \\ \hline
+\textbf{Identificador:} RF-19 &
+\textbf{Nombre:} Captura mediante cámara. \\ \cline{1-1}
+\textbf{Prioridad de desarrollo:} Media &
+\multicolumn{1}{p{8cm}|}{} \\ \hline
+\textbf{Entrada:} Acción del alumno de activar la cámara del dispositivo desde la modalidad de carga de imagen. &
+\textbf{Salida:} Fotografía capturada con vista previa disponible para confirmar o repetir la toma antes de adjuntarla al ejercicio. \\ \hline
+\multicolumn{2}{|p{15cm}|}{
+\textbf{Descripción:} Dentro de la modalidad de carga de imagen (RF-18), el alumno puede optar por tomar una fotografía directamente con la cámara de su dispositivo en lugar de cargar un archivo existente. La aplicación muestra una vista previa de la fotografía capturada para que el alumno la confirme o repita la toma antes de proceder.
+
+\vspace{0.2cm}
+\textbf{Precondición:} El alumno debe estar en la modalidad de carga de imagen dentro de la vista de captura y el dispositivo debe contar con cámara disponible.
+
+\vspace{0.2cm}
+\textbf{Postcondición:} La fotografía capturada queda disponible como imagen del intento, lista para ser ajustada o enviada a revisión.
+} \\ \hline
+\end{tabular}
+\label{tab:rf19}
+\end{table}
+
+% =========================
+% RF-20: Formatos soportados
+% =========================
+\begin{table}[H]
+\caption{Especificación de requerimiento RF-20}
+\centering
+\renewcommand{\arraystretch}{1.3}
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{|p{7cm}|p{8cm}|}
+\hline
+\multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web aceptará únicamente imágenes en formato JPEG (.jpeg, .jpg) y PNG (.png) para la carga de escritura manuscrita.} \\ \hline
+\textbf{Identificador:} RF-20 &
+\textbf{Nombre:} Formatos soportados. \\ \cline{1-1}
+\textbf{Prioridad de desarrollo:} Alta &
+\multicolumn{1}{p{8cm}|}{} \\ \hline
+\textbf{Entrada:} Archivo de imagen seleccionado por el alumno para cargar como intento de ejercicio. &
+\textbf{Salida:} Aceptación del archivo si cumple con los formatos soportados, o mensaje de error indicando el formato no permitido. \\ \hline
+\multicolumn{2}{|p{15cm}|}{
+\textbf{Descripción:} La aplicación web valida el formato del archivo de imagen cargado por el alumno, aceptando únicamente archivos con extensión .jpeg, .jpg y .png. Si el archivo no cumple con los formatos soportados, la aplicación web notifica al alumno con un mensaje de error y le solicita cargar un archivo válido.
+
+\vspace{0.2cm}
+\textbf{Precondición:} El alumno debe estar en la modalidad de carga de imagen dentro de la vista de captura (RF-18) e intentar cargar un archivo de imagen.
+
+\vspace{0.2cm}
+\textbf{Postcondición:} Si el formato es válido, la imagen queda disponible como intento del ejercicio. Si no lo es, la aplicación web muestra un mensaje de error y el alumno debe seleccionar un archivo con formato soportado.
+} \\ \hline
+\end{tabular}
+\label{tab:rf20}
+\end{table}
+
+% =========================
+% RF-21: Herramientas de pre-edición de imagen
+% =========================
+\begin{longtable}{|p{7cm}|p{8cm}|}
+\caption{Especificación de requerimiento RF-21}
+\label{tab:rf21} \\ \hline
+
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15cm}|}{
+\textbf{Requerimiento:} La aplicación web contará con herramientas para rotar imágenes en incrementos de 90° y recortar mediante selección rectangular antes de su envío.
+} \\ \hline
+
+\textbf{Identificador:} RF-21 &
+\textbf{Nombre:} Herramientas de pre-edición de imagen. \\ \cline{1-1}
+
+\textbf{Prioridad de desarrollo:} Media &
+\multicolumn{1}{p{8cm}|}{} \\ \hline
+
+\textbf{Entrada:} Imagen cargada o capturada por el alumno y acciones de rotación o recorte aplicadas sobre ella. &
+\textbf{Salida:} Imagen ajustada con los cambios aplicados, disponible en la vista previa para su confirmación y envío. \\ \hline
+
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15cm}|}{
+\textbf{Descripción:} Una vez que el alumno carga o captura una imagen de su escritura manuscrita, la aplicación web le proporciona herramientas de pre-edición que le permiten rotar la imagen en incrementos de 90° y recortarla mediante selección rectangular, con el fin de asegurar que la escritura sea legible antes de enviarla al análisis.
+
+\vspace{0.2cm}
+
+\textbf{Precondición:} El alumno debe haber cargado un archivo de imagen (RF-18) o capturado una fotografía con la cámara (RF-19) dentro de la vista de captura.
+
+\vspace{0.2cm}
+
+\textbf{Postcondición:} La imagen editada queda disponible en la vista previa con los ajustes aplicados, lista para ser confirmada y enviada a revisión.
+} \\ \hline
+
+\end{longtable}
+% =========================
+% RF-22: Reinicio de captura
+% =========================
+\begin{table}[H]
+\caption{Especificación de requerimiento RF-22}
+\centering
+\renewcommand{\arraystretch}{1.3}
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{|p{7cm}|p{8cm}|}
+\hline
+\multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web permitirá al alumno descartar la imagen actual cargada mediante una función de limpieza que restablezca el estado de la vista previa y elimine la referencia del archivo.} \\ \hline
+\textbf{Identificador:} RF-22 &
+\textbf{Nombre:} Reinicio de captura. \\ \cline{1-1}
+\textbf{Prioridad de desarrollo:} Media &
+\multicolumn{1}{p{8cm}|}{} \\ \hline
+\textbf{Entrada:} Acción del alumno de descartar la imagen actualmente cargada en la vista de captura. &
+\textbf{Salida:} Vista previa restablecida a su estado inicial y referencia del archivo eliminada, habilitando una nueva carga de imagen. \\ \hline
+\multicolumn{2}{|p{15cm}|}{
+\textbf{Descripción:} Permite al alumno descartar la imagen cargada o capturada si decide reemplazarla por otra. La función de limpieza restablece completamente el estado de la vista previa y elimina la referencia al archivo anterior, dejando la vista lista para una nueva captura o carga de imagen.
+
+\vspace{0.2cm}
+\textbf{Precondición:} El alumno debe tener una imagen cargada o capturada en la vista de captura que desee descartar.
+
+\vspace{0.2cm}
+\textbf{Postcondición:} La vista de captura regresa a su estado inicial sin ninguna imagen referenciada, permitiendo al alumno cargar o capturar una nueva imagen.
+} \\ \hline
+\end{tabular}
+\label{tab:rf22}
+\end{table}
+
+% =========================
+% RF-23: Herramientas del lienzo digital
+% =========================
+\begin{table}[H]
+\caption{Especificación de requerimiento RF-23}
+\centering
+\renewcommand{\arraystretch}{1.3}
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{|p{7cm}|p{8cm}|}
+\hline
+\multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web proporcionará al alumno un conjunto de herramientas dentro del lienzo digital para facilitar la escritura manuscrita y su corrección.} \\ \hline
+\textbf{Identificador:} RF-23 &
+\textbf{Nombre:} Herramientas del lienzo digital. \\ \cline{1-1}
+\textbf{Prioridad de desarrollo:} Alta &
+\multicolumn{1}{p{8cm}|}{} \\ \hline
+\textbf{Entrada:} Interacción del alumno con las herramientas disponibles en el lienzo digital durante la realización del ejercicio. &
+\textbf{Salida:} Trazos y correcciones reflejados en tiempo real sobre el lienzo digital. \\ \hline
+\multicolumn{2}{|p{15cm}|}{
+\textbf{Descripción:} El lienzo digital integrado en la vista de captura proporciona al alumno las siguientes herramientas para la escritura y corrección de trazos: ajuste de grosor de trazo (RF-23.1), herramienta de borrador (RF-23.2), deshacer acciones (RF-23.3), rehacer acciones (RF-23.4) y limpieza completa del lienzo (RF-23.5). Cada herramienta se detalla en su especificación correspondiente.
+
+\vspace{0.2cm}
+\textbf{Precondición:} El alumno debe haber accedido a la modalidad de lienzo digital dentro de la vista de captura (RF-18).
+
+\vspace{0.2cm}
+\textbf{Postcondición:} El alumno puede escribir y corregir su escritura sobre el lienzo digital utilizando las herramientas disponibles antes de proceder a la previsualización y envío del ejercicio.
+} \\ \hline
+\end{tabular}
+\label{tab:rf23}
+\end{table}
+
+% =========================
+% RF-23.1: Ajuste de grosor de trazo
+% =========================
+\begin{longtable}{|p{7cm}|p{8cm}|}
+\caption{Especificación de requerimiento RF-23.1}
+\label{tab:rf231} \\ \hline
+
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15cm}|}{
+\textbf{Requerimiento:} La aplicación web permitirá ajustar el grosor del trazo en el lienzo digital.
+} \\ \hline
+
+\textbf{Identificador:} RF-23.1 &
+\textbf{Nombre:} Ajuste de grosor de trazo. \\ \cline{1-1}
+
+\textbf{Prioridad de desarrollo:} Media &
+\multicolumn{1}{p{8cm}|}{} \\ \hline
+
+\textbf{Entrada:} Selección del grosor de trazo deseado por el alumno dentro del lienzo digital. &
+\textbf{Salida:} Trazos posteriores reflejados con el grosor seleccionado sobre el lienzo digital. \\ \hline
+
+\multicolumn{2}{|>{\raggedright\arraybackslash}p{15cm}|}{
+\textbf{Descripción:} Permite al alumno ajustar el grosor del trazo antes o durante la escritura en el lienzo digital, adaptándolo a sus necesidades de escritura manuscrita.
+
+\vspace{0.2cm}
+
+\textbf{Precondición:} El alumno debe estar utilizando la modalidad de lienzo digital dentro de la vista de captura (RF-18).
+
+\vspace{0.2cm}
+
+\textbf{Postcondición:} Los trazos realizados después del ajuste se muestran con el grosor seleccionado en el lienzo digital.
+} \\ \hline
+
+\end{longtable}
+
+
+% =========================
+% RF-23.2: Herramienta de borrador
+% =========================
+\begin{table}[H]
+\caption{Especificación de requerimiento RF-23.2}
+\centering
+\renewcommand{\arraystretch}{1.3}
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{|p{7cm}|p{8cm}|}
+\hline
+\multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web proporcionará una herramienta de borrador para eliminar trazos de forma selectiva sobre el lienzo digital.} \\ \hline
+\textbf{Identificador:} RF-23.2 &
+\textbf{Nombre:} Herramienta de borrador. \\ \cline{1-1}
+\textbf{Prioridad de desarrollo:} Alta &
+\multicolumn{1}{p{8cm}|}{} \\ \hline
+\textbf{Entrada:} Acción del alumno de activar el borrador y arrastrarlo sobre los trazos que desea eliminar. &
+\textbf{Salida:} Trazos seleccionados eliminados del lienzo digital de forma inmediata. \\ \hline
+\multicolumn{2}{|p{15cm}|}{
+\textbf{Descripción:} Permite al alumno corregir errores en su escritura eliminando trazos de manera selectiva mediante el borrador, sin afectar el resto del contenido del lienzo digital.
+
+\vspace{0.2cm}
+\textbf{Precondición:} El alumno debe estar utilizando la modalidad de lienzo digital y tener trazos registrados sobre el lienzo (RF-23).
+
+\vspace{0.2cm}
+\textbf{Postcondición:} Los trazos sobre los que se aplicó el borrador quedan eliminados del lienzo, permitiendo al alumno continuar escribiendo en el área corregida.
+} \\ \hline
+\end{tabular}
+\label{tab:rf23_2}
+\end{table}
+
+% =========================
+% RF-23.3: Deshacer acciones
+% =========================
+\begin{longtable}{|p{7cm}|p{8cm}|}
+\caption{Especificación de requerimiento RF-23.3}
+\label{tab:rf23_3} \\ \hline
+
+\multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web permitirá al alumno deshacer la última acción realizada sobre el lienzo digital.} \\ \hline
+
+\textbf{Identificador:} RF-23.3 &
+\textbf{Nombre:} Deshacer acciones. \\ \cline{1-1}
+
+\textbf{Prioridad de desarrollo:} Alta &
+\multicolumn{1}{p{8cm}|}{} \\ \hline
+
+\textbf{Entrada:} Acción del alumno de activar la función de deshacer dentro del lienzo digital. &
+\textbf{Salida:} Reversión de la última acción registrada sobre el lienzo, restaurando el estado anterior. \\ \hline
+
+\multicolumn{2}{|p{15cm}|}{
+\textbf{Descripción:} Permite al alumno revertir la última acción realizada sobre el lienzo digital, ya sea un trazo o una corrección con el borrador, facilitando la corrección de errores sin necesidad de limpiar el lienzo completo.
+
+\vspace{0.2cm}
+\textbf{Precondición:} El alumno debe estar utilizando la modalidad de lienzo digital y haber realizado al menos una acción sobre el lienzo (RF-23).
+
+\vspace{0.2cm}
+\textbf{Postcondición:} La última acción registrada queda revertida y el lienzo refleja el estado anterior a dicha acción.
+} \\ \hline
+
+\end{longtable}
+
+% =========================
+% RF-23.4: Rehacer acciones
+% =========================
+\begin{table}[H]
+\caption{Especificación de requerimiento RF-23.4}
+\centering
+\renewcommand{\arraystretch}{1.3}
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{|p{7cm}|p{8cm}|}
+\hline
+\multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web permitirá al alumno rehacer la última acción deshecha sobre el lienzo digital.} \\ \hline
+\textbf{Identificador:} RF-23.4 &
+\textbf{Nombre:} Rehacer acciones. \\ \cline{1-1}
+\textbf{Prioridad de desarrollo:} Media &
+\multicolumn{1}{p{8cm}|}{} \\ \hline
+\textbf{Entrada:} Acción del alumno de activar la función de rehacer dentro del lienzo digital. &
+\textbf{Salida:} Restauración de la última acción revertida sobre el lienzo digital. \\ \hline
+\multicolumn{2}{|p{15cm}|}{
+\textbf{Descripción:} Permite al alumno restaurar una acción previamente deshecha sobre el lienzo digital, en caso de que decida mantenerla después de haberla revertido.
+
+\vspace{0.2cm}
+\textbf{Precondición:} El alumno debe haber utilizado la función de deshacer (RF-23.3) al menos una vez sobre el lienzo digital.
+
+\vspace{0.2cm}
+\textbf{Postcondición:} La acción revertida queda restaurada y el lienzo refleja el estado posterior a dicha acción.
+} \\ \hline
+\end{tabular}
+\label{tab:rf23_4}
+\end{table}
+
+% =========================
+% RF-23.5: Limpieza completa del lienzo
+% =========================
+\begin{longtable}{|p{7cm}|p{8cm}|}
+\caption{Especificación de requerimiento RF-23.5}
+\label{tab:rf23_5} \\ \hline
+
+\multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web permitirá al alumno limpiar completamente el lienzo digital, eliminando todos los trazos registrados.} \\ \hline
+
+\textbf{Identificador:} RF-23.5 &
+\textbf{Nombre:} Limpieza completa del lienzo. \\ \cline{1-1}
+
+\textbf{Prioridad de desarrollo:} Media &
+\multicolumn{1}{p{8cm}|}{} \\ \hline
+
+\textbf{Entrada:} Acción del alumno de activar la función de limpieza completa dentro del lienzo digital. &
+\textbf{Salida:} Lienzo digital completamente vacío, listo para iniciar una nueva escritura. \\ \hline
+
+\multicolumn{2}{|p{15cm}|}{
+\textbf{Descripción:} Permite al alumno eliminar todos los trazos registrados en el lienzo digital de forma inmediata, restableciendo el lienzo a su estado inicial para comenzar la escritura desde cero.
+
+\vspace{0.2cm}
+\textbf{Precondición:} El alumno debe estar utilizando la modalidad de lienzo digital y tener al menos un trazo registrado sobre el lienzo (RF-23).
+
+\vspace{0.2cm}
+\textbf{Postcondición:} El lienzo queda completamente vacío y el alumno puede iniciar una nueva escritura desde cero.
+} \\ \hline
+
+\end{longtable}
+
+% =========================
+% RF-24: Previsualización y confirmación
+% =========================
+\begin{table}[H]
+\caption{Especificación de requerimiento RF-24}
+\centering
+\renewcommand{\arraystretch}{1.3}
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{|p{7cm}|p{8cm}|}
+\hline
+\multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web mostrará al alumno una vista previa de su captura de escritura antes de confirmar el envío, aplicable tanto para imagen cargada como para el lienzo digital.} \\ \hline
+\textbf{Identificador:} RF-24 &
+\textbf{Nombre:} Previsualización y confirmación. \\ \cline{1-1}
+\textbf{Prioridad de desarrollo:} Alta &
+\multicolumn{1}{p{8cm}|}{} \\ \hline
+\textbf{Entrada:} Captura de escritura generada por el alumno, ya sea mediante imagen cargada o trazos en el lienzo digital convertidos a imagen. &
+\textbf{Salida:} Vista previa de la captura de escritura disponible para que el alumno la revise y confirme antes de proceder al envío. \\ \hline
+\multicolumn{2}{|p{15cm}|}{
+\textbf{Descripción:} Antes de enviar el ejercicio, la aplicación web muestra al alumno una vista previa de su captura de escritura. En el caso del lienzo digital, los trazos son convertidos a imagen. 
+
+\vspace{0.2cm}
+\textbf{Precondición:} El alumno debe haber generado contenido en la vista de captura, ya sea mediante imagen cargada (RF-18) o trazos en el lienzo digital (RF-23).
+
+\vspace{0.2cm}
+\textbf{Postcondición:} Si el alumno confirma, el ejercicio procede al envío. Si decide regresar, la vista de captura se mantiene con el contenido anterior para continuar editando.
+} \\ \hline
+\end{tabular}
+\label{tab:rf24}
+\end{table}
+
+% =========================
+% RF-25: Validación de envío vacío
+% =========================
+\begin{longtable}{|p{7cm}|p{8cm}|}
+\caption{Especificación de requerimiento RF-25}
+\label{tab:rf25} \\ \hline
+
+\multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web deshabilitará el botón de envío cuando el alumno no haya registrado trazos en el lienzo digital ni cargado una imagen, evitando envíos vacíos.} \\ \hline
+
+\textbf{Identificador:} RF-25 &
+\textbf{Nombre:} Validación de envío vacío. \\ \cline{1-1}
+
+\textbf{Prioridad de desarrollo:} Alta &
+\multicolumn{1}{p{8cm}|}{} \\ \hline
+
+\textbf{Entrada:} Estado de la vista de captura sin trazos registrados en el lienzo ni imagen cargada. &
+\textbf{Salida:} Botón de envío deshabilitado visualmente. \\ \hline
+
+\multicolumn{2}{|p{15cm}|}{
+\textbf{Descripción:} La aplicacióon web verifica si el alumno ha generado contenido en la vista de captura, ya sea trazos en el lienzo digital o una imagen cargada. Si no existe contenido válido, el botón de envío permanece deshabilitado.
+
+\vspace{0.2cm}
+\textbf{Precondición:} El alumno debe encontrarse en la vista de captura de escritura sin haber registrado trazos ni cargado una imagen.
+
+\vspace{0.2cm}
+\textbf{Postcondición:} El botón de envío se habilita únicamente cuando existe contenido en la vista de captura, permitiendo al alumno proceder con el envío del ejercicio.
+} \\ \hline
+
+\end{longtable}
+
+% =========================
+% RF-26: Análisis OCR
+% =========================
+\begin{table}[H]
+\caption{Especificación de requerimiento RF-26}
+\centering
+\renewcommand{\arraystretch}{1.3}
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{|p{7cm}|p{8cm}|}
+\hline
+\multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web analizará automáticamente la imagen del intento de escritura enviado mediante el módulo de reconocimiento óptico de caracteres (OCR), evaluando los aspectos caligráficos del trazo.} \\ \hline
+\textbf{Identificador:} RF-26 &
+\textbf{Nombre:} Análisis OCR. \\ \cline{1-1}
+\textbf{Prioridad de desarrollo:} Alta &
+\multicolumn{1}{p{8cm}|}{} \\ \hline
+\textbf{Entrada:} Imagen del intento de escritura enviado por el alumno (trazo digital convertido a imagen o fotografía cargada). &
+\textbf{Salida:} Resultado del análisis caligráfico generado por el módulo OCR, incluyendo el texto reconocido y las observaciones sobre la calidad del trazo. \\ \hline
+\multicolumn{2}{|p{15cm}|}{
+\textbf{Descripción:} Una vez que el alumno envía su intento de escritura, el módulo OCR integrado en la aplicación web procesa la imagen para reconocer los caracteres escritos y evaluar los aspectos caligráficos del trazo, como la forma, legibilidad y trazado de las letras.
+
+\vspace{0.2cm}
+\textbf{Precondición:} El alumno debe haber enviado un intento de ejercicio con una imagen válida generada desde el lienzo digital o cargada desde su dispositivo.
+
+\vspace{0.2cm}
+\textbf{Postcondición:} El resultado del análisis caligráfico queda almacenado y disponible para ser procesado por el módulo NLP (RF-27), visualizado por el alumno (RF-16) y consultado por el tutor (RF-09).
+} \\ \hline
+\end{tabular}
+\label{tab:rf26}
+\end{table}
+
+% =========================
+% RF-27: Análisis NLP
+% =========================
+\begin{table}[H]
+\caption{Especificación de requerimiento RF-27}
+\centering
+\renewcommand{\arraystretch}{1.3}
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{|p{7cm}|p{8cm}|}
+\hline
+\multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web analizará el texto reconocido por el módulo OCR mediante procesamiento de lenguaje natural (NLP), evaluando los aspectos ortográficos de la escritura del alumno.} \\ \hline
+\textbf{Identificador:} RF-27 &
+\textbf{Nombre:} Análisis NLP. \\ \cline{1-1}
+\textbf{Prioridad de desarrollo:} Alta &
+\multicolumn{1}{p{8cm}|}{} \\ \hline
+\textbf{Entrada:} Texto reconocido por el módulo OCR (RF-26) a partir de la imagen del intento de escritura del alumno. &
+\textbf{Salida:} Resultado del análisis ortográfico con identificación de errores, palabras incorrectas. \\ \hline
+\multicolumn{2}{|p{15cm}|}{
+\textbf{Descripción:} A partir del texto extraído por el módulo OCR, el módulo NLP evalúa la ortografía de la escritura del alumno, identificando errores como palabras mal escritas, acentuación incorrecta y uso inadecuado de caracteres. Los resultados del análisis ortográfico se combinan con los del análisis caligráfico (RF-26) para generar un resultado integral del intento.
+
+\vspace{0.2cm}
+\textbf{Precondición:} El módulo OCR debe haber procesado exitosamente la imagen del intento y generado el texto reconocido (RF-26).
+
+\vspace{0.2cm}
+\textbf{Postcondición:} El resultado del análisis ortográfico queda almacenado y disponible para su visualización por el alumno (RF-16), consulta por el tutor (RF-09) y generación de recomendaciones por intento.
+} \\ \hline
+\end{tabular}
+\label{tab:rf27}
+\end{table}
+
+% =========================
+% RF-28: Notificación de fallo en análisis
+% =========================
+\begin{longtable}{|p{7cm}|p{8cm}|}
+\caption{Especificación de requerimiento RF-28}
+\label{tab:rf28} \\ \hline
+
+\multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web notificará al alumno cuando el análisis automático de escritura falle, permitiéndole realizar un nuevo intento de envío.} \\ \hline
+
+\textbf{Identificador:} RF-28 &
+\textbf{Nombre:} Notificación de fallo en análisis. \\ \cline{1-1}
+
+\textbf{Prioridad de desarrollo:} Media &
+\multicolumn{1}{p{8cm}|}{} \\ \hline
+
+\textbf{Entrada:} Error generado por el módulo OCR (RF-26) o NLP (RF-27) al procesar el intento de escritura enviado por el alumno. &
+\textbf{Salida:} Mensaje de notificación al alumno indicando el fallo en el análisis. \\ \hline
+
+\multicolumn{2}{|p{15cm}|}{
+\textbf{Descripción:} Si el módulo OCR o NLP falla al procesar el intento de escritura enviado, la aplicación web notifica al alumno del error de forma clara.
+
+\vspace{0.2cm}
+\textbf{Precondición:} El alumno debe haber enviado un intento de ejercicio que el módulo de análisis no pudo procesar correctamente.
+
+\vspace{0.2cm}
+\textbf{Postcondición:} El alumno es notificado del fallo y puede realizar un nuevo intento de envío con la misma captura de escritura.
+} \\ \hline
+
+\end{longtable}
+
+% =========================
+% RF-29: Modificación de resultados
+% =========================
+\begin{table}[H]
+\caption{Especificación de requerimiento RF-29}
+\centering
+\renewcommand{\arraystretch}{1.3}
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{|p{7cm}|p{8cm}|}
+\hline
+\multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web permitirá al tutor modificar los resultados del análisis ortográfico y caligráfico de un ejercicio realizado por un alumno, cuando no esté de acuerdo con el análisis automático.} \\ \hline
+\textbf{Identificador:} RF-29 &
+\textbf{Nombre:} Modificación de resultados. \\ \cline{1-1}
+\textbf{Prioridad de desarrollo:} Media &
+\multicolumn{1}{p{8cm}|}{} \\ \hline
+\textbf{Entrada:} Ejercicio completado seleccionado y correcciones ingresadas por el tutor sobre los resultados del análisis automático. &
+\textbf{Salida:} Resultados actualizados reflejados en el historial del alumno. \\ \hline
+\multicolumn{2}{|p{15cm}|}{
+\textbf{Descripción:} Cuando el tutor considera que el análisis automático generado por los módulos OCR y NLP no refleja correctamente el desempeño del alumno, puede modificar los resultados del intento.
+
+\vspace{0.2cm}
+\textbf{Precondición:} El tutor debe estar autenticado, haber consultado el historial de actividades del alumno (RF-09) y el intento debe tener resultados de análisis disponibles.
+
+\vspace{0.2cm}
+\textbf{Postcondición:} Los resultados modificados quedan almacenados y se reflejan en el historial del alumno (RF-16).
+} \\ \hline
+\end{tabular}
+\label{tab:rf29}
+\end{table}
+
+% =========================
+% RF-30: Actividades sugeridas
+% =========================
+\begin{table}[H]
+\caption{Especificación de requerimiento RF-30}
+\centering
+\renewcommand{\arraystretch}{1.3}
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{|p{7cm}|p{8cm}|}
+\hline
+\multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web presentará al alumno actividades de mejora sugeridas, ordenadas por prioridad según las debilidades ortográficas y caligráficas.} \\ \hline
+\textbf{Identificador:} RF-30 &
+\textbf{Nombre:} Actividades sugeridas. \\ \cline{1-1}
+\textbf{Prioridad de desarrollo:} Alta &
+\multicolumn{1}{p{8cm}|}{} \\ \hline
+\textbf{Entrada:} Resultados del análisis ortográfico (RF-27) y caligráfico (RF-26) generados a partir del intento de escritura del alumno. &
+\textbf{Salida:} Lista de actividades de mejora sugeridas ordenadas por prioridad y enfocadas en las áreas de oportunidad detectadas. \\ \hline
+\multicolumn{2}{|p{15cm}|}{
+\textbf{Descripción:} La aplicación web genera recomendaciones de actividades de mejora personalizadas para el alumno. Cada recomendación cuenta con un atributo de prioridad que permite al alumno identificar sus debilidades ortografía y caligrafía. 
+
+\vspace{0.2cm}
+\textbf{Precondición:} El alumno debe haber completado y enviado al menos un intento con resultados de análisis OCR y NLP disponibles (RF-26, RF-27).
+
+\vspace{0.2cm}
+\textbf{Postcondición:} Las actividades sugeridas quedan registradas y disponibles para que el alumno las consulte por orden de prioridad.
+} \\ \hline
+\end{tabular}
+\label{tab:rf30}
+\end{table}
+
+% =========================
+% RF-31: Realización de actividades sugeridas
+% =========================
+\begin{longtable}{|p{7cm}|p{8cm}|}
+\caption{Especificación de requerimiento RF-31}
+\label{tab:rf31} \\ \hline
+
+\multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web permitirá al alumno realizar las actividades sugeridas, generando un nuevo intento evaluado por los módulos OCR y NLP para medir el progreso en las áreas de ortografía y caligrafía identificadas.} \\ \hline
+
+\textbf{Identificador:} RF-31 &
+\textbf{Nombre:} Realización de actividades sugeridas. \\ \cline{1-1}
+
+\textbf{Prioridad de desarrollo:} Alta &
+\multicolumn{1}{p{8cm}|}{} \\ \hline
+
+\textbf{Entrada:} Actividad sugerida seleccionada por el alumno desde su lista de recomendaciones ordenadas por prioridad (RF-30). &
+\textbf{Salida:} Nuevo intento evaluado con resultados de análisis ortográfico o caligráfico, reflejando el progreso del alumno respecto al intento que originó la recomendación. \\ \hline
+
+\multicolumn{2}{|p{15cm}|}{
+\textbf{Descripción:} El alumno selecciona una actividad sugerida y la realiza mediante el módulo de captura de escritura (RF-17 al RF-25), generando un nuevo intento que es evaluado por los módulos OCR (RF-26) y NLP (RF-27) según el tipo de la actividad. 
+
+\vspace{0.2cm}
+\textbf{Precondición:} El alumno debe estar autenticado y tener actividades sugeridas disponibles con prioridad asignada (RF-30).
+
+\vspace{0.2cm}
+\textbf{Postcondición:} El nuevo intento queda registrado y evaluado, el progreso del alumno queda actualizado y se generan nuevas recomendaciones si el análisis identifica áreas de oportunidad adicionales. La actividad realizada se marca como completada en el historial del alumno.
+} \\ \hline
+
+\end{longtable}
+
+%------- RFN
+
+\subsubsection{Requerimientos no funcionales}
+
+\begin{longtable}{|p{3.2cm}|p{3.8cm}|p{8.5cm}|}
+\caption{Requerimientos no funcionales del sistema} \label{tab:rnf} \\ \hline
+
+\textbf{Requerimiento} & \textbf{Nombre} & \textbf{Descripción} \\ \hline
+\endfirsthead
+
+\hline
+\textbf{Requerimiento} & \textbf{Nombre} & \textbf{Descripción} \\ \hline
+\endhead
+
+RNF-01 &
+Usabilidad &
+La aplicación web debe garantizar la accesibilidad, comprensión y correcta interacción del usuario en múltiples dispositivos.
+
+Especificación: Los textos deben mantener un índice de legibilidad Fernández-Huerta mayor o igual a 80. [38] La interfaz debe ser responsiva y se deben bloquear los gestos de desplazamiento del navegador.
+\\ \hline
+
+RNF-02 &
+Eficiencia &
+La aplicación web debe responder a las acciones del usuario en tiempos que no interrumpan el flujo de trabajo.
+
+Especificación: La interfaz debe proporcionar retroalimentación visual al cambiar de herramienta en un tiempo menor o igual a 100 ms. [39] Los procesos de procesamiento y exportación del dibujo deben ejecutarse de manera asíncrona, sin generar bloqueos perceptibles.
+\\ \hline
+
+RNF-03 &
+Confiabilidad &
+La aplicación web debe prevenir fallos derivados de entradas incorrectas por parte del usuario y garantizar condiciones operativas mínimas.
+
+Especificación: Las imágenes procesadas deben cumplir con una resolución mínima de 1024 x 768 píxeles. Si la validación falla, la aplicación web debe interrumpir el flujo de envío y emitir un mensaje de alerta solicitando una captura válida.
+\\ \hline
+
+RNF-04 &
+Interoperabilidad &
+La aplicación web debe generar salidas de datos en formatos estrictos para garantizar la compatibilidad y precisión de sistemas externos dependientes (módulo OCR).
+
+Especificación: La exportación de imágenes desde el lienzo digital debe realizarse obligatoriamente en formato PNG.
+\\ \hline
+\end{longtable}

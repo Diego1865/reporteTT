@@ -1,0 +1,129 @@
+% ─────────────────────────────────────────────────────────────────────────────
+%  Sección 3.9  Módulo de Ejercicios y Retroalimentación
+%  Insertar al final del Capítulo 3: Análisis, después de la sección 3.8
+%  (Criterios de selección de dataset).
+%  CITES: Reemplazar sep_tercer_grado, sep_cuarto_grado y sep_planes_primaria
+%  con las claves exactas de su archivo .bib cuando las tengan.
+% ─────────────────────────────────────────────────────────────────────────────
+
+\subsection{Módulo de Ejercicios y Retroalimentación}
+
+El módulo de ejercicios y retroalimentación es el componente pedagógico
+central del sistema, encargado de transformar los resultados de los
+análisis ortográfico y caligráfico en acciones correctivas concretas.
+Su propósito es proporcionar al alumno material de práctica focalizado
+en sus áreas de oportunidad específicas y al tutor las herramientas para
+supervisar y complementar dicho proceso. A diferencia de los módulos de
+captura y análisis, cuya naturaleza es predominantemente técnica, este
+módulo establece el puente entre el procesamiento computacional y el
+contexto pedagógico en el que opera la aplicación.
+
+% ─────────────────────────────────────────────────────────
+\subsubsection{Justificación pedagógica de los ejercicios}
+
+La selección y diseño de los ejercicios dentro de la plataforma se
+fundamentan en los requerimientos del plan de estudios de la Secretaría
+de Educación Pública (SEP) para tercer y cuarto grado de primaria
+\cite{sep2011guia, sep2024saberes4, mejoredu2022indicadores}, etapa
+en la cual el alumno transita de la decodificación básica hacia la
+consolidación de la ortografía convencional y la fluidez del trazo
+manuscrito. En este periodo, los errores no corregidos tienden a fijarse
+como hábitos, lo que justifica la intervención temprana y personalizada
+que el sistema propone.
+
+Los ejercicios se categorizan en dos grandes rubros, en correspondencia
+directa con las métricas evaluadas por el sistema:
+
+\paragraph{Ejercicios de refuerzo caligráfico}
+
+Orientados a mejorar las métricas de trazo extraídas por el módulo OCR:
+alineación, tamaño de letra, espaciado e inclinación. Se contemplan dos
+tipos:
+
+\begin{enumerate}
+    \item \textbf{Copia de modelos (pangramas y frases cortas):} Se
+    utilizan frases que contienen todas las letras del alfabeto
+    —pangramas— y oraciones adaptadas al vocabulario infantil. La
+    práctica de este tipo de textos obliga al alumno a trabajar la
+    proporción de tamaño y el espaciado correcto entre caracteres de
+    distinta frecuencia de uso, dado que los pangramas incluyen letras
+    poco comunes que requieren mayor atención en el trazo.
+
+    \item \textbf{Trazos de direccionalidad:} Ejercicios enfocados en
+    grupos de letras que comparten patrones motores similares, como
+    \textit{a, c, d, g, q} o \textit{b, p, d, q}. Su objetivo es
+    corregir la inclinación del trazo y reducir la confusión espacial
+    derivada de la similitud morfológica entre estos caracteres, un
+    fenómeno frecuente en alumnos de este nivel educativo.
+\end{enumerate}
+
+\paragraph{Ejercicios de corrección ortográfica}
+
+Generados dinámicamente a partir de los errores detectados por el módulo
+NLP y asignados según el tipo de falla identificada. Se contemplan tres
+modalidades:
+
+\begin{enumerate}
+    \item \textbf{Uso de grafías conflictivas:} Ejercicios de completar
+    palabras enfocados en las reglas ortográficas de mayor dificultad en
+    este nivel educativo: uso de \textit{b/v}, \textit{c/s/z},
+    \textit{g/j} y el uso de la \textit{h}. Cada ejercicio presenta al
+    alumno el contexto de la palabra con la grafía omitida, de modo que
+    la decisión ortográfica requiera razonamiento y no memorización
+    mecánica.
+
+    \item \textbf{Acentuación:} Ejercicios de identificación y
+    colocación de tildes, con énfasis en la clasificación de palabras en
+    agudas, graves y esdrújulas. El sistema selecciona palabras del mismo
+    campo semántico que el texto original del alumno para mantener la
+    coherencia con el ejercicio que motivó el análisis.
+
+    \item \textbf{Reescritura focalizada:} Cuando el módulo NLP detecta
+    una palabra mal escrita en el texto libre del alumno, el sistema
+    genera automáticamente un ejercicio de repetición espaciada en el
+    que el alumno debe reescribir correctamente esa palabra específica
+    dentro de un nuevo contexto oracional. Esta modalidad es la de mayor
+    personalización, pues el contenido del ejercicio se construye
+    directamente a partir del error individual del alumno.
+\end{enumerate}
+
+% ─────────────────────────────────────────────────────────
+\subsubsection{Estructura del catálogo de ejercicios}
+
+El catálogo de ejercicios disponibles en la plataforma se almacena en
+la tabla \texttt{Ejercicios} de la base de datos. Cada registro del
+catálogo contiene los atributos necesarios para que el sistema pueda
+tanto presentarlo al alumno como procesarlo automáticamente para la
+generación de variantes. La Tabla~\ref{tab:catalogo-ejercicios} describe
+los atributos del catálogo y su propósito dentro del módulo.
+
+\begin{table}[H]
+\centering
+\caption{Atributos del catálogo de ejercicios del sistema}
+\label{tab:catalogo-ejercicios}
+\begin{tabular}{|l|l|p{7cm}|}
+\hline
+\textbf{Atributo} & \textbf{Tipo} & \textbf{Descripción} \\
+\hline
+\texttt{id\_ejercicio}  & Entero        & Identificador único del ejercicio en el catálogo. \\
+\texttt{titulo}         & VARCHAR(150)  & Nombre descriptivo del ejercicio visible para el tutor. \\
+\texttt{descripcion}    & VARCHAR(MAX)  & Instrucciones del ejercicio para el alumno. \\
+\texttt{tipo}           & VARCHAR(30)   & Categoría del ejercicio: \texttt{caligrafico} u \texttt{ortografico}. \\
+\texttt{contenido\_base}& VARCHAR(MAX)  & Texto base, pangrama, frase o patrón de letra sobre el que se construye el ejercicio. \\
+\texttt{id\_estatus}    & Entero        & Estado del ejercicio en el catálogo (activo/inactivo). \\
+\hline
+\end{tabular}
+\end{table}
+
+El campo \texttt{tipo} actúa como discriminador para que el sistema
+pueda filtrar y asignar ejercicios de forma coherente con el tipo de
+error detectado: errores caligráficos activan ejercicios de tipo
+\texttt{caligrafico}, mientras que errores ortográficos activan
+ejercicios de tipo \texttt{ortografico}. Esta separación garantiza que
+la retroalimentación entregada al alumno sea siempre pertinente al área
+de oportunidad identificada en su intento.
+
+La relación entre el catálogo y el tutor se gestiona a través de la
+tabla \texttt{Ejercicios\_Tutor}, que representa la activación de un
+ejercicio del catálogo por parte de un tutor específico y contiene su
+propio ciclo de vida independiente, conforme al diseño descrito en la Sección~4.5.

@@ -1,0 +1,456 @@
+\section{Capítulo 5: Desarrollo}
+
+En este capítulo se presenta la fase de desarrollo del sistema, en la cual se lleva a cabo la implementación de la arquitectura y el diseño previamente definidos en la etapa de análisis. A partir de los requerimientos funcionales, no funcionales y las reglas de negocio establecidas en el capítulo anterior, se detalla la construcción de los distintos módulos que conforman la plataforma.
+
+\subsection{Desarrollo de la base de datos}
+
+El desarrollo de la base de datos presentado en esta sección se basa en el diagrama relacional y decisiones de diseño de la base de datos. Se llevó a cabo la implementación en el sistema gestor de bases de datos SQL Server, traduciendo cada entidad, atributo y relación en estructuras físicas mediante sentencias T-SQL. 
+
+\subsubsection{Creación del esquema}
+
+Durante esta etapa, se implementaron restricciones de integridad y definición de claves primarias y foráneas, con el objetivo de garantizar la consistencia, eficiencia y correcto funcionamiento de la aplicación web.
+
+\textbf{A. Gestión de usuarios}
+
+Este módulo está compuesto por las tablas \texttt{Usuarios}, \texttt{Tutor} y \texttt{Alumno}, las cuales representan la estructura principal de acceso y perfiles del sistema. La tabla \texttt{Estatus} actúa como catálogo compartido y debe crearse previamente, ya que es referenciada por \texttt{Usuarios} mediante una clave foránea.
+
+\begin{lstlisting}[language=SQL, caption={Implementacion de entidades de usuario en la base de datos}]
+-- Estatus (catalogo compartido, debe crearse primero)
+IF OBJECT_ID('Estatus', 'U') IS NULL
+CREATE TABLE Estatus (
+    id_estatus    INT           IDENTITY(1,1) NOT NULL,
+    descripcion   VARCHAR(30)   NOT NULL,
+    CONSTRAINT PK_Estatus PRIMARY KEY (id_estatus),
+    CONSTRAINT UQ_Estatus_descripcion UNIQUE (descripcion)
+);
+GO
+
+-- Usuarios
+IF OBJECT_ID('Usuarios', 'U') IS NULL
+CREATE TABLE Usuarios (
+    id_usuario            INT           IDENTITY(1,1) NOT NULL,
+    nombre                VARCHAR(50)   NOT NULL,
+    usuario               VARCHAR(50)   NOT NULL,
+    contrasena_cifrada    VARCHAR(255)  NOT NULL,
+    tipo_usuario          VARCHAR(30)   NOT NULL,
+    fecha_registro        DATETIME      NOT NULL DEFAULT GETDATE(),
+    id_estatus            INT           NOT NULL,
+    CONSTRAINT PK_Usuarios PRIMARY KEY (id_usuario),
+    CONSTRAINT UQ_Usuarios_usuario UNIQUE (usuario),
+    CONSTRAINT FK_Usuarios_Estatus
+        FOREIGN KEY (id_estatus)
+        REFERENCES Estatus(id_estatus)
+);
+GO
+
+-- Tutor
+IF OBJECT_ID('Tutor', 'U') IS NULL
+CREATE TABLE Tutor (
+    id_tutor      INT           NOT NULL,
+    correo        VARCHAR(100)  NOT NULL,
+    id_usuario    INT           NOT NULL,
+    CONSTRAINT PK_Tutor PRIMARY KEY (id_tutor),
+    CONSTRAINT UQ_Tutor_correo UNIQUE (correo),
+    -- id_tutor hereda el id_usuario de la tabla Usuarios
+    CONSTRAINT FK_Tutor_Usuario
+        FOREIGN KEY (id_usuario)
+        REFERENCES Usuarios(id_usuario)
+);
+GO
+
+-- Alumno
+IF OBJECT_ID('Alumno', 'U') IS NULL
+CREATE TABLE Alumno (
+    id_alumno     INT           IDENTITY(1,1) NOT NULL,
+    grado         VARCHAR(15)   NOT NULL,
+    grupo         VARCHAR(15)   NOT NULL,
+    id_tutor      INT           NOT NULL,
+    id_usuario    INT           NOT NULL,
+    CONSTRAINT PK_Alumno PRIMARY KEY (id_alumno),
+    CONSTRAINT FK_Alumno_Tutor
+        FOREIGN KEY (id_tutor)
+        REFERENCES Tutor(id_tutor),
+    CONSTRAINT FK_Alumno_Usuario
+        FOREIGN KEY (id_usuario)
+        REFERENCES Usuarios(id_usuario)
+);
+GO
+\end{lstlisting}
+
+\textbf{B. Proceso de evaluación}
+
+Este módulo agrupa las tablas centrales del flujo de evaluación: \texttt{Ejercicio\_Tutor}, \texttt{Intento} y \texttt{Analisis\_ortografico}. La tabla \texttt{Ejercicio\_Tutor} materializa la relación M:N entre tutores y ejercicios del catálogo, incorporando atributos propios de la asignación. La tabla \texttt{Intento} registra cada ejecución de un ejercicio por parte del alumno, almacenando la imagen capturada y el texto reconocido por el módulo OCR. La tabla \texttt{Analisis\_ortografico} almacena los resultados del procesamiento NLP, utilizando un campo JSON para representar las sugerencias de corrección de forma flexible.
+
+\begin{lstlisting}[language=SQL, caption={Implementación de entidades del proceso de evaluación}]
+-- Ejercicio_Tutor (tabla de asociación M:N con atributos propios)
+IF OBJECT_ID('Ejercicio_Tutor', 'U') IS NULL
+CREATE TABLE Ejercicio_Tutor (
+    id_ejercicio_tutor    INT           IDENTITY(1,1) NOT NULL,
+    id_tutor              INT           NOT NULL,
+    id_ejercicio          INT           NOT NULL,
+    fecha_asignacion      DATETIME      NOT NULL DEFAULT GETDATE(),
+    fecha_limite          DATETIME      NULL,
+    id_estatus            INT           NOT NULL,
+    CONSTRAINT PK_Ejercicio_Tutor PRIMARY KEY (id_ejercicio_tutor),
+    CONSTRAINT FK_EjercicioTutor_Tutor
+        FOREIGN KEY (id_tutor)
+        REFERENCES Tutor(id_tutor),
+    CONSTRAINT FK_EjercicioTutor_Ejercicio
+        FOREIGN KEY (id_ejercicio)
+        REFERENCES Ejercicio(id_ejercicio),
+    CONSTRAINT FK_EjercicioTutor_Estatus
+        FOREIGN KEY (id_estatus)
+        REFERENCES Estatus(id_estatus)
+);
+GO
+
+--  Intentos 
+IF OBJECT_ID('Intentos', 'U') IS NULL
+CREATE TABLE Intentos (
+    id_intento           INT         IDENTITY(1,1) NOT NULL,
+    id_alumno            INT         NOT NULL,         
+    id_ejercicio_tutor   INT         NOT NULL,
+    imagen_codificada    VARCHAR(MAX) NOT NULL,            
+    texto_detectado_ocr  VARCHAR(MAX)    NULL,           
+    fecha_envio          DATETIME2   NOT NULL DEFAULT GETDATE(),
+    retroalimentacion    VARCHAR(MAX)    NULL,
+    CONSTRAINT PK_Intentos          PRIMARY KEY (id_intento),
+    CONSTRAINT FK_Intentos_alumno  FOREIGN KEY (id_alumno)    REFERENCES Alumno(id_alumno),
+    CONSTRAINT FK_Intentos_ET       FOREIGN KEY (id_ejercicio_tutor) REFERENCES Ejercicios_Tutor(id_ejercicio_tutor)
+);
+GO
+
+--  Análisis ortográfico
+IF OBJECT_ID('Analisis_Ortografico', 'U') IS NULL
+CREATE TABLE Analisis_Ortografico (
+    id_analisis_ortografico INT            NOT NULL IDENTITY(1,1),
+    id_intento              INT            NOT NULL,     
+    cantidad_errores        INT            NOT NULL DEFAULT 0,
+    sugerencias_json        NVARCHAR(MAX)      NULL,       
+    ortografia_score        DECIMAL(5,2)       NULL,
+    CONSTRAINT PK_Analisis_Ortografico  PRIMARY KEY (id_analisis_ortografico),
+    CONSTRAINT UQ_Analisis_Ort_intento  UNIQUE      (id_intento),
+    CONSTRAINT FK_Analisis_Ort_intento  FOREIGN KEY (id_intento) REFERENCES Intentos(id_intento),
+    CONSTRAINT CK_sugerencias_json      CHECK (sugerencias_json IS NULL OR ISJSON(sugerencias_json) = 1)
+);
+GO
+\end{lstlisting}
+
+\subsubsection{Implementación de restricciones e integridad referencial}
+
+Con el objetivo de garantizar la consistencia y calidad de los datos almacenados en la aplicación web, se definieron restricciones de integridad a nivel de base de datos. Estas restricciones operan de forma independiente a la lógica del backend, asegurando que ninguna operación pueda comprometer la coherencia del modelo de datos.
+
+A continuación se describen las restricciones implementadas agrupadas por categoría.
+
+\paragraph{Unicidad de campos críticos}
+
+Se establecieron restricciones \texttt{UNIQUE} en los campos que deben identificar de forma exclusiva a cada registro dentro del sistema, evitando duplicados que comprometan la integridad de la información.
+
+\begin{lstlisting}[language=SQL, caption={Restricciones de unicidad en campos críticos}]
+-- Unicidad de nombre de usuario en Usuarios
+CONSTRAINT UQ_Usuarios_usuario 
+    UNIQUE (usuario),
+
+-- Unicidad de correo electrónico en Tutor
+CONSTRAINT UQ_Tutor_correo 
+    UNIQUE (correo),
+
+-- Un alumno solo puede tener un intento por ejercicio asignado
+CREATE UNIQUE INDEX UQ_Intentos_original
+ON Intentos (id_alumno, id_ejercicio_tutor)
+WHERE id_recomendacion IS NULL;
+
+-- Un tutor no puede asignar el mismo ejercicio si ya tiene una asignacion activa. 
+CREATE UNIQUE INDEX UQ_ET_activo
+    ON Ejercicio_Tutor (id_tutor, id_ejercicio)
+    WHERE id_estatus = 1;
+
+-- Relación 1:1 entre Intento y Análisis ortográfico
+CONSTRAINT UQ_Analisis_Ort_intento 
+    UNIQUE (id_intento),
+
+-- Relación 1:1 entre Intento y Análisis caligráfico
+CONSTRAINT UQ_Analisis_Cal_intento 
+    UNIQUE (id_intento)
+\end{lstlisting}
+
+\paragraph{Validación de rangos en scores}
+
+Los atributos de puntuación en las tablas \texttt{Analisis\_Ortografico} y \texttt{Analisis\_Caligrafico} deben estar acotados en un rango de 0 a 10, representando la escala de evaluación del sistema. Se implementaron restricciones \texttt{CHECK} para garantizar que ningún valor fuera de este rango pueda ser insertado o actualizado.
+
+\begin{lstlisting}[language=SQL, caption={Restricciones de rango en atributos de puntuación}]
+-- Scores en Analisis_Ortografico
+CONSTRAINT CK_ortografia_score
+    CHECK (ortografia_score IS NULL 
+        OR (ortografia_score >= 0 AND ortografia_score <= 10)),
+
+-- Scores en Analisis_Caligrafico
+CONSTRAINT CK_alineacion_score
+    CHECK (alineacion_score IS NULL 
+        OR (alineacion_score >= 0 AND alineacion_score <= 10)),
+
+CONSTRAINT CK_tamano_letra_score
+    CHECK (tamano_letra_score IS NULL 
+        OR (tamano_letra_score >= 0 AND tamano_letra_score <= 10)),
+
+CONSTRAINT CK_espaciado_score
+    CHECK (espaciado_score IS NULL 
+        OR (espaciado_score >= 0 AND espaciado_score <= 10)),
+
+CONSTRAINT CK_inclinacion_score
+    CHECK (inclinacion_score IS NULL 
+        OR (inclinacion_score >= 0 AND inclinacion_score <= 10))
+\end{lstlisting}
+
+\paragraph{Integridad referencial}
+
+Se definieron claves foráneas en todas las entidades que mantienen relaciones entre sí, garantizando que no puedan existir registros huérfanos en el sistema. La siguiente tabla resume las relaciones de integridad referencial implementadas.
+
+\begin{longtable}{|p{4.5cm}|p{4cm}|p{4cm}|}
+\caption{Relaciones de integridad referencial del sistema}
+\label{tab:integridad_referencial} \\
+
+\hline
+\textbf{Tabla origen} & \textbf{Tabla destino} & \textbf{Cardinalidad} \\
+\hline
+\endfirsthead
+
+\hline
+\textbf{Tabla origen} & \textbf{Tabla destino} & \textbf{Cardinalidad} \\
+\hline
+\endhead
+
+Usuarios & Estatus & N:1 \\
+\hline
+Tutor & Usuarios & 1:1 \\
+\hline
+Alumno & Usuarios & 1:1 \\
+\hline
+Alumno & Tutor & N:1 \\
+\hline
+Ejercicio\_Tutor & Tutor & N:1 \\
+\hline
+Ejercicio\_Tutor & Ejercicio & N:1 \\
+\hline
+Ejercicio\_Tutor & Estatus & N:1 \\
+\hline
+Intentos & Alumno & N:1 \\
+\hline
+Intentos & Ejercicio\_Tutor & N:1 \\
+\hline
+Analisis\_Ortografico & Intentos & 1:1 \\
+\hline
+Sugerencia\_ortografica & Analisis\_Ortografico & N:1 \\
+\hline
+Analisis\_Caligrafico & Intentos & 1:1 \\
+\hline
+
+\end{longtable}
+
+\paragraph{Obligatoriedad de campos}
+
+Se establecieron restricciones \texttt{NOT NULL} en todos los atributos que son indispensables para el funcionamiento del sistema, garantizando que ningún registro pueda ser insertado sin la información mínima requerida. Los campos marcados como \texttt{NULL} corresponden a información opcional o generada de forma asíncrona, como el texto detectado por OCR o los scores de análisis, los cuales se completan una vez procesado el intento.
+
+\subsubsection{Implementación de la vista vw\_historial\_alumno}
+
+La vista \texttt{vw\_historial\_alumno} se creó con el objetivo de consolidar en una única consulta predefinida la información distribuida entre las tablas \texttt{Intentos}, \texttt{Analisis\_Ortografico}, \texttt{Analisis\_Caligrafico}, \texttt{Alumno} y \texttt{Ejercicio}. Su implementación responde a tres necesidades concretas del sistema:
+
+\begin{itemize}
+    \item \textbf{Rendimiento:} evita la ejecución repetitiva de consultas con múltiples \texttt{JOIN} cada vez que el tutor consulta el historial de un alumno (RF-09) o el alumno revisa sus ejercicios completados (RF-16).
+    \item \textbf{Separación de responsabilidades:} el controlador accede al historial mediante una consulta simple sobre la vista, sin necesidad de conocer la estructura interna de las tablas involucradas, lo cual es coherente con el patrón MVC adoptado.
+    \item \textbf{Normalización:} permite mantener el modelo de datos normalizado sin sacrificar la facilidad de consulta, ya que la vista actúa como capa de abstracción sobre las relaciones existentes sin almacenar datos redundantes.
+\end{itemize}
+
+Se utilizaron \texttt{LEFT JOIN} en las tablas de análisis para contemplar el caso en que un intento recién enviado aún no haya sido procesado por los módulos OCR y NLP, mostrando \texttt{NULL} en los scores mientras el análisis está pendiente.
+
+\begin{lstlisting}[language=SQL, caption={Implementación de la vista vw\_historial\_alumno}]
+CREATE VIEW vw_historial_alumno AS
+SELECT
+    -- Alumno
+    a.id_alumno,
+    u.nombre                        AS nombre_alumno,
+    -- Ejercicio
+    e.id_ejercicio,
+    e.titulo                        AS titulo_ejercicio,
+    e.tipo                          AS tipo_ejercicio,
+    -- Intento
+    i.id_intento,
+    i.fecha_envio,
+    i.retroalimentacion,
+    CASE
+        WHEN i.id_recomendacion IS NULL
+        THEN 'Original'
+        ELSE 'Reintento'
+    END                             AS tipo_intento,
+    -- Análisis ortográfico
+    ao.ortografia_score,
+    ao.cantidad_errores,
+    -- Análisis caligráfico
+    ac.alineacion_score,
+    ac.tamano_letra_score,
+    ac.espaciado_score,
+    ac.inclinacion_score
+FROM Intentos i
+INNER JOIN Alumno a
+    ON a.id_alumno = i.id_alumno
+INNER JOIN Usuarios u
+    ON u.id_usuario = a.id_usuario
+INNER JOIN Ejercicios_Tutor et
+    ON et.id_ejercicio_tutor = i.id_ejercicio_tutor
+INNER JOIN Ejercicio e
+    ON e.id_ejercicio = et.id_ejercicio
+LEFT JOIN Analisis_Ortografico ao
+    ON ao.id_intento = i.id_intento
+LEFT JOIN Analisis_Caligrafico ac
+    ON ac.id_intento = i.id_intento;
+GO
+\end{lstlisting}
+
+Una vez creada la vista, el historial completo de un alumno se obtiene desde el controlador mediante una consulta directa, filtrando por \texttt{id\_alumno} y ordenando por fecha de envío descendente, sin necesidad de replicar la lógica de JOIN en cada petición.
+
+
+\begin{lstlisting}[language=SQL, caption={Consulta del historial de un alumno mediante la vista}]
+SELECT *
+FROM vw_historial_alumno
+WHERE id_alumno = @id_alumno
+ORDER BY fecha_envio DESC;
+\end{lstlisting}
+
+\subsubsection{Implementación de triggers}
+
+Los triggers implementados tienen como objetivo mantener actualizada la tabla \texttt{Progreso\_Alumno} de forma automática cada vez que se registra un nuevo análisis, sin requerir intervención del controlador. Se definieron dos triggers independientes: uno sobre \texttt{Analisis\_Ortografico} y otro sobre \texttt{Analisis\_Caligrafico}, cada uno responsable de actualizar los promedios correspondientes a su dimensión de evaluación.
+
+Ambos triggers manejan dos escenarios: la creación del primer registro de progreso del alumno y la actualización de un registro existente, garantizando la consistencia de los datos en cualquier situación.
+
+\textbf{Trigger sobre Analisis\_Ortografico}
+\vspace{0.5cm}
+\begin{lstlisting}[language=SQL, caption={Trigger de actualización del promedio ortográfico}]
+CREATE TRIGGER trg_actualizar_progreso_ortografia
+ON Analisis_Ortografico
+AFTER INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @id_alumno      INT;
+    DECLARE @nuevo_promedio DECIMAL(5,2);
+
+    -- Obtener el alumno del intento recién analizado
+    SELECT @id_alumno = i.id_alumno
+    FROM inserted ins
+    INNER JOIN Intentos i ON i.id_intento = ins.id_intento;
+
+    -- Calcular el nuevo promedio ortográfico del alumno
+    SELECT @nuevo_promedio = AVG(ao.ortografia_score)
+    FROM Analisis_Ortografico ao
+    INNER JOIN Intentos i ON i.id_intento = ao.id_intento
+    WHERE i.id_alumno = @id_alumno
+    AND ao.ortografia_score IS NOT NULL;
+
+    -- Insertar o actualizar según si ya existe el registro
+    IF EXISTS (
+        SELECT 1 FROM Progreso_Alumno
+        WHERE id_alumno = @id_alumno
+    )
+    BEGIN
+        UPDATE Progreso_Alumno
+        SET promedio_ortografia = @nuevo_promedio,
+            fecha_modificacion  = GETDATE()
+        WHERE id_alumno = @id_alumno;
+    END
+    ELSE
+    BEGIN
+        INSERT INTO Progreso_Alumno (
+            id_alumno,
+            promedio_ortografia,
+            promedio_aliniacion,
+            promedio_tamano_letra,
+            promedio_espaciado,
+            prommedio_inclinacion,
+            fecha_modificacion
+        )
+        VALUES (
+            @id_alumno,
+            @nuevo_promedio,
+            NULL, NULL, NULL, NULL,
+            GETDATE()
+        );
+    END
+END;
+GO
+\end{lstlisting}
+\vspace{0.5cm}
+\textbf{Trigger sobre Analisis\_Caligrafico}
+\vspace{0.5cm}
+
+\begin{lstlisting}[language=SQL, caption={Trigger de actualización de promedios caligráficos}]
+CREATE TRIGGER trg_actualizar_progreso_caligrafico
+ON Analisis_Caligrafico
+AFTER INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @id_alumno              INT;
+    DECLARE @prom_alineacion        DECIMAL(5,2);
+    DECLARE @prom_tamano_letra      DECIMAL(5,2);
+    DECLARE @prom_espaciado         DECIMAL(5,2);
+    DECLARE @prom_inclinacion       DECIMAL(5,2);
+
+    -- Obtener el alumno del intento recién analizado
+    SELECT @id_alumno = i.id_alumno
+    FROM inserted ins
+    INNER JOIN Intentos i ON i.id_intento = ins.id_intento;
+
+    -- Calcular los nuevos promedios caligráficos del alumno
+    SELECT
+        @prom_alineacion    = AVG(ac.alineacion_score),
+        @prom_tamano_letra  = AVG(ac.tamano_letra_score),
+        @prom_espaciado     = AVG(ac.espaciado_score),
+        @prom_inclinacion   = AVG(ac.inclinacion_score)
+    FROM Analisis_Caligrafico ac
+    INNER JOIN Intentos i ON i.id_intento = ac.id_intento
+    WHERE i.id_alumno = @id_alumno
+    AND ac.alineacion_score   IS NOT NULL
+    AND ac.tamano_letra_score IS NOT NULL
+    AND ac.espaciado_score    IS NOT NULL
+    AND ac.inclinacion_score  IS NOT NULL;
+
+    -- Insertar o actualizar según si ya existe el registro
+    IF EXISTS (
+        SELECT 1 FROM Progreso_Alumno
+        WHERE id_alumno = @id_alumno
+    )
+    BEGIN
+        UPDATE Progreso_Alumno
+        SET promedio_aliniacion     = @prom_alineacion,
+            promedio_tamano_letra   = @prom_tamano_letra,
+            promedio_espaciado      = @prom_espaciado,
+            prommedio_inclinacion   = @prom_inclinacion,
+            fecha_modificacion      = GETDATE()
+        WHERE id_alumno = @id_alumno;
+    END
+    ELSE
+    BEGIN
+        INSERT INTO Progreso_Alumno (
+            id_alumno,
+            promedio_ortografia,
+            promedio_aliniacion,
+            promedio_tamano_letra,
+            promedio_espaciado,
+            prommedio_inclinacion,
+            fecha_modificacion
+        )
+        VALUES (
+            @id_alumno,
+            NULL,
+            @prom_alineacion,
+            @prom_tamano_letra,
+            @prom_espaciado,
+            @prom_inclinacion,
+            GETDATE()
+        );
+    END
+END;
+GO
+\end{lstlisting}

@@ -1,0 +1,33 @@
+\section{Capítulo 3: Análisis}
+
+En este capítulo se trabajará el análisis de los módulos de la aplicación para su correcto funcionamiento abarcando desde los límites y capacidades de la aplicación, así como los requerimientos, riesgos y mitigación de estos para tener una base sólida para el diseño y posterior desarrollo de nuestra solución.
+
+\subsection{Alcance y Límites de la aplicación}
+
+El propósito de este apartado es establecer de manera precisa el ámbito de desarrollo e implementación del proyecto. A continuación, se definen las capacidades operativas y el público objetivo que conforman el alcance del sistema, así como las restricciones técnicas, lingüísticas y de conectividad que delimitan su funcionamiento.
+
+\subsubsection{Alcance de la aplicación web}
+
+La aplicación web está dirigida exclusivamente a estudiantes de tercer y cuarto grado de educación primaria. La plataforma permitirá la recolección de textos manuscritos en letra de molde mediante la escritura directa en un lienzo en pantalla o a través de la carga de imágenes.
+
+Una vez capturado, el texto será procesado mediante algoritmos de OCR para su digitalización, seguido por la intervención de un módulo de NLP encargado de analizar el contenido, detectar errores ortográficos y generar sugerencias automáticas de corrección.
+
+Además, el sistema evaluará métricas cuantitativas del trazo manuscrito, considerando parámetros como la legibilidad, alineación, tamaño y espaciado.
+
+\subsubsection{Límites de la aplicación web}
+
+Las restricciones técnicas y operativas de la aplicación son en cuanto al estilo de escritura, el modelo de reconocimiento está estrictamente acotado al procesamiento de letra de molde (tipografía Century) \cite{ref40}, excluyendo la evaluación de letra cursiva u otras tipografías.
+
+Respecto a la restricción lingüística, el análisis ortográfico y las sugerencias generadas se limitarán al nivel cognitivo y vocabulario correspondiente a los grados de tercero y cuarto de primaria.
+
+En relación con el rol de la aplicación, el sistema funcionará exclusivamente como una herramienta de retroalimentación automatizada y complementaria, basada en un enfoque de aprendizaje ecléctico, sin sustituir la evaluación pedagógica integral del docente.
+
+Finalmente, debido a su diseño basado en una arquitectura web cliente-servidor, existe una dependencia de conectividad, por lo que el funcionamiento de los módulos OCR y NLP requerirá una conexión activa a internet.
+
+
+\input{Capitulo3/factibilidadeconomica}
+\input{Capitulo3/factibilidadlegal}
+\input{Capitulo3/casosuso}
+\input{Capitulo3/requerimientos}
+\input{Capitulo3/analisisejercicios}
+\input{Capitulo3/dataset}

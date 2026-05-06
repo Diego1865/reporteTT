@@ -1,0 +1,268 @@
+% ─────────────────────────────────────────────────────────────────────────────
+%  Sección 4.X  Diseño Preliminar del Módulo de Análisis OCR y NLP
+%  NOTA PARA EL EQUIPO: Esta sección corresponde al diseño de la iteración
+%  siguiente (TT2). Se presenta a nivel arquitectónico y conceptual, dejando
+%  abiertas las decisiones de implementación que serán tomadas conforme al
+%  proceso de desarrollo en espiral adoptado por el proyecto.
+% ─────────────────────────────────────────────────────────────────────────────
+
+\subsection{Diseño Preliminar del Módulo de Análisis OCR y NLP}
+
+\textit{El presente apartado constituye un diseño preliminar enmarcado en
+la metodología de desarrollo en espiral adoptada por el proyecto. Dado que
+la implementación completa de este módulo corresponde a la siguiente
+iteración (TT2), las decisiones que se presentan a continuación tienen
+carácter arquitectónico y conceptual: establecen las interfaces, los
+contratos de datos y la posición del módulo dentro del sistema, pero dejan
+abiertas las decisiones de modelo, hiperparámetros y bibliotecas específicas,
+las cuales serán evaluadas y refinadas con base en las pruebas de la iteración
+actual. Esto es consistente con el enfoque en espiral, cuya característica
+distintiva es precisamente diferir las decisiones de alto riesgo técnico hasta
+que se cuente con evidencia empírica suficiente para tomarlas.}
+
+\vspace{0.5em}
+
+El módulo de análisis OCR y NLP constituye el núcleo de procesamiento
+inteligente de la plataforma. Su función es transformar la imagen de escritura
+manuscrita capturada por el alumno en dos conjuntos de resultados cuantitativos
+y cualitativos: las métricas caligráficas (alineación, tamaño, espaciado e
+inclinación) y el análisis ortográfico del texto detectado. Los fundamentos
+teóricos de ambas tecnologías han sido descritos en las Secciones~2.3 y~2.4
+del presente documento; esta sección se limita a su diseño de integración
+dentro de la arquitectura del sistema.
+
+La arquitectura de este módulo sigue el patrón MVC establecido para el
+sistema y se divide en tres componentes principales:
+
+\begin{enumerate}
+    \item \textbf{Capa de Procesamiento (Back-End):} Un controlador dedicado
+    \texttt{analisis.py} recibirá como entrada la imagen en formato Base64
+    almacenada en la tabla \texttt{Intentos} y orquestará la ejecución
+    secuencial del sub-módulo OCR y del sub-módulo NLP. Este controlador
+    será invocado de forma \textbf{diferida} respecto al registro del intento,
+    es decir, el alumno recibe confirmación inmediata de envío y el
+    procesamiento ocurre de manera asíncrona en segundo plano, evitando
+    tiempos de espera perceptibles en la interfaz.
+
+    \item \textbf{Sub-módulo OCR:} Responsable de preprocesar la imagen y
+    extraer el texto manuscrito en formato digital, así como de calcular las
+    métricas caligráficas del trazo.
+
+    \item \textbf{Sub-módulo NLP:} Responsable de analizar el texto producido
+    por el OCR, detectar errores ortográficos y generar sugerencias de
+    corrección contextualizadas al nivel léxico de tercer y cuarto grado de
+    primaria.
+\end{enumerate}
+
+% ─────────────────────────────────────────────────────────
+\subsubsection{Diseño del Flujo de Procesamiento}
+
+El flujo general del módulo, desde la captura del intento hasta el
+almacenamiento de resultados, se describe a continuación:
+
+\begin{enumerate}
+    \item El alumno envía su intento mediante el endpoint
+    \texttt{/api/intentos/registrar}. El Back-End almacena la imagen en
+    Base64 en la tabla \texttt{Intentos} con los campos
+    \texttt{texto\_detectado\_ocr} y los registros de análisis en estado
+    nulo, confirmando el envío al cliente de forma inmediata.
+
+    \item Un proceso en segundo plano —cuyo mecanismo de programación
+    será definido en TT2, ya sea mediante un scheduler como el ya
+    utilizado en \texttt{cerrar\_ejercicio.py}, una cola de tareas o una
+    llamada asíncrona— detecta el nuevo intento pendiente de análisis.
+
+    \item El \textbf{sub-módulo OCR} recibe la imagen en Base64, la
+    decodifica y ejecuta la siguiente secuencia de procesamiento:
+    \begin{enumerate}
+        \item \textbf{Preprocesamiento:} conversión a escala de grises,
+        binarización (método de Otsu \cite{otsu1979threshold}),
+        eliminación de ruido y corrección de inclinación
+        (\textit{deskewing}), conforme a las técnicas descritas en la
+        Sección~2.3.
+        \item \textbf{Extracción de métricas caligráficas:} cálculo de
+        los cuatro parámetros definidos en el sistema:
+        \texttt{alineacion\_score}, \texttt{tamano\_letra\_score},
+        \texttt{espaciado\_score} e \texttt{inclinacion\_score}. La
+        metodología exacta de cálculo será determinada en TT2.
+        \item \textbf{Reconocimiento de texto:} aplicación del modelo de
+        reconocimiento para obtener el texto digital. La elección del
+        modelo (TrOCR, Tesseract u otro) queda abierta a la iteración
+        siguiente, sujeta a las pruebas de precisión sobre escritura
+        infantil descritas en el objetivo específico OE-03.
+    \end{enumerate}
+
+    \item El texto reconocido se escribe en el campo
+    \texttt{texto\_detectado\_ocr} de la tabla \texttt{Intentos} y los
+    scores caligráficos se persisten en la tabla
+    \texttt{Analisis\_Caligrafico}.
+
+    \item El \textbf{sub-módulo NLP} recibe el texto digitalizado y
+    ejecuta:
+    \begin{enumerate}
+        \item \textbf{Tokenización:} división del texto en unidades
+        léxicas individuales.
+        \item \textbf{Detección de errores ortográficos:} comparación de
+        cada token contra el modelo lingüístico, considerando el nivel
+        cognitivo y vocabulario de tercer y cuarto grado de primaria.
+        \item \textbf{Generación de sugerencias:} producción de
+        correcciones contextualizadas mediante algoritmos de similitud
+        o modelos estadísticos, conforme a lo descrito en la
+        Sección~2.4.
+    \end{enumerate}
+
+    \item Los resultados del análisis ortográfico se persisten en la tabla
+    \texttt{Analisis\_Ortografico}: el \texttt{ortografia\_score}, la
+    \texttt{cantidad\_errores} y el campo \texttt{sugerencias\_json} con
+    la estructura definida en la Sección~4.X.2.
+
+    \item Con ambos análisis completados, el proceso actualiza el registro
+    de \texttt{Progreso\_Alumno} mediante el trigger de base de datos
+    descrito en la Sección~4.X+1, reflejando el nuevo promedio acumulado
+    del alumno.
+\end{enumerate}
+
+% ─────────────────────────────────────────────────────────
+\subsubsection{Contratos de Datos entre Módulos}
+
+Dado que el diseño de integración se establece en TT1 para orientar el
+desarrollo de TT2, se definen a continuación los contratos de datos que
+las interfaces entre módulos deben respetar. Estos contratos son fijos
+y no están sujetos a cambio en la iteración siguiente, pues representan
+el acuerdo entre la base de datos ya implementada y el módulo por
+desarrollar.
+
+\paragraph{Entrada del sub-módulo OCR}
+
+El sub-módulo OCR recibirá la imagen codificada en Base64 directamente
+del campo \texttt{imagen\_codificada} de la tabla \texttt{Intentos},
+identificada por su \texttt{id\_intento}. No se requiere ningún endpoint
+adicional, ya que el proceso opera sobre datos ya persistidos.
+
+\textbf{\textit{Salida del sub-módulo OCR hacia la base de datos}}
+
+\begin{lstlisting}[language=json, caption={Estructura de resultados del sub-módulo OCR hacia la BD}, label={lst:ocr-output}]
+/* Tabla Intentos — campo a actualizar */
+{
+  "texto_detectado_ocr": "string (texto reconocido)"
+}
+
+/* Tabla Analisis_Caligrafico — registro a insertar */
+{
+  "id_intento":          <integer>,
+  "alineacion_score":    <decimal(5,2)>,
+  "tamano_letra_score":  <decimal(5,2)>,
+  "espaciado_score":     <decimal(5,2)>,
+  "inclinacion_score":   <decimal(5,2)>,
+  "observaciones":       "string | null"
+}
+\end{lstlisting}
+
+\textbf{\textit{Salida del sub-módulo NLP hacia la base de datos}}
+
+\begin{lstlisting}[language=json, caption={Estructura de resultados del sub-módulo NLP hacia la BD}, label={lst:nlp-output}]
+/* Tabla Analisis_Ortografico — registro a insertar */
+{
+  "id_intento":        <integer>,
+  "cantidad_errores":  <integer>,
+  "ortografia_score":  <decimal(5,2)>,
+  "errores_detectados": "string | null",
+  "sugerencias_json": [
+    {
+      "palabra_incorrecta": "string",
+      "posicion":           <integer>,
+      "sugerencia":         "string",
+      "contexto":           "string"
+    }
+  ]
+}
+\end{lstlisting}
+
+El campo \texttt{sugerencias\_json} es validado al momento de la
+inserción mediante la restricción \texttt{CK\_sugerencias\_json}
+definida en el esquema de base de datos, la cual verifica que el
+contenido sea JSON válido mediante la función \texttt{ISJSON()} de
+SQL Server.
+
+% ─────────────────────────────────────────────────────────
+\subsubsection{Diseño del Endpoint de Consulta de Resultados}
+
+Para que el Front-End pueda presentar los resultados del análisis al
+alumno y al tutor, se contempla el siguiente endpoint en el controlador
+\texttt{analisis.py}:
+
+\paragraph{Endpoint: Consulta de Análisis por Intento}
+
+El endpoint \texttt{/api/analisis/\{id\_intento\}} operará mediante el
+método \texttt{GET} y requerirá autenticación JWT con rol de tutor o
+alumno. Su propósito es retornar de forma consolidada los resultados
+del análisis OCR y NLP asociados a un intento específico.
+
+\begin{lstlisting}[language=json, caption={Estructura de respuesta del endpoint de análisis}, label={lst:analisis-response}]
+/* Respuesta 200 OK */
+{
+  "id_intento":          <integer>,
+  "texto_detectado_ocr": "string | null",
+  "caligrafia": {
+    "alineacion_score":   <decimal>,
+    "tamano_letra_score": <decimal>,
+    "espaciado_score":    <decimal>,
+    "inclinacion_score":  <decimal>,
+    "observaciones":      "string | null"
+  },
+  "ortografia": {
+    "ortografia_score":   <decimal>,
+    "cantidad_errores":   <integer>,
+    "sugerencias": [
+      {
+        "palabra_incorrecta": "string",
+        "posicion":           <integer>,
+        "sugerencia":         "string",
+        "contexto":           "string"
+      }
+    ]
+  }
+}
+\end{lstlisting}
+
+Si el análisis aún no ha sido procesado (campos nulos en la BD), el
+endpoint retornará los campos de \texttt{caligrafia} y
+\texttt{ortografia} como \texttt{null}, indicando al cliente que el
+procesamiento se encuentra pendiente.
+
+% ─────────────────────────────────────────────────────────
+\subsubsection{Decisiones Abiertas para TT2}
+
+En concordancia con el desarrollo en espiral, las siguientes decisiones
+técnicas de alto riesgo se posponen deliberadamente a la siguiente
+iteración, donde serán evaluadas mediante pruebas controladas:
+
+\begin{itemize}
+    \item \textbf{Modelo OCR:} la elección entre TrOCR, Tesseract
+    \cite{smith2007overview} u otro motor queda condicionada a las
+    pruebas de precisión sobre muestras de escritura infantil en letra
+    de molde (tipografía Century), conforme al objetivo específico OE-03
+    que establece una precisión mínima del 85\%.
+
+    \item \textbf{Metodología de métricas caligráficas:} la definición
+    de los algoritmos de cálculo de \texttt{alineacion\_score},
+    \texttt{tamano\_letra\_score}, \texttt{espaciado\_score} e
+    \texttt{inclinacion\_score} depende del análisis de las
+    características del trazo reconocido por el motor OCR elegido.
+
+    \item \textbf{Modelo NLP:} la selección entre un corrector basado en
+    diccionario, distancia de Levenshtein o un modelo estadístico más
+    avanzado \cite{jurafsky2023speech} queda sujeta a la evaluación de
+    su desempeño con el vocabulario del nivel educativo objetivo.
+
+    \item \textbf{Mecanismo de ejecución diferida:} la decisión de
+    implementar el procesamiento asíncrono mediante un scheduler,
+    una cola de tareas (como Celery) o corutinas de FastAPI queda
+    abierta a la iteración siguiente, donde se evaluará el impacto
+    en el rendimiento del servidor.
+\end{itemize}
+
+Lo que sí queda definido y es inmutable para TT2 son los contratos de
+datos descritos en la Sección~4.X.2 y el esquema de base de datos
+ya implementado, que garantizan la integración sin fricciones del
+módulo una vez desarrollado.

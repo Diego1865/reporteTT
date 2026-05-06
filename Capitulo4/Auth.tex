@@ -1,0 +1,220 @@
+\subsection{Arquitectura del Módulo de Autenticación}
+ 
+El módulo de autenticación es el punto de entrada transversal de la
+plataforma: cualquier operación protegida —registro de intentos, consulta
+de alumnos, asignación de ejercicios— depende de que el usuario haya
+obtenido previamente un token válido. El diseño sigue el patrón
+arquitectónico MVC establecido para el sistema y se apoya en el estándar
+JSON Web Token (JWT) para la transmisión segura de identidad y rol entre
+el Front-End y el Back-End.
+ 
+La arquitectura del módulo se divide en tres componentes principales:
+ 
+\begin{enumerate}
+    \item Capa de Presentación (Front-End): Compuesta por los
+    componentes \texttt{Login.jsx} y \texttt{Registro.jsx}. Esta capa es
+    responsable de la validación de formato en el cliente (longitud de
+    campos, caracteres permitidos), el envío de las credenciales al
+    Back-End mediante peticiones HTTP y el almacenamiento del token
+    recibido en \texttt{localStorage} para su uso en peticiones
+    subsecuentes.
+ 
+    \item Capa de Lógica de Negocio (Back-End): Implementada
+    en el controlador \texttt{auth.py} mediante FastAPI. Esta capa
+    gestiona la verificación de credenciales contra la base de datos,
+    el cifrado y la validación de contraseñas con bcrypt, la emisión de
+    tokens JWT firmados y la verificación del estado activo del usuario.
+    Adicionalmente, el módulo \texttt{dependencies.py} expone las
+    dependencias reutilizables \texttt{require\_tutor} y
+    \texttt{require\_alumno}, que actúan como guardas de acceso en todos
+    los demás controladores del sistema.
+ 
+    \item Capa de Persistencia (Base de Datos): El módulo opera
+    exclusivamente sobre la tabla \texttt{Usuario}, consultando el campo
+    \texttt{contrasena\_cifrada} (almacenado como hash bcrypt en
+    \texttt{VARCHAR(255)}) y el campo \texttt{id\_estatus} para verificar
+    que la cuenta se encuentre activa antes de emitir el token.
+\end{enumerate}
+ 
+% ─────────────────────────────────────────────────────────
+\subsubsection{Diseño del Token JWT}
+ 
+El token emitido por el sistema sigue el estándar JWT (RFC 7519) firmado
+con el algoritmo simétrico HMAC-SHA256 (HS256). El payload del token
+contiene exclusivamente los campos necesarios para que cualquier
+controlador pueda tomar decisiones de autorización sin consultar la base
+de datos en cada petición:
+ 
+\begin{lstlisting}[language=json, caption={Estructura del payload JWT emitido por el Back-End}, label={lst:jwt-payload}]
+{
+  "id_usuario": <integer>,
+  "nombre":     <string>,
+  "tipo_usuario": "tutor" | "alumno",
+  "exp":        <unix timestamp>
+}
+\end{lstlisting}
+ 
+El campo \texttt{tipo\_usuario} es el discriminador de rol que consumen
+las dependencias \texttt{require\_tutor} y \texttt{require\_alumno}.
+El token tiene una vigencia de 24 horas (\texttt{ACCESS\_TOKEN\_EXPIRE\_MINUTES = 1440}),
+tras la cual el usuario debe autenticarse nuevamente. La clave de firma
+(\texttt{SECRET\_KEY}) se gestiona mediante variables de entorno y no se
+incluye en el repositorio.
+ 
+% ─────────────────────────────────────────────────────────
+\subsubsection{Diseño del Flujo de Interacción}
+ 
+El módulo contempla dos flujos principales: inicio de sesión y registro
+de tutor.
+ 
+\paragraph{Flujo de Inicio de Sesión:}
+\begin{enumerate}
+    \item El usuario introduce su \texttt{username} y contraseña en el
+    componente \texttt{Login.jsx} y envía la petición.
+    \item El Front-End realiza una petición \texttt{POST} al endpoint
+    \texttt{/api/auth/login} con el payload en formato JSON.
+    \item El Back-End consulta la tabla \texttt{Usuario} filtrando por
+    \texttt{username}. Si el registro no existe, retorna un error
+    \texttt{401 Unauthorized} con un mensaje genérico para evitar la
+    enumeración de usuarios.
+    \item Se verifica que \texttt{id\_estatus = 1} (cuenta activa). Si
+    el valor es distinto, se retorna \texttt{403 Forbidden}.
+    \item Se verifica la contraseña ingresada contra el hash almacenado
+    utilizando bcrypt. Un fallo retorna \texttt{401 Unauthorized} con
+    el mismo mensaje genérico del paso 3.
+    \item Si todas las validaciones son exitosas, se genera el token JWT
+    con el payload descrito en la sección anterior y se retorna al
+    Front-End junto con un mensaje de confirmación.
+    \item El Front-End almacena el token en \texttt{localStorage} y
+    redirige al usuario a su panel correspondiente según el campo
+    \texttt{tipo\_usuario} incluido en el payload decodificado.
+\end{enumerate}
+ 
+\paragraph{Flujo de Registro de Tutor:}
+\begin{enumerate}
+    \item El tutor introduce sus datos en el componente
+    \texttt{Registro.jsx}. El Front-End aplica validaciones de formato
+    antes del envío.
+    \item El Front-End realiza una petición \texttt{POST} al endpoint
+    \texttt{/api/auth/register} con el payload en formato JSON.
+    \item El Back-End verifica que el correo electrónico y el
+    \texttt{username} no existan previamente en la tabla
+    \texttt{Usuario}. En caso de duplicado, retorna \texttt{400 Bad Request}
+    con el campo en conflicto especificado.
+    \item La contraseña es validada contra las reglas de complejidad
+    definidas en el modelo Pydantic (longitud mínima de 8 caracteres,
+    al menos una mayúscula, una minúscula, un dígito y un carácter
+    especial). Una contraseña inválida retorna \texttt{422 Unprocessable
+    Entity}.
+    \item La contraseña válida se cifra con bcrypt y se inserta un nuevo
+    registro en la tabla \texttt{Usuario} con \texttt{tipo\_usuario =
+    'tutor'} e \texttt{id\_estatus = 1} (activo por defecto).
+    \item El Back-End retorna \texttt{200 OK} con un mensaje de
+    confirmación. El tutor debe iniciar sesión de forma explícita
+    para obtener su token.
+\end{enumerate}
+ 
+\noindent \textit{Nota de diseño:} el registro está restringido a cuentas
+de tipo tutor. Los alumnos son dados de alta únicamente por su tutor
+asignado a través del módulo de gestión de alumnos, lo que garantiza que
+ningún alumno pueda auto-registrarse en la plataforma.
+ 
+% ─────────────────────────────────────────────────────────
+\subsubsection{Diseño de APIs}
+ 
+Para soportar los flujos descritos, el diseño de la API contempla los
+siguientes endpoints en el controlador \texttt{auth.py}:
+ 
+\textbf{Endpoint 1:} Inicio de Sesión
+ 
+El endpoint \texttt{/api/auth/login} opera mediante el método
+\texttt{POST} y no requiere autenticación previa. Recibe un payload
+JSON con \texttt{username} y \texttt{password} y, ante credenciales
+válidas, retorna el token JWT.
+ 
+\begin{lstlisting}[language=json, caption={Payload de solicitud y respuesta del endpoint de login}, label={lst:login-payload}]
+/* Solicitud */
+{
+  "username": "string",
+  "password": "string"
+}
+ 
+/* Respuesta 200 OK */
+{
+  "message": "Inicio de sesion exitoso",
+  "token":   "eyJhbGci..."
+}
+\end{lstlisting}
+ 
+\textbf{Endpoint 2:} Registro de Tutor
+ 
+El endpoint \texttt{/api/auth/register} opera mediante el método
+\texttt{POST} y no requiere autenticación previa. Recibe los datos del
+nuevo tutor y aplica las validaciones de unicidad y complejidad de
+contraseña descritas en el flujo anterior.
+ 
+\begin{lstlisting}[language=json, caption={Payload de solicitud del endpoint de registro}, label={lst:register-payload}]
+/* Solicitud */
+{
+  "nombre":   "string",
+  "username": "string (min 6 chars, [a-zA-Z0-9_])",
+  "email":    "string",
+  "password": "string (min 8 chars, mayus + minus + num + especial)"
+}
+ 
+/* Respuesta 200 OK */
+{
+  "message": "Usuario registrado exitosamente"
+}
+\end{lstlisting}
+ 
+% ─────────────────────────────────────────────────────────
+\subsubsection{Diseño del Control de Acceso Basado en Roles}
+ 
+El sistema implementa un control de acceso basado en roles (RBAC) a
+través de dos dependencias reutilizables definidas en
+\texttt{dependencies.py}: \texttt{require\_tutor} y
+\texttt{require\_alumno}. Ambas se inyectan como parámetros en los
+endpoints que requieren autenticación, siguiendo el mecanismo de
+inyección de dependencias de FastAPI.
+ 
+El flujo de validación es el siguiente:
+ 
+\begin{enumerate}
+    \item El cliente incluye el token en el encabezado HTTP de cada
+    petición protegida: \texttt{Authorization: Bearer <token>}.
+    \item La dependencia \texttt{get\_current\_user} extrae y decodifica
+    el token usando la misma \texttt{SECRET\_KEY} y algoritmo HS256. Si
+    el token está vencido o es inválido, retorna \texttt{401 Unauthorized}.
+    \item Las dependencias \texttt{require\_tutor} y
+    \texttt{require\_alumno} verifican el campo \texttt{tipo\_usuario}
+    del payload decodificado. Si el rol no corresponde al requerido por
+    el endpoint, retornan \texttt{403 Forbidden}.
+    \item Si la validación es exitosa, el objeto \texttt{current\_user}
+    (con \texttt{id\_usuario}, \texttt{tipo\_usuario} y \texttt{nombre})
+    queda disponible para la lógica del controlador sin necesidad de
+    realizar consultas adicionales a la base de datos.
+\end{enumerate}
+ 
+La Tabla~\ref{tab:endpoints-auth} resume los endpoints del sistema
+clasificados por el tipo de autenticación que requieren.
+ 
+\begin{table}[H]
+\centering
+\caption{Clasificación de endpoints por nivel de acceso}
+\label{tab:endpoints-auth}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Endpoint} & \textbf{Método} & \textbf{Acceso requerido} \\
+\hline
+\texttt{/api/auth/login}              & POST & Público \\
+\texttt{/api/auth/register}           & POST & Público \\
+\texttt{/api/intentos/registrar}      & POST & Alumno (JWT) \\
+\texttt{/api/intentos/tutor/\{id\}}   & GET  & Tutor (JWT) \\
+\texttt{/api/intentos/calificar/\{id\}} & PUT & Tutor (JWT) \\
+\texttt{/api/alumnos/...}             & *    & Tutor (JWT) \\
+\texttt{/api/ejercicios/...}          & *    & Tutor / Alumno (JWT) \\
+\texttt{/api/perfil/...}              & *    & Tutor / Alumno (JWT) \\
+\hline
+\end{tabular}
+\end{table}
