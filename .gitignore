@@ -5,3 +5,5 @@
 *.toc
 *.synctex.gz
 *.lot
+*.bbl
+*.blg

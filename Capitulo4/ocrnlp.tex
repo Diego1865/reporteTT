@@ -141,13 +141,16 @@ adicional, ya que el proceso opera sobre datos ya persistidos.
 
 \textbf{\textit{Salida del sub-módulo OCR hacia la base de datos}}
 
+Actualización del campo \texttt{texto\_detectado\_ocr} en la tabla \texttt{Intentos}:
+
 \begin{lstlisting}[language=json, caption={Estructura de resultados del sub-módulo OCR hacia la BD}, label={lst:ocr-output}]
-/* Tabla Intentos — campo a actualizar */
 {
   "texto_detectado_ocr": "string (texto reconocido)"
 }
 
-/* Tabla Analisis_Caligrafico — registro a insertar */
+Registro a insertar en la tabla \texttt{Analisis\_Caligrafico}:
+
+\begin{lstlisting}[language=json]
 {
   "id_intento":          <integer>,
   "alineacion_score":    <decimal(5,2)>,
@@ -160,8 +163,9 @@ adicional, ya que el proceso opera sobre datos ya persistidos.
 
 \textbf{\textit{Salida del sub-módulo NLP hacia la base de datos}}
 
+Registro a insertar en la tabla \texttt{Analisis\_Ortografico}:
+
 \begin{lstlisting}[language=json, caption={Estructura de resultados del sub-módulo NLP hacia la BD}, label={lst:nlp-output}]
-/* Tabla Analisis_Ortografico — registro a insertar */
 {
   "id_intento":        <integer>,
   "cantidad_errores":  <integer>,
@@ -199,7 +203,6 @@ alumno. Su propósito es retornar de forma consolidada los resultados
 del análisis OCR y NLP asociados a un intento específico.
 
 \begin{lstlisting}[language=json, caption={Estructura de respuesta del endpoint de análisis}, label={lst:analisis-response}]
-/* Respuesta 200 OK */
 {
   "id_intento":          <integer>,
   "texto_detectado_ocr": "string | null",
