@@ -1,0 +1,267 @@
+% ─────────────────────────────────────────────────────────────────────────────
+%  Sección 4.X  Arquitectura del Módulo de Progreso y Recomendaciones
+%  Insertar en el Capítulo 4: Diseño, después del módulo OCR/NLP.
+% ─────────────────────────────────────────────────────────────────────────────
+
+\subsection{Arquitectura del Módulo de Progreso y Recomendaciones}
+
+El módulo de progreso y recomendaciones centraliza el seguimiento
+longitudinal del desempeño del alumno y expone al tutor las herramientas
+de supervisión grupal necesarias para tomar decisiones pedagógicas
+informadas. A diferencia de los módulos anteriores, cuyo alcance es
+transaccional —un intento, un ejercicio, una autenticación—, este módulo
+opera sobre el historial acumulado del alumno, sintetizando múltiples
+análisis en indicadores agregados que reflejan su evolución en el tiempo.
+
+La arquitectura del módulo se divide en tres componentes principales:
+
+\begin{enumerate}
+    \item \textbf{Capa de Presentación (Front-End):} Compuesta por el
+    componente \texttt{ProgresoAlumnos.jsx} en el panel del tutor, que
+    presenta gráficas de dona y de barras con la distribución del grupo
+    por categoría de desempeño, y por el componente
+    \texttt{PerfilAlumno.jsx} en el panel del alumno, que expone sus
+    datos personales y permite actualizarlos. La clasificación del grupo
+    se presenta en dos dimensiones independientes —ortografía y
+    legibilidad— seleccionables mediante pestañas, con soporte
+    responsivo para pantallas móviles.
+
+    \item \textbf{Capa de Lógica de Negocio (Back-End):} Implementada
+    en los controladores \texttt{alumnos.py} y \texttt{perfil.py}
+    mediante FastAPI. El primero gestiona el registro, la consulta y la
+    baja de alumnos, así como la clasificación del grupo por nivel de
+    desempeño y la generación de datos para las gráficas de progreso.
+    El segundo gestiona las operaciones de actualización de perfil tanto
+    del tutor como del alumno.
+
+    \item \textbf{Capa de Persistencia (Base de Datos):} El módulo opera
+    principalmente sobre las tablas \texttt{Progreso\_Alumno} e
+    \texttt{Historial\_Alumno}. La primera almacena el promedio acumulado
+    vigente del alumno en cada dimensión de evaluación; la segunda
+    registra una fotografía histórica del progreso cada vez que dicho
+    promedio es actualizado, permitiendo trazar la evolución del alumno
+    a lo largo del tiempo. Las tablas \texttt{Recomendacion} y
+    \texttt{Actividad\_Sugerida} soportan la generación de actividades
+    personalizadas a partir de los errores detectados.
+\end{enumerate}
+
+% ─────────────────────────────────────────────────────────
+\subsubsection{Diseño del Modelo de Progreso}
+
+El progreso del alumno se representa mediante dos dimensiones
+independientes pero complementarias:
+
+\begin{itemize}
+    \item \textbf{Promedio ortográfico} (\texttt{promedio\_ortografia}):
+    promedio acumulado del campo \texttt{ortografia\_score} de todos los
+    análisis ortográficos registrados para el alumno.
+
+    \item \textbf{Promedio de legibilidad} (calculado): promedio aritmético
+    de los cuatro scores caligráficos —\texttt{alineacion\_score},
+    \texttt{tamano\_letra\_score}, \texttt{espaciado\_score} e
+    \texttt{inclinacion\_score}— derivados de los análisis caligráficos
+    del alumno.
+\end{itemize}
+
+El \textbf{promedio general} se obtiene como la media de ambas
+dimensiones y actúa como indicador sintético para la clasificación del
+alumno dentro de su grupo:
+
+\begin{equation}
+    Promedio\_general = \frac{Promedio\_ortográfico +
+    Promedio\_legibilidad}{2}
+    \label{eq:promedio-general}
+\end{equation}
+
+Con base en el promedio general, el sistema clasifica a cada alumno en
+una de tres categorías, conforme a la Tabla~\ref{tab:categorias-progreso}:
+
+\begin{table}[H]
+\centering
+\caption{Categorías de clasificación de alumnos por promedio general}
+\label{tab:categorias-progreso}
+\begin{tabular}{|l|l|p{7cm}|}
+\hline
+\textbf{Categoría} & \textbf{Rango} & \textbf{Interpretación} \\
+\hline
+En riesgo   & $< 6.0$         & El alumno presenta deficiencias significativas en
+                                 ortografía o legibilidad que requieren atención
+                                 prioritaria del tutor. \\
+Regular     & $[6.0, \ 8.0]$  & El alumno mantiene un desempeño aceptable con
+                                 áreas de oportunidad identificadas. \\
+Excelencia  & $> 8.0$         & El alumno muestra un desempeño consistentemente
+                                 alto en ambas dimensiones evaluadas. \\
+\hline
+\end{tabular}
+\end{table}
+
+\noindent\textbf{Nota de diseño:} los umbrales de clasificación (6.0 y
+8.0) están alineados con la escala de evaluación del sistema educativo
+mexicano de educación primaria \cite{sep2011guia}, donde 6.0 representa
+el mínimo aprobatorio y 8.0 delimita el desempeño sobresaliente.
+
+% ─────────────────────────────────────────────────────────
+\subsubsection{Diseño del Flujo de Actualización de Progreso}
+
+La tabla \texttt{Progreso\_Alumno} se actualiza cada vez que el módulo
+OCR/NLP completa el análisis de un intento. El mecanismo de actualización
+opera en dos pasos:
+
+\begin{enumerate}
+    \item \textbf{Actualización del promedio vigente:} al persistir los
+    resultados de \texttt{Analisis\_Ortografico} y
+    \texttt{Analisis\_Caligrafico}, el proceso recalcula los promedios
+    acumulados del alumno mediante una consulta \texttt{UPDATE} con
+    subconsulta \texttt{AVG} sobre todos sus intentos analizados hasta
+    la fecha, y los escribe en \texttt{Progreso\_Alumno}.
+
+    \item \textbf{Registro histórico:} simultáneamente, se inserta un
+    nuevo registro en \texttt{Historial\_Alumno} con una instantánea
+    (\textit{snapshot}) del progreso en ese momento, incluyendo la fecha
+    con precisión \texttt{DATETIME2}. Este registro es inmutable y
+    permite reconstruir la curva de progreso del alumno a lo largo del
+    tiempo, independientemente de los cambios posteriores en
+    \texttt{Progreso\_Alumno}.
+\end{enumerate}
+
+La separación entre la tabla de progreso vigente y la tabla de historial
+responde a una decisión de diseño deliberada: \texttt{Progreso\_Alumno}
+es la fuente de verdad para las consultas actuales del tutor y los
+cálculos de clasificación, mientras que \texttt{Historial\_Alumno}
+es la fuente de verdad para la visualización de la evolución temporal.
+Ambas responsabilidades son distintas y justifican la existencia de dos
+tablas separadas.
+
+% ─────────────────────────────────────────────────────────
+\subsubsection{Diseño del Flujo de Recomendaciones}
+
+Cuando el análisis de un intento es completado, el sistema genera
+recomendaciones de actividades personalizadas para el alumno. El flujo
+es el siguiente:
+
+\begin{enumerate}
+    \item El proceso evalúa los resultados del análisis recién
+    completado e identifica el tipo de error predominante: ortográfico
+    si \texttt{ortografia\_score} está por debajo del umbral, caligráfico
+    si alguno de los cuatro scores de legibilidad lo está.
+
+    \item Se consulta la tabla \texttt{Actividad\_Sugerida} filtrando por
+    \texttt{tipo\_error} y \texttt{tipo\_ejercicio} correspondientes al
+    error identificado.
+
+    \item Se insertan registros en la tabla \texttt{Recomendacion}
+    vinculando el \texttt{id\_intento} con las actividades seleccionadas.
+    Cada recomendación recibe un valor de \texttt{prioridad}
+    (\texttt{alta}, \texttt{media} o \texttt{baja}) calculado con base
+    en la magnitud del error: a mayor desviación respecto al umbral,
+    mayor prioridad.
+
+    \item El alumno consulta sus recomendaciones pendientes, ordenadas
+    por prioridad, desde su panel. Al realizar una actividad sugerida,
+    el campo \texttt{estado} de la recomendación transiciona de
+    \texttt{pendiente} a \texttt{completada}.
+\end{enumerate}
+
+% ─────────────────────────────────────────────────────────
+\subsubsection{Diseño de APIs}
+
+Para soportar los flujos descritos, el diseño de la API contempla los
+siguientes endpoints distribuidos entre los controladores
+\texttt{alumnos.py} y \texttt{perfil.py}:
+
+\paragraph{Endpoints de gestión de alumnos (tutor)}
+
+\begin{table}[H]
+\centering
+\caption{Endpoints de gestión de alumnos}
+\label{tab:endpoints-alumnos}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Endpoint} & \textbf{Método} & \textbf{Acceso} \\
+\hline
+\texttt{/api/alumnos/registrar}              & POST & Tutor (JWT) \\
+\texttt{/api/alumnos/tutor/\{id\_tutor\}}    & GET  & Tutor (JWT) \\
+\texttt{/api/alumnos/baja/\{id\_alumno\}}    & PUT  & Tutor (JWT) \\
+\hline
+\end{tabular}
+\end{table}
+
+\paragraph{Endpoints de clasificación y progreso grupal (tutor)}
+
+Los siguientes tres endpoints implementan la clasificación del grupo
+según las categorías definidas en la Tabla~\ref{tab:categorias-progreso}.
+Cada uno ejecuta la misma consulta CTE (\textit{Common Table Expression})
+sobre \texttt{Progreso\_Alumno}, variando únicamente el filtro de
+\texttt{promedio\_general} aplicado:
+
+\begin{table}[H]
+\centering
+\caption{Endpoints de clasificación de alumnos por desempeño}
+\label{tab:endpoints-clasificacion}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Endpoint} & \textbf{Método} & \textbf{Acceso} \\
+\hline
+\texttt{/api/alumnos/riesgo/\{id\_tutor\}}      & GET & Tutor (JWT) \\
+\texttt{/api/alumnos/regular/\{id\_tutor\}}     & GET & Tutor (JWT) \\
+\texttt{/api/alumnos/excelencia/\{id\_tutor\}}  & GET & Tutor (JWT) \\
+\hline
+\end{tabular}
+\end{table}
+
+El endpoint \texttt{/api/alumnos/progreso/\{id\_tutor\}} opera mediante
+el método \texttt{GET} y retorna los datos agrupados para las gráficas
+del panel del tutor. Ejecuta dos consultas independientes: una sobre
+el promedio ortográfico y otra sobre el promedio de legibilidad,
+retornando para cada dimensión la cantidad de alumnos por categoría.
+
+\begin{lstlisting}[language=json, caption={Estructura de respuesta del endpoint de progreso gráfico}, label={lst:progreso-response}]
+/* Respuesta 200 OK */
+{
+  "ortografia": [
+    { "categoria": "Buen Promedio",    "cantidad_alumnos": <int> },
+    { "categoria": "Promedio Regular", "cantidad_alumnos": <int> },
+    { "categoria": "Mal Promedio",     "cantidad_alumnos": <int> }
+  ],
+  "legibilidad": [
+    { "categoria": "Buena Legibilidad",    "cantidad_alumnos": <int> },
+    { "categoria": "Legibilidad Regular",  "cantidad_alumnos": <int> },
+    { "categoria": "Mala Legibilidad",     "cantidad_alumnos": <int> }
+  ]
+}
+\end{lstlisting}
+
+\paragraph{Endpoints de perfil (tutor y alumno)}
+
+\begin{table}[H]
+\centering
+\caption{Endpoints del módulo de perfil}
+\label{tab:endpoints-perfil}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Endpoint} & \textbf{Método} & \textbf{Acceso} \\
+\hline
+\texttt{/api/perfil/tutor/nombre}             & PUT    & Tutor (JWT) \\
+\texttt{/api/perfil/tutor/correo}             & PUT    & Tutor (JWT) \\
+\texttt{/api/perfil/tutor/password}           & PUT    & Tutor (JWT) \\
+\texttt{/api/perfil/tutor/cuenta}             & DELETE & Tutor (JWT) \\
+\texttt{/api/perfil/alumno/info}              & PUT    & Alumno (JWT) \\
+\texttt{/api/perfil/alumno/password}          & PUT    & Alumno (JWT) \\
+\texttt{/api/perfil/alumno/estado-tutor}      & GET    & Alumno (JWT) \\
+\hline
+\end{tabular}
+\end{table}
+
+El endpoint \texttt{/api/perfil/alumno/estado-tutor} merece una mención
+especial: su propósito es verificar si el tutor asociado al alumno
+sigue activo en el sistema (\texttt{id\_estatus = 1}). Esta verificación
+protege al alumno de intentar acceder a funcionalidades dependientes
+del tutor cuando este ha sido dado de baja, retornando un indicador
+booleano (\texttt{tutor\_activo: true | false}) que el Front-End
+utiliza para condicionar la renderización del panel del alumno.
+
+\noindent\textbf{Nota de diseño:} todas las operaciones de actualización
+de perfil que involucran datos sensibles —correo electrónico, contraseña
+o eliminación de cuenta— requieren la verificación de la contraseña
+actual antes de ejecutar el cambio, como capa adicional de seguridad
+frente a sesiones comprometidas.

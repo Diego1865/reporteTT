@@ -148,14 +148,14 @@ El proceso general de detección de errores ortográficos mediante NLP puede rep
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{Imagenes/procesoNLP.png}
-    \caption{Flujo básico del proceso de corrección ortográfica mediante NLP.}
+    \caption{Flujo básico del proceso de corrección ortográfica mediante NLP. Elaboración con base en \cite{jurafsky2023speech}}
     \label{fig:NLP}
 \end{figure}
-Elaboración con base en \cite{jurafsky2023speech}
+
 
 Como se muestra en la Figura \ref{fig:NLP}, el procedimiento inicia con el texto digital previamente obtenido. Posteriormente, en la etapa de tokenización, el sistema divide el texto en unidades mínimas, generalmente palabras o tokens individuales, lo cual facilita su análisis individual y contextual dentro de la oración.
 
-En la siguiente fase, cada token es comparado con un diccionario léxico o modelo lingüístico entrenado. Si una palabra no coincide con las entradas válidas, el sistema la identifica como posible error ortográfico. Para generar una sugerencia, pueden emplearse algoritmos de similitud como la distancia de Levenshtein o modelos estadísticos que calculan la probabilidad de ocurrencia de una palabra dentro de un contexto determinado \cite{refpendiente}. Este tipo de técnicas permite no solo detectar errores, sino también proponer alternativas adecuadas.
+En la siguiente fase, cada token es comparado con un diccionario léxico o modelo lingüístico entrenado. Si una palabra no coincide con las entradas válidas, el sistema la identifica como posible error ortográfico. Para generar una sugerencia, pueden emplearse algoritmos de similitud como la distancia de Levenshtein o modelos estadísticos que calculan la probabilidad de ocurrencia de una palabra dentro de un contexto determinado \cite{jurafsky2023speech}. Este tipo de técnicas permite no solo detectar errores, sino también proponer alternativas adecuadas.
 
 Este enfoque permite ofrecer retroalimentación automatizada en forma de sugerencias, lo cual resulta útil en entornos educativos cuando se busca apoyar el aprendizaje sin reemplazar la intervención del docente. No obstante, la precisión del sistema depende de la calidad del modelo lingüístico, del contexto del texto y de la claridad del contenido procesado.
 
@@ -167,11 +167,11 @@ Asimismo, el uso de modelos más avanzados basados en arquitecturas modernas ha 
 
 \subsection{Evaluación del trazo manuscrito}
 
-El trazo manuscrito constituye un elemento relevante dentro del proceso de adquisición de la escritura en educación primaria. La legibilidad de un texto no depende únicamente de la ortografía correcta, sino también de factores visuales y espaciales que permiten interpretar adecuadamente el contenido escrito \cite{ref34}. Entre estos factores se encuentran la alineación sobre la línea base, la proporción del tamaño de las letras, el espaciado entre palabras y la uniformidad del trazo, los cuales influyen directamente en la claridad y comprensión del texto.
+El trazo manuscrito constituye un elemento relevante dentro del proceso de adquisición de la escritura en educación primaria. La legibilidad de un texto no depende únicamente de la ortografía correcta, sino también de factores visuales y espaciales que permiten interpretar adecuadamente el contenido escrito \cite{mikolov2013distributed, goodfellow2016deep}. Entre estos factores se encuentran la alineación sobre la línea base, la proporción del tamaño de las letras, el espaciado entre palabras y la uniformidad del trazo, los cuales influyen directamente en la claridad y comprensión del texto.
 
-Diversos estudios sobre desarrollo de la escritura señalan que la evaluación de la letra manuscrita puede abordarse mediante parámetros observables que permitan identificar patrones de mejora o dificultad en los estudiantes \cite{ref35}. En contextos educativos tradicionales, esta evaluación es realizada por el docente de forma visual y cualitativa; sin embargo, con el apoyo de herramientas digitales es posible establecer métricas básicas que complementen dicha valoración, aportando un enfoque más objetivo al análisis del desempeño.
+Diversos estudios sobre desarrollo de la escritura señalan que la evaluación de la letra manuscrita puede abordarse mediante parámetros observables que permitan identificar patrones de mejora o dificultad en los estudiantes \cite{berninger2010teaching, graham2010handwriting}. En contextos educativos tradicionales, esta evaluación es realizada por el docente de forma visual y cualitativa; sin embargo, con el apoyo de herramientas digitales es posible establecer métricas básicas que complementen dicha valoración, aportando un enfoque más objetivo al análisis del desempeño.
 
-Desde una perspectiva computacional, algunos de estos parámetros pueden aproximarse mediante técnicas de análisis de imagen, tales como la medición de altura promedio de caracteres, la variación de inclinación o la separación entre segmentos gráficos \cite{ref36}. Estas técnicas permiten cuantificar características del trazo que, de otra forma, serían evaluadas únicamente de manera subjetiva. Si bien estos indicadores no sustituyen la evaluación pedagógica, pueden ofrecer información cuantitativa útil para el seguimiento del progreso del estudiante a lo largo del tiempo.
+Desde una perspectiva computacional, algunos de estos parámetros pueden aproximarse mediante técnicas de análisis de imagen, tales como la medición de altura promedio de caracteres, la variación de inclinación o la separación entre segmentos gráficos \cite{marti2002iam, plamondon2000online}. Estas técnicas permiten cuantificar características del trazo que, de otra forma, serían evaluadas únicamente de manera subjetiva. Si bien estos indicadores no sustituyen la evaluación pedagógica, pueden ofrecer información cuantitativa útil para el seguimiento del progreso del estudiante a lo largo del tiempo.
 
 Los principales parámetros considerados para la evaluación básica del trazo en el presente proyecto se describen en la Tabla \ref{tab:parametros_evaluacion}, donde se establecen tanto los criterios pedagógicos como sus posibles aproximaciones computacionales, permitiendo vincular la evaluación tradicional con el análisis automatizado.
 
@@ -191,7 +191,7 @@ Uniformidad & Consistencia en forma y grosor del trazo & Variación en contornos
 \end{tabular}
 \end{table}
 
-Como se observa en la Tabla 4, los parámetros seleccionados combinan criterios pedagógicos tradicionales con posibles métricas de análisis digital. Esta integración permite establecer un modelo básico de evaluación que apoye el seguimiento del desempeño del estudiante sin reemplazar la interpretación docente, sino más bien complementándola.
+Como se observa en la Tabla \ref{tab:parametros_evaluacion}, los parámetros seleccionados combinan criterios pedagógicos tradicionales con posibles métricas de análisis digital. Esta integración permite establecer un modelo básico de evaluación que apoye el seguimiento del desempeño del estudiante sin reemplazar la interpretación docente, sino más bien complementándola.
 
 La incorporación de estos indicadores dentro del sistema propuesto busca complementar el análisis ortográfico realizado mediante NLP, ofreciendo una visión más integral del proceso de escritura. De esta manera, el sistema no solo evalúa la corrección del texto, sino también la calidad del trazo manuscrito, integrando así componentes visuales y lingüísticos dentro de una misma solución tecnológica.
 
@@ -203,7 +203,7 @@ En la Figura \ref{fig:MVC} se presenta el esquema general de la arquitectura MVC
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{Imagenes/MVC.jpg}
-    \caption{Arquitectura Modelo-Vista-Controlador aplicada al sistema \cite{refpendiente}.}
+    \caption{Arquitectura Modelo-Vista-Controlador aplicada al sistema \cite{buschmann1996pattern}.}
     \label{fig:MVC}
 \end{figure}
 
