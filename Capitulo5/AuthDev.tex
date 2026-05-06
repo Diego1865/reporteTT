@@ -1,0 +1,125 @@
+\subsection{Desarrollo del módulo de autenticación}
+
+En esta sección se describe el desarrollo del módulo de autenticación, el cual se encarga de gestionar el acceso seguro de los usuarios. Para ello, se implementaron mecanismos basados en tokens JWT, control de acceso por roles y la definición de APIs que permiten la comunicación entre los distintos componentes de la aplicación web.
+
+\subsubsection{Implementación del token JWT}
+
+Para la gestión de autenticación en el sistema, se implementó un mecanismo basado en JSON Web Tokens (JWT), el cual permite validar la identidad del usuario de forma segura y sin necesidad de mantener sesiones en el servidor.
+
+El proceso de autenticación inicia cuando el usuario envía sus credenciales a través del endpoint de inicio de sesión. Estas credenciales son verificadas contra la información almacenada en la base de datos, validando tanto la existencia del usuario como su estatus y la coincidencia de la contraseña cifrada.
+
+Una vez que las credenciales son validadas correctamente, se genera un token JWT que contiene información relevante del usuario, como su identificador, nombre y tipo de usuario. Este token incluye además un tiempo de expiración, con el objetivo de limitar su validez y mejorar la seguridad del sistema.
+
+El token generado es enviado al cliente, quien deberá incluirlo en las solicitudes posteriores para acceder a los recursos protegidos del sistema.
+
+El proceso de generación del token se realiza mediante una función que recibe los datos del usuario y construye la carga útil (payload) del token. Posteriormente, se agrega el campo de expiración y se codifica utilizando una clave secreta y un algoritmo de cifrado.
+
+A continuación, se muestra el fragmento de código utilizado para la generación del token JWT:
+
+\begin{lstlisting}[language=Python, caption={Generación del token JWT}, label={lst:jwt_token}]
+    def create_access_token(data: dict):
+        to_encode = data.copy()
+        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        to_encode.update({"exp": expire})
+        encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+        return encoded_jwt
+\end{lstlisting}
+
+
+\subsubsection{Implementación del control de acceso por rol}
+
+El sistema implementa un mecanismo de control de acceso basado en roles (RBAC, por sus siglas en inglés), con el objetivo de restringir el acceso a los recursos y funcionalidades según el tipo de usuario autenticado.
+
+Cada usuario posee un rol definido dentro del sistema, el cual se encuentra almacenado en la base de datos y es incluido dentro del token JWT generado durante el proceso de autenticación. Este rol es utilizado posteriormente para validar los permisos de acceso a los diferentes endpoints del sistema.
+
+Durante la implementación, se definieron distintos tipos de usuario, tales como alumno y tutor, cada uno con permisos específicos. Por ejemplo, los alumnos pueden realizar actividades relacionadas con la captura y envío de ejercicios, mientras que los tutores tienen acceso a funciones de revisión, asignación y monitoreo del desempeño.
+
+Para garantizar el cumplimiento de estas restricciones, se implementaron validaciones en los endpoints del sistema, donde se verifica el rol del usuario antes de permitir la ejecución de una operación. En caso de que el usuario no cuente con los permisos necesarios, el sistema responde con un error de autorización.
+
+Este enfoque permite mantener la seguridad del sistema, evitando accesos no autorizados y asegurando que cada usuario interactúe únicamente con las funcionalidades correspondientes a su rol.
+
+El rol del usuario es incluido dentro del payload del token JWT durante el proceso de autenticación, permitiendo que sea utilizado en cada solicitud para validar los permisos de acceso sin necesidad de consultar constantemente la base de datos.
+
+A continuación, se muestra un ejemplo de validación de rol en un endpoint del sistema:
+
+\begin{lstlisting}[language=Python, caption={Validación de acceso por rol}]
+    if current_user["tipo_usuario"] != "tutor":
+        raise HTTPException(
+            status_code=403,
+            detail="Acceso no autorizado"
+        )
+    \end{lstlisting}
+
+\subsubsection{Implementación de APIs}
+
+El endpoint de inicio de sesión se encarga de validar las credenciales del usuario y generar el token correspondiente. Este proceso incluye la verificación del estatus del usuario, así como la validación de la contraseña cifrada.
+
+Una vez autenticado, se construye el payload del token con la información del usuario y se genera el JWT que será utilizado para futuras solicitudes.
+
+El siguiente fragmento muestra la implementación del endpoint de autenticación:
+
+\begin{lstlisting}[language=Python, caption={Endpoint de autenticación y generación de JWT}, label={lst:jwt_login}]
+    @router.post("/login", response_model=LoginResponse)
+    async def login(credentials: LoginRequest):
+        conn = connect_to_database()
+        if not conn:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
+                detail="Error de conexion a la base de datos"
+            )
+    
+        cursor = conn.cursor()
+    
+        try:
+            query = """
+                SELECT id_usuario, contrasena_cifrada, nombre, tipo_usuario, id_estatus 
+                FROM Usuario
+                WHERE username = ?
+            """
+            cursor.execute(query, credentials.username)
+            user = cursor.fetchone()
+    
+            if not user:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Usuario o contrasena incorrectos"
+                )
+    
+            id_usuario, contrasena_cifrada, nombre, tipo_usuario, id_estatus = user
+    
+            if id_estatus != 1:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="El usuario no se encuentra activo"
+                )
+    
+            if not verify_password(credentials.password, contrasena_cifrada):
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Usuario o contrasena incorrectos"
+                )
+    
+            token_payload = {
+                "id_usuario": id_usuario,
+                "nombre": nombre,
+                "tipo_usuario": tipo_usuario
+            }
+    
+            token = create_access_token(token_payload)
+    
+            return {
+                "message": "Inicio de sesion exitoso",
+                "token": token
+            }
+    
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
+                detail=f"Error: {str(e)}"
+            )
+        finally:
+            cursor.close()
+            conn.close()
+\end{lstlisting}

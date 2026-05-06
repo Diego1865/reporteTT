@@ -20,6 +20,7 @@
 \usepackage{graphicx}
 \usepackage{caption}
 \usepackage{amssymb}
+\usepackage[utf8]{inputenc}
 
 % --- Tablas largas ajustables (reemplaza longtable+tabularx) ---
 \usepackage{array}
@@ -39,6 +40,7 @@
 \colorlet{punct}{red!60!black}
 \definecolor{delim}{RGB}{20,105,176}
 \colorlet{numb}{magenta!60!black}
+
 
 \lstdefinelanguage{JSON}{
     basicstyle=\normalfont\ttfamily\small,
@@ -79,6 +81,17 @@
     breaklines=true,
     frame=single
 }
+
+\lstset{
+    language=Python,
+    inputencoding=utf8,
+    extendedchars=true,
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    showstringspaces=false
+}
+
 % Formato de secciones igual que en Word
 \titleformat{\section}
     {\large\bfseries}{\thesection}{1em}{}
