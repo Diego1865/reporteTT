@@ -1,0 +1,206 @@
+\section{Análisis de riesgos}
+
+Durante el desarrollo e implementación de la aplicación pueden presentarse distintos riesgos técnicos, operativos y de seguridad que afecten el funcionamiento del sistema o el cumplimiento de los objetivos del proyecto.
+
+Debido a que la solución propuesta integra tecnologías de reconocimiento óptico de caracteres, procesamiento de lenguaje natural y almacenamiento de información en una plataforma web, resulta necesario identificar posibles problemáticas relacionadas con la precisión del procesamiento, la calidad de los datos, la disponibilidad de los servicios y la interacción de los usuarios con la aplicación.
+
+El análisis presentado a continuación permite identificar los principales riesgos asociados al proyecto y definir medidas orientadas a reducir su impacto sobre el sistema.
+
+%------------------------------------------------
+
+\subsection{Identificación de riesgos}
+
+La identificación de riesgos se realizó mediante el análisis de los diferentes componentes que integran la arquitectura de la aplicación, considerando aspectos relacionados con el procesamiento OCR, el análisis ortográfico mediante NLP, la infraestructura tecnológica utilizada, la calidad de las imágenes procesadas y la interacción de los usuarios con el sistema.
+
+Asimismo, se consideraron posibles riesgos relacionados con la seguridad de la información, el rendimiento del sistema y la experiencia de usuario, debido a que la aplicación está orientada a estudiantes de educación primaria y requiere mecanismos de procesamiento confiables y accesibles.
+
+%------------------------------------------------
+
+\subsection{Matriz de riesgos}
+
+Con el objetivo de clasificar los riesgos identificados, se empleó una matriz de evaluación 5x5 basada en la probabilidad de ocurrencia y el impacto potencial sobre el sistema.
+
+La matriz permite determinar visualmente el nivel de prioridad de cada riesgo y establecer criterios para definir las estrategias de mitigación correspondientes.
+
+\begin{table}[H]
+\centering
+\caption{Matriz de evaluación de riesgos 5x5}
+\renewcommand{\arraystretch}{1.1}
+
+\small
+
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+
+\multirow{2}{*}{
+\shortstack{\textbf{Probabilidad} \\ \scriptsize ¿Qué tan probable es?}
+}
+
+& \multicolumn{5}{c|}{
+\shortstack{\textbf{Impacto} \\ \scriptsize ¿Qué tan grave sería?}
+}
+\\
+
+\cline{2-6}
+
+& \textbf{1} & \textbf{2} & \textbf{3} & \textbf{4} & \textbf{5} \\
+\hline
+
+\textbf{5}
+& \cellcolor{RiskYellow}
+& \cellcolor{RiskOrange}
+& \cellcolor{RiskRed}
+& \cellcolor{RiskRed}
+& \cellcolor{RiskRed} \\
+\hline
+
+\textbf{4}
+& \cellcolor{RiskYellow}
+& \cellcolor{RiskYellow}
+& \cellcolor{RiskOrange}
+& \cellcolor{RiskRed}
+& \cellcolor{RiskRed} \\
+\hline
+
+\textbf{3}
+& \cellcolor{RiskGreen}
+& \cellcolor{RiskYellow}
+& \cellcolor{RiskYellow}
+& \cellcolor{RiskOrange}
+& \cellcolor{RiskRed} \\
+\hline
+
+\textbf{2}
+& \cellcolor{RiskGreen}
+& \cellcolor{RiskGreen}
+& \cellcolor{RiskYellow}
+& \cellcolor{RiskOrange}
+& \cellcolor{RiskOrange} \\
+\hline
+
+\textbf{1}
+& \cellcolor{RiskGreen}
+& \cellcolor{RiskGreen}
+& \cellcolor{RiskGreen}
+& \cellcolor{RiskYellow}
+& \cellcolor{RiskYellow} \\
+\hline
+
+\end{tabular}
+
+\label{tab:matriz_riesgos}
+\end{table}
+
+Los riesgos clasificados en color rojo corresponden a riesgos críticos que requieren atención prioritaria debido a su alta probabilidad y elevado impacto potencial. Por otra parte, los riesgos identificados en color naranja representan riesgos altos que deben ser monitoreados constantemente durante el desarrollo e integración de la aplicación.
+
+Los riesgos moderados y bajos, representados en amarillo y verde respectivamente, presentan una menor afectación potencial; sin embargo, también requieren estrategias de seguimiento y mitigación para evitar afectaciones futuras en el funcionamiento del sistema.
+
+%------------------------------------------------
+
+\subsection{Evaluación de riesgos}
+
+Con base en la matriz de evaluación presentada anteriormente, se clasificaron los principales riesgos identificados durante el análisis del sistema, considerando su probabilidad de ocurrencia, impacto potencial y las medidas de contingencia propuestas para reducir sus efectos sobre la aplicación.
+\begin{table}[H]
+\centering
+\caption{Evaluación de riesgos del proyecto}
+\renewcommand{\arraystretch}{1.3}
+
+\resizebox{\textwidth}{!}{
+\begin{tabular}{|p{2.6cm}|p{4cm}|p{2.5cm}|p{1.8cm}|p{4cm}|p{2cm}|}
+\hline
+
+\centering\textbf{Riesgo} &
+\centering\textbf{Descripción} &
+\centering\textbf{Probabilidad} &
+\centering\textbf{Impacto} &
+\centering\textbf{Plan de contingencia} &
+\centering\textbf{Semáforo}
+\tabularnewline
+\hline
+
+Baja precisión del OCR &
+La escritura infantil puede generar errores de reconocimiento debido a variaciones en el trazo. &
+Alta &
+Alto &
+Aplicar preprocesamiento de imagen y ajustar datasets de entrenamiento. &
+\cellcolor{RiskOrange} Alto \\
+\hline
+
+Errores en análisis ortográfico &
+El módulo NLP podría generar sugerencias incorrectas o falsos positivos. &
+Media &
+Medio &
+Implementar validaciones contextuales y pruebas controladas. &
+\cellcolor{RiskYellow} Medio \\
+\hline
+
+Imágenes de baja calidad &
+Fotografías borrosas o mal iluminadas pueden afectar el procesamiento OCR. &
+Alta &
+Alto &
+Incorporar validaciones de calidad de imagen y permitir la captura manual mediante lienzo digital.&
+\cellcolor{RiskRed} Crítico \\
+\hline
+
+Acceso no autorizado &
+Posible acceso indebido a información almacenada en el sistema. &
+Media &
+Alto &
+Implementar JWT, cifrado de contraseñas y control de roles. &
+\cellcolor{RiskOrange} Alto \\
+\hline
+
+Sobrecarga del servidor &
+Procesamiento simultáneo excesivo durante pruebas piloto. &
+Baja &
+Medio &
+Optimizar procesamiento y limitar concurrencia. &
+\cellcolor{RiskGreen} Bajo \\
+\hline
+
+Dificultad de uso por alumnos &
+Interfaces complejas pueden afectar la experiencia de usuario infantil. &
+Media &
+Medio &
+Realizar pruebas de usabilidad y simplificar navegación. &
+\cellcolor{RiskYellow} Medio \\
+\hline
+
+Pérdida de información &
+Fallos en base de datos o errores del sistema. &
+Baja &
+Alto &
+Implementar respaldos automáticos y validaciones de integridad. &
+\cellcolor{RiskYellow} Medio \\
+\hline
+
+Dependencia de librerías externas &
+Cambios o incompatibilidades en dependencias utilizadas. &
+Baja &
+Medio &
+Mantener versiones estables y alternativas locales. &
+\cellcolor{RiskGreen} Bajo \\
+\hline
+
+\end{tabular}
+}
+
+\label{tab:evaluacion_riesgos}
+\end{table}
+%------------------------------------------------
+
+\subsection{Estrategias de mitigación}
+
+Con base en los riesgos identificados y evaluados, se establecen estrategias orientadas a reducir la probabilidad de ocurrencia o minimizar el impacto que estos podrían generar sobre el sistema.
+
+Las estrategias de mitigación contemplan medidas técnicas, operativas y de seguridad aplicadas durante las etapas de desarrollo, integración y validación de la aplicación. Entre las principales acciones consideradas se encuentran el uso de técnicas de preprocesamiento de imágenes, validaciones de calidad, mecanismos de autenticación y control de acceso, respaldos automáticos de información y pruebas de usabilidad orientadas a estudiantes de educación primaria.
+
+La implementación de estas medidas permite disminuir la exposición a riesgos críticos y mejorar la estabilidad, confiabilidad y seguridad de la solución propuesta.
+
+En el caso del módulo OCR, las estrategias de mitigación se enfocan principalmente en reducir errores ocasionados por imágenes de baja calidad o variaciones en la escritura manuscrita. Para ello, se contempla la implementación de técnicas de preprocesamiento de imágenes, validaciones de resolución y una alternativa de captura manual mediante un lienzo digital, permitiendo disminuir problemas asociados a iluminación, desenfoque o ruido presentes en fotografías tomadas por el usuario.
+
+Por otra parte, los riesgos asociados al análisis ortográfico mediante NLP serán mitigados mediante pruebas de validación contextual y revisión de resultados generados por el modelo, con el propósito de disminuir falsos positivos o sugerencias incorrectas durante el procesamiento del texto.
+
+Respecto a la seguridad de la información, se consideran mecanismos de autenticación mediante JWT, cifrado de contraseñas y control de acceso por roles para reducir riesgos relacionados con accesos no autorizados o exposición de datos almacenados en la plataforma.
+
+Finalmente, para disminuir riesgos relacionados con la experiencia de usuario, se contempla la realización de pruebas de usabilidad orientadas a estudiantes de educación primaria, permitiendo identificar posibles problemas de interacción y mejorar la accesibilidad de la aplicación.
