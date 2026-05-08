@@ -9,3 +9,6 @@
 *.blg
 *.fdb_latexmk
 *.pdf
+*.fls
+*.nav
+*.snm
