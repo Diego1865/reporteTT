@@ -1,0 +1,46 @@
+\subsection{Diseño del Conjunto de Datos y Estrategia de Entrenamiento OCR}
+
+Con base en el análisis de requerimientos y las brechas identificadas en la selección de conjuntos de datos (Sección 3.9), este apartado detalla el diseño de la estrategia para la consolidación, preprocesamiento y aumentación de datos. El objetivo es estructurar un corpus de entrenamiento robusto que permita ajustar el modelo base (Tesseract \texttt{spa.traineddata}) a las particularidades de la escritura manuscrita infantil en letra de molde.
+
+\subsubsection{Integración y Fusión de Datasets}
+
+Para resolver la falta de un conjunto de datos único que cumpla con todos los criterios, se diseñó un pipeline de fusión de los datasets primario y complementario. 
+
+1. \textbf{Mapeo de Clases Compartidas:} Se extraen las 52 clases del alfabeto latino básico (A-Z, a-z) del dataset EMNIST Balanced. Este subconjunto aporta un volumen masivo de variabilidad morfológica.
+
+2. \textbf{Inyección de Caracteres Específicos:} Se incorporan las clases correspondientes a la \textit{ñ}, \textit{Ñ} y las vocales acentuadas (\textit{á, é, í, ó, ú}) provenientes del dataset Kaggle de Letras del Alfabeto Español.
+
+3. \textbf{Balanceo de Clases:} Dado que el volumen de EMNIST supera significativamente al de Kaggle, se aplica una técnica de submuestreo (undersampling) sobre EMNIST y un sobremuestreo (oversampling) mediante aumentación sintética sobre el dataset de Kaggle, buscando estabilizar la distribución de clases en un mínimo de 2,000 muestras por carácter.
+
+\subsubsection{Estrategia de Aumentación de Datos (Data Augmentation)}
+
+La brecha principal detectada en la Sección 3.9 fue la ausencia de muestras reales de escritura infantil. Para compensar esta deficiencia y emular las irregularidades típicas de niños de tercer y cuarto grado, se aplica una capa de transformaciones estocásticas al conjunto consolidado antes de la fase de entrenamiento (fine-tuning).
+
+Las transformaciones seleccionadas se dividen en cuatro categorías:
+\begin{itemize}
+    \item \textbf{Deformación Elástica (Elastic Distortions):} Simula la inestabilidad motriz y el temblor en el trazo. Se implementa alterando localmente los píxeles mediante un campo de desplazamiento suavizado con un filtro gaussiano.
+    \item \textbf{Alteración de Geometría:} Incluye rotaciones aleatorias en un rango de $[-15^\circ, 15^\circ]$ y variaciones de escala anisótropas para emular inconsistencias en el tamaño y la inclinación de las letras.
+    \item \textbf{Variabilidad de Grosor:} Uso de operaciones morfológicas (dilatación y erosión con kernels de $2\times2$ y $3\times3$) para simular variaciones en la presión del lápiz sobre el papel.
+    \item \textbf{Inyección de Ruido de Fondo:} Adición de ruido sal y pimienta, y artefactos visuales de baja intensidad para robustecer el modelo ante capturas fotográficas de baja calidad.
+\end{itemize}
+
+\subsubsection{Pipeline de Preprocesamiento Unificado}
+
+El diseño exige que todas las imágenes ingresadas al modelo de reconocimiento, tanto durante el entrenamiento como en la inferencia en producción, pasen por un flujo estricto de estandarización.
+
+\begin{enumerate}
+    \item \textbf{Conversión a escala de grises:} Eliminación de canales de color para reducir la dimensionalidad.
+    \item \textbf{Binarización Adaptativa:} En lugar de un umbral global, se aplica una binarización de Otsu o binarización adaptativa local para aislar el trazo del fondo, mitigando problemas de iluminación irregular.
+    \item \textbf{Normalización de Dimensiones:} Las imágenes de caracteres aislados se redimensionan a un tamaño estándar esperado por la arquitectura del motor (por ejemplo, $32\times32$ píxeles), preservando la relación de aspecto mediante relleno (padding).
+\end{enumerate}
+
+\subsubsection{Estrategia de Ajuste Fino (Fine-Tuning) y Validación Piloto}
+
+El entrenamiento del módulo OCR se estructura mediante un enfoque de aprendizaje por transferencia (Transfer Learning). Se utilizará el modelo preentrenado \texttt{spa.traineddata} de Tesseract como peso inicial. 
+
+El proceso de fine-tuning consistirá en descongelar las últimas capas del modelo para adaptarlo a la tipografía y las distorsiones sintéticas generadas, mientras que se conservan los pesos de las capas iniciales responsables de la extracción de características básicas de alto nivel.
+
+\textbf{Definición del Conjunto de Validación:}
+Para garantizar que el modelo no se sobreajuste a las deformaciones sintéticas y para validar directamente la resolución de la brecha principal (CR-07), el conjunto de prueba (Test Set) no se generará a partir de los datasets públicos. En su lugar, \textbf{se conformará exclusivamente por las muestras reales de escritura infantil recolectadas durante la prueba piloto con 25 alumnos}. 
+
+Esta decisión arquitectónica asegura que la métrica de precisión mínima del 85\% (OE-03) se mida en un entorno de producción representativo del público objetivo.
