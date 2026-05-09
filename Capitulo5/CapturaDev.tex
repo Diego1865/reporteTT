@@ -1,0 +1,275 @@
+% ============================================================
+%  5.4  Desarrollo del módulo de captura y registro de intentos
+%  Pegar a continuación de la sección 5.3 en main.tex
+% ============================================================
+
+\subsection{Desarrollo del módulo de captura y registro de intentos}
+
+En esta sección se describe la implementación del módulo de captura,
+cuya responsabilidad es obtener una imagen de la escritura del alumno
+y transmitirla al servidor para su posterior análisis. El módulo se
+concretó en dos componentes de interfaz independientes, cada uno
+diseñado para un modo de entrada diferente:
+\textit{CapturaEscritura}, que permite al alumno fotografiar un
+trabajo realizado en papel, y \textit{LienzoDigital}, que ofrece un
+lienzo interactivo para escribir directamente sobre la pantalla.
+Ambos componentes comparten el mismo contrato de comunicación con el
+\textit{backend}: una petición \texttt{POST} al endpoint
+\texttt{/api/intentos/registrar} con la imagen codificada en
+Base64 y el identificador del ejercicio asignado.
+
+% ------------------------------------------------------------
+\subsubsection{Implementación del componente \textit{CapturaEscritura}}
+% ------------------------------------------------------------
+
+El componente \textit{CapturaEscritura} atiende el caso en que el
+alumno realiza el ejercicio de forma manuscrita en papel y necesita
+digitalizar su trabajo mediante la cámara o la galería del
+dispositivo. Su implementación resuelve tres retos prácticos: la
+heterogeneidad de dispositivos (móvil versus escritorio), la
+variabilidad de calidad de las imágenes obtenidas, y la necesidad de
+ofrecer herramientas de edición básica antes del envío.
+
+\subsubsection{Detección del dispositivo y apertura de la cámara}
+
+La lógica de captura varía según el tipo de dispositivo. En
+dispositivos móviles, el sistema operativo expone una interfaz nativa
+de cámara a través del atributo \texttt{capture="environment"} del
+elemento \texttt{<input type="file">}, la cual ofrece mayor
+compatibilidad que las APIs web. En equipos de escritorio, en cambio,
+se utiliza la API \texttt{MediaDevices.getUserMedia} para abrir una
+vista de la cámara directamente dentro de la interfaz de la
+aplicación. La función \texttt{handleTomarFotoClick} encapsula esta
+bifurcación detectando el agente de usuario mediante una expresión
+regular; si el resultado es positivo activa el \texttt{<input>} nativo,
+de lo contrario solicita el stream de video con la cámara trasera como
+preferencia y una resolución ideal de 1\,280 píxeles de ancho:
+
+\begin{lstlisting}[language=Python, caption={Detección de dispositivo y apertura de cámara}, label={lst:deteccion_dispositivo}]
+const handleTomarFotoClick = () => {
+  const isMobile =
+    /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  if (isMobile) cameraInputRef.current.click();
+  else iniciarCamaraWeb();
+};
+
+const iniciarCamaraWeb = async () => {
+  if (!navigator.mediaDevices?.getUserMedia) {
+    setError(
+      'La camara no esta disponible. Usa "Subir Archivo".'
+    );
+    return;
+  }
+  try {
+    const mediaStream = await navigator.mediaDevices
+      .getUserMedia({
+        video: { facingMode: 'environment',
+                 width: { ideal: 1280 } }
+      });
+    setStream(mediaStream);
+    setMostrarCamaraWeb(true);
+  } catch {
+    setError('No se pudo acceder a la camara.');
+  }
+};
+\end{lstlisting}
+
+Cuando la vista de cámara está activa, se muestra sobre ella una
+plantilla guía (\textit{PlantillaGuia}) que delimita el área de
+encuadre recomendada. Al presionar el botón de captura, el frame
+actual del elemento \texttt{<video>} se transfiere a un canvas
+temporal mediante \texttt{drawImage} y se convierte a \textit{data URL}
+en formato JPEG. Una vez obtenida la imagen, el stream se libera
+deteniendo todas sus pistas de video, evitando así que el indicador
+de cámara del dispositivo permanezca activo.
+
+\subsubsection{Preprocesamiento y normalización de la imagen}
+
+Las imágenes capturadas o seleccionadas desde la galería pueden tener
+dimensiones y pesos muy variados. Para garantizar que el payload
+enviado al servidor sea manejable sin degradar la información útil
+para el OCR, la función \texttt{procesarArchivo} valida primero el
+tipo MIME y rechaza archivos que superen los 10\,MB, con lo que
+proporciona retroalimentación inmediata antes de iniciar cualquier
+transferencia. Si la imagen es válida, se aplica un redimensionamiento
+proporcional que limita el lado mayor a 1\,200 píxeles, y el resultado
+se recodifica como JPEG con calidad 0.8:
+
+\begin{lstlisting}[language=Python, caption={Redimensionamiento y normalización de la imagen capturada}, label={lst:redimensionamiento}]
+const procesarArchivo = (file) => {
+  if (!file.type.startsWith('image/')) {
+    setError('Solo se admiten imagenes.'); return;
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    setError('La imagen es demasiado grande. Maximo 10MB.');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onloadend = () => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let { width, height } = img;
+      const MAX = 1200;
+      if (width > height && width > MAX) {
+        height *= MAX / width; width = MAX;
+      } else if (height > MAX) {
+        width *= MAX / height; height = MAX;
+      }
+      canvas.width = width; canvas.height = height;
+      canvas.getContext('2d')
+            .drawImage(img, 0, 0, width, height);
+      setImagenPreview(canvas.toDataURL('image/jpeg', 0.8));
+    };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+};
+\end{lstlisting}
+
+\subsubsection{Herramientas de edición: rotación y recorte}
+
+Una imagen capturada con el dispositivo en orientación incorrecta o
+con exceso de contexto visual alrededor de la escritura puede afectar
+negativamente el reconocimiento OCR. Para mitigar este riesgo, el
+componente expone dos herramientas de edición que operan íntegramente
+en el cliente.
+
+\textbf{Rotación.} La función \texttt{rotarImagen} aplica una rotación
+de 90° en sentido horario intercambiando las dimensiones del canvas y
+aplicando una transformación afín sobre el contexto 2D mediante
+\texttt{ctx.translate} y \texttt{ctx.rotate(Math.PI / 2)}.
+El resultado se serializa nuevamente a JPEG y sustituye la vista
+previa actual.
+
+\textbf{Recorte interactivo.} Al activar el modo de recorte, se
+superpone sobre la imagen una región de selección con ocho manejadores
+de arrastre (cuatro esquinas y cuatro puntos medios). La lógica de
+arrastre escucha los eventos \texttt{pointermove} y \texttt{pointerup}
+sobre el objeto \texttt{window}, de modo que el desplazamiento
+continúa aunque el cursor salga momentáneamente del manejador. El
+estado de la selección se almacena en coordenadas relativas al
+elemento \texttt{<img>} renderizado; al confirmar el recorte, dichas
+coordenadas se escalan a las dimensiones naturales de la imagen
+mediante los factores \texttt{naturalWidth\,/\,clientWidth} y
+\texttt{naturalHeight\,/\,clientHeight}, garantizando precisión
+independientemente del tamaño de visualización.
+
+\subsubsection{Envío del intento al servidor}
+
+Una vez satisfecha con la imagen, el alumno la envía pulsando el botón
+de confirmación. El componente recupera el token JWT almacenado en
+\texttt{localStorage}, construye el cuerpo de la petición con el
+identificador del ejercicio y la imagen en formato \textit{data URL},
+y realiza la solicitud \texttt{POST} al endpoint de registro. Ante
+una respuesta exitosa se limpia el estado del formulario y se invoca
+el \textit{callback} \texttt{alTerminar}, que notifica al componente
+padre para que muestre la confirmación o navegue a la pantalla de
+resultados.
+
+% ------------------------------------------------------------
+\subsubsection{Implementación del componente \textit{LienzoDigital}}
+% ------------------------------------------------------------
+
+El componente \textit{LienzoDigital} ofrece un lienzo de dibujo basado
+en el elemento \texttt{<canvas>} de HTML5 para que el alumno escriba
+directamente sobre la pantalla con ratón o con el dedo en dispositivos
+táctiles. Incluye herramientas de lápiz y goma con grosor ajustable,
+un mecanismo de deshacer por historial de estados, y un modo de
+pantalla completa que amplía el área de trabajo.
+
+\subsubsection{Inicialización y ciclo de dibujo}
+
+El canvas se dimensiona al montarse el componente para que ocupe el
+área disponible de su elemento padre; esta inicialización se repite
+cada vez que el modo de pantalla completa cambia, garantizando que
+el área de dibujo llene el contenedor sin deformaciones. Los atributos
+\texttt{lineCap} y \texttt{lineJoin} se fijan en \texttt{'round'} para
+suavizar extremos y uniones de cada trazo, produciendo una apariencia
+más cercana a la escritura real.
+
+Para garantizar compatibilidad táctil, la función
+\texttt{obtenerCoordenadas} extrae la posición del puntero desde
+\texttt{e.touches[0]} en eventos táctiles o desde
+\texttt{e.clientX} / \texttt{e.clientY} en eventos de ratón. Las
+coordenadas resultantes se escalan con el factor
+\texttt{canvas.width\,/\,rect.width}, que compensa la diferencia entre
+el tamaño lógico del canvas y el tamaño visual renderizado por CSS,
+evitando desplazamientos del trazo respecto al punto de contacto.
+
+La diferenciación entre lápiz y goma se realiza a través de la
+propiedad \texttt{globalCompositeOperation} del contexto 2D. Con el
+lápiz activo se usa \texttt{'source-over'}, que superpone nuevos
+píxeles sobre los existentes; con la goma se usa
+\texttt{'destination-out'}, que elimina los píxeles del canvas de
+forma no destructiva sin reemplazarlos por ningún color de fondo:
+
+\begin{lstlisting}[language=Python, caption={Configuración de la operación de composición según herramienta activa}, label={lst:composicion}]
+if (esBorrador) {
+  contextRef.current.globalCompositeOperation = 'destination-out';
+  contextRef.current.lineWidth = grosurGoma;
+} else {
+  contextRef.current.globalCompositeOperation = 'source-over';
+  contextRef.current.strokeStyle = 'black';
+  contextRef.current.lineWidth   = grosurLapiz;
+}
+\end{lstlisting}
+
+Al finalizar cada trazo, la operación de composición se restaura a
+\texttt{'source-over'} y se guarda el estado actual del canvas.
+
+\subsubsection{Historial de estados, pantalla completa y envío}
+
+\textbf{Deshacer.} Cada vez que el alumno levanta el lápiz o el dedo,
+el contenido completo del canvas se serializa como \textit{data URL}
+y se agrega a un arreglo de estados. La acción de deshacer extrae el
+último elemento de ese arreglo y restaura el estado anterior
+redibujando la imagen serializada sobre el canvas; una condición de
+guarda impide retroceder más allá del estado inicial (lienzo en blanco).
+
+\textbf{Modo de pantalla completa.} El lienzo puede expandirse a las
+dimensiones de la ventana para ofrecer mayor área de escritura. Dado
+que redimensionar el canvas borra su contenido, el sistema verifica
+si existen trazos en el historial antes de aplicar el cambio; de ser
+así, muestra un diálogo de confirmación que advierte al alumno sobre
+la pérdida del contenido. Una vez confirmado, un \texttt{useEffect}
+dependiente del estado de pantalla completa reinicializa el canvas con
+un retardo de 150\,ms para que React aplique los cambios de CSS antes
+de releer las dimensiones del contenedor.
+
+\textbf{Exportación y envío.} Al concluir, el lienzo se convierte a 
+PNG mediante \texttt{canvas.toDataURL(}\allowbreak\texttt{'image/png')} 
+y se envía al mismo endpoint de registro de intentos, siguiendo el mismo 
+esquema de autenticación por token JWT que \textit{CapturaEscritura}. 
+A diferencia de este último, que presenta los errores de forma persistente, 
+\textit{LienzoDigital} utiliza notificaciones temporales que desaparecen 
+automáticamente a los cuatro segundos para no obstruir el área de trabajo 
+de forma prolongada.
+
+% ------------------------------------------------------------
+\subsection{Contrato compartido con el \textit{backend}}
+% ------------------------------------------------------------
+
+Ambos componentes del módulo de captura convergen en el mismo
+contrato de comunicación hacia el servidor. El cuerpo de la petición
+es un objeto JSON con dos campos: \texttt{id\_ejercicio\_tutor},
+que identifica la asignación a la que corresponde el intento, e
+\texttt{imagen\_codificada}, que contiene la imagen serializada como
+\textit{data URL}. La cabecera \texttt{Authorization} transporta el
+token JWT para que el middleware del servidor pueda identificar al
+alumno y verificar que el ejercicio le fue asignado antes de persistir
+el intento:
+
+\begin{lstlisting}[language=JSON, caption={Estructura del cuerpo de la petición POST al endpoint de registro de intentos}, label={lst:payload_intento}]
+{
+  "id_ejercicio_tutor": 42,
+  "imagen_codificada":
+    "data:image/jpeg;base64,/9j/4AAQSkZJRgAB..."
+}
+\end{lstlisting}
+
+Esta uniformidad del contrato permite que el backend procese los
+intentos sin distinguir el origen de la imagen (fotografía o lienzo
+digital), simplificando la lógica del endpoint de registro y
+favoreciendo la extensibilidad del módulo ante futuros modos de
+captura adicionales.
