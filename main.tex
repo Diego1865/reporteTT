@@ -101,6 +101,15 @@
     showstringspaces=false
 }
 
+\lstdefinelanguage{JavaScript}{
+  keywords={const, let, var, async, await, return, if, else},
+  sensitive=true,
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]',
+  morestring=[b]"
+}
+
 % Formato de secciones igual que en Word
 \titleformat{\section}
     {\large\bfseries}{\thesection}{1em}{}
