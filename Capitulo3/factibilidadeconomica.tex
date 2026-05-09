@@ -1,76 +1,237 @@
-\subsection{Factibilidad económica}
-
-Para fundamentar cuantitativamente la viabilidad económica del proyecto, se aplicó el modelo COCOMO I Básico (Constructive Cost Model), ampliamente utilizado en la estimación de proyectos de software a partir del tamaño del código fuente. Este modelo permite determinar el esfuerzo requerido, el tiempo de desarrollo y el costo comercial equivalente del sistema, proporcionando una base objetiva para evaluar si el proyecto es ejecutable con los recursos disponibles.
-
-\subsubsection{Clasificación del proyecto}
-
-De acuerdo con la taxonomía de COCOMO I, los proyectos se clasifican en tres modos según la complejidad del equipo y del entorno de desarrollo: orgánico, semiacoplado e integrado. El presente proyecto se clasifica como orgánico, dado que el equipo de desarrollo es pequeño (tres integrantes), existe familiaridad previa con las tecnologías utilizadas, y los requerimientos no presentan rigidez crítica. Este modo corresponde a sistemas de tamaño moderado desarrollados en entornos académicos o de investigación.
-
-\subsubsection{Estimación de líneas de código}
-
-Como entrada principal del modelo, se realizó una estimación de las Líneas de Código Fuente (LOC) por módulo del sistema. La estimación se elaboró con base en la arquitectura y los requerimientos funcionales definidos en las secciones 3.4, 3.5 y 3.7, considerando el stack tecnológico seleccionado (React, FastAPI, SQL Server). Los resultados se presentan en la Tabla \ref{tab:estimacion_loc}.
-\clearpage
-
+\subsection{Factibilidad}
+ 
+El estudio de factibilidad es un instrumento que sirve para orientar la toma de decisiones en la evaluación de un proyecto. Se formula con base en información que tiene la menor incertidumbre posible para medir las posibilidades de éxito o fracaso, apoyándose en él se tomará la decisión de proceder o no con su implementación.
+ 
+% ─────────────────────────────────────────────
+\subsubsection{Factibilidad Técnica}
+% ─────────────────────────────────────────────
+ 
+La factibilidad técnica estudia la posibilidad tecnológica para que el proyecto pueda llevarse a cabo satisfactoriamente con el menor riesgo posible. Las herramientas tecnológicas se dividen en software y hardware.
+ 
+\paragraph{Software}
+ 
+El software es una parte esencial en la elaboración del proyecto, ya que con este se desarrollará la aplicación web y el servidor. Todas las herramientas seleccionadas tienen costo cero para el equipo, incluyendo GitHub en su plan gratuito, el cual cubre repositorios privados ilimitados, colaboradores ilimitados y 2{,}000 minutos mensuales de CI/CD, suficientes para un equipo de tres personas.
+ 
 \begin{table}[H]
 \centering
-\caption{Estimación de líneas de código por módulo del sistema.}
-\label{tab:estimacion_loc}
-\renewcommand{\arraystretch}{1.5} 
-\begin{tabular}{|>{\centering\arraybackslash}m{4.5cm}|>{\centering\arraybackslash}m{7cm}|>{\centering\arraybackslash}m{3.5cm}|}
+\caption{Herramientas de software para el desarrollo del proyecto.}
+\label{tab:software}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|l|X|l|r|r|}
 \hline
-\textbf{Módulo} & \textbf{Componentes principales} & \textbf{LOC estimadas} \\ \hline
-Front-End (React) & Autenticación, panel tutor, panel alumno, lienzo digital, visualización de resultados & 3,500 \\ \hline
-Back-End (FastAPI) & Endpoints REST, lógica de negocio, integración OCR/NLP, seguridad JWT & 3,000 \\ \hline
-Módulo OCR & Preprocesamiento de imagen, integración del modelo, extracción de métricas caligráficas & 1,500 \\ \hline
-Módulo NLP & Tokenización, análisis ortográfico, generación de sugerencias & 1,200 \\ \hline
-Base de datos (SQL Server) & DDL (tablas, relaciones, restricciones), procedimientos almacenados & 800 \\ \hline
-\multicolumn{2}{|c|}{\textbf{Total}} & 10,000 \\ \hline
-\end{tabular}
+\textbf{Herramienta} & \textbf{Uso en el proyecto} & \textbf{Tipo} & \textbf{Costo/mes} & \textbf{11 meses} \\
+\hline
+React / Next.js   & Front-End: panel tutor, panel alumno, lienzo digital  & Libre & \$0 & N/A \\
+\hline
+FastAPI (Python)  & Back-End: endpoints REST, lógica de negocio, JWT      & Libre & \$0 & N/A \\
+\hline
+SQL Server Express & Base de datos: tablas, triggers, vistas, restricciones & Libre & \$0 & N/A \\
+\hline
+Docker            & Contenedorización y despliegue                        & Libre & \$0 & N/A \\
+\hline
+VS Code           & Editor de código fuente                               & Libre & \$0 & N/A \\
+\hline
+Figma             & Diseño de interfaces y prototipos UI/UX               & Libre & \$0 & N/A \\
+\hline
+Postman           & Pruebas y documentación de APIs REST                  & Libre & \$0 & N/A \\
+\hline
+GitHub (Free)     & Control de versiones, repos privados, CI/CD           & Libre & \$0 & N/A \\
+\hline
+GCP / AWS         & Hosting: prueba piloto en tier gratuito               & Libre & \$0 & N/A \\
+\hline
+\multicolumn{3}{|r|}{\textbf{Total}} & \multicolumn{2}{r|}{\textbf{\$0 MXN}} \\
+\hline
+\end{tabularx}
 \end{table}
-
-\subsubsection{Aplicación del modelo COCOMO I Básico}
-
-A partir del total estimado de 10 KLOC, se aplicaron las fórmulas del modelo COCOMO I en modo orgánico para calcular el esfuerzo, el tiempo de desarrollo y el número de personas requeridas.
-Las fórmulas utilizadas son las siguientes:
-
-Las fórmulas utilizadas son las siguientes:
-
-\begin{itemize}
-    \item[a)] Esfuerzo (E):
-    \[ E = 2.4 \times (KLOC)^{1.05} \]
-    
-    \item[b)] Tiempo de desarrollo (D):
-    \[ D = 2.5 \times (E)^{0.38} \]
-    
-    \item[c)] Personas requeridas (P):
-    \[ P = \frac{E}{D} \]
-\end{itemize}
-
-Los resultados de la aplicación del modelo se presentan en la Tabla \ref{tab:cocomo_resultados}.
-
+ 
+\paragraph{Hardware}
+ 
+El hardware es fundamental para el desarrollo del proyecto. A continuación se presentan las especificaciones de los equipos de cómputo de cada integrante del equipo, los cuales serán utilizados durante todo el desarrollo.
+ 
 \begin{table}[H]
 \centering
-\caption{Resultados del modelo COCOMO I Básico aplicado al sistema.}
-\label{tab:cocomo_resultados}
-\renewcommand{\arraystretch}{1.5}
-\begin{tabular}{|>{\centering\arraybackslash}m{4.5cm}|>{\centering\arraybackslash}m{4.5cm}|>{\centering\arraybackslash}m{4.5cm}|}
+\caption{Características de los equipos de cómputo y dispositivos de prueba.}
+\label{tab:hardware}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|X|X|c|c|c|r|}
 \hline
-\textbf{Parámetro} & \textbf{Fórmula aplicada} & \textbf{Resultado} \\ \hline
-Tamaño del proyecto & --- & 10 KLOC \\ \hline
-Esfuerzo (E) & $2.4 \times (10)^{1.05}$ & 26.93 personas-mes \\ \hline
-Tiempo de desarrollo (D) & $2.5 \times (26.93)^{0.38}$ & 8.74 meses \\ \hline
-Personas requeridas (P) & $\displaystyle \frac{26.93}{8.74}$ & $3.08 \approx 3$ personas \\ \hline
-\end{tabular}
+\textbf{Equipo} & \textbf{Procesador} & \textbf{RAM} & \textbf{Almac.} & \textbf{SO} & \textbf{Valor ref. (MXN)} \\
+\hline
+Lenovo IdeaPad  & AMD Ryzen 7 & 16 GB & 512 GB SSD & Arch Linux & \$18,000 \\
+\hline
+MacBook Air     & Apple M1 & 8 GB & 256 GB SSD & macOS & \$28,000 \\
+\hline
+HP Spectre x360 & Intel Core i7 & 16 GB & 512 GB SSD & Windows 11 & \$25,000 \\
+\hline
+iPad / Tablets  & N/A & N/A & N/A & iPadOS/Android & \$10,000 \\
+\hline
+\multicolumn{5}{|r|}{\textbf{Total (valor de referencia — ya en posesión del equipo)}} & \textbf{\$81,000} \\
+\hline
+\end{tabularx}
 \end{table}
-
-\subsubsection{Estimación del costo comercial equivalente}
-
-Para determinar el costo que representaría el desarrollo del sistema en un entorno comercial, se utilizó como referencia el salario promedio mensual de un desarrollador de software de nivel junior a intermedio en México para el año 2025, estimado en \$20,000 MXN según datos del mercado laboral nacional \cite{occmundial2025salarios}.
-
-El costo comercial equivalente se calcula de la siguiente manera:
-
-\[ Costo_{comercial} = E \times Salario_{mensual} = 26.93 \times \$20,000 = \$538,000 \ MXN \]
-
-Este valor representa el costo hipotético de contratar a un equipo de desarrolladores externos para construir un sistema equivalente, y sirve como referencia para evaluar el ahorro generado por el desarrollo académico.
-
-En un escenario de despliegue productivo futuro, mediante contenedores Docker en plataformas como Google Cloud Platform o Amazon Web Services, el costo de infraestructura mensual estimado oscilaría entre $50 y $100 USD según el nivel de tráfico, lo que no compromete la factibilidad del presente proyecto dado que la prueba piloto se mantiene dentro del tier gratuito disponible. \cite{google2025cloudrun, refx14}
+ 
+Dadas las características de las herramientas tanto en software como en hardware, se puede observar que el proyecto puede llevarse a cabo correctamente. El stack tecnológico es coherente y moderno: React/Next.js cubre el front-end educativo, FastAPI con Python concentra la lógica de inteligencia artificial (OCR y NLP), y SQL Server garantiza integridad referencial con soporte a triggers y vistas. El Ryzen 7 y el M1 son los equipos más capaces para ejecutar los modelos localmente durante el desarrollo.
+ 
+% ─────────────────────────────────────────────
+\subsubsection{Factibilidad Operativa}
+% ─────────────────────────────────────────────
+ 
+La factibilidad operativa comprende una determinación de la probabilidad para que un proyecto se realice o funcione como se supone, considerando si se cuenta con el personal capacitado y los recursos humanos necesarios. Al realizar el análisis se calcula tanto el tiempo de esfuerzo como las horas dedicadas al sistema.
+ 
+\begin{table}[H]
+\centering
+\caption{Resumen de días hábiles para el desarrollo del proyecto.}
+\label{tab:dias}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|l|r|r|r|r|r|r|}
+\hline
+\textbf{Mes} & \textbf{Días} & \textbf{Fin de semana} & \textbf{Días no laborales} & \textbf{Días hábiles} & \textbf{Hrs/día} & \textbf{Hrs totales} \\
+\hline
+Enero      & 31 & 9 & 1 & 21 & 4 & 84  \\
+\hline
+Febrero    & 28 & 8 & 1 & 19 & 4 & 76  \\
+\hline
+Marzo      & 31 & 8 & 1 & 22 & 4 & 88  \\
+\hline
+Abril      & 30 & 8 & 2 & 20 & 4 & 80  \\
+\hline
+Mayo       & 31 & 9 & 1 & 21 & 4 & 84  \\
+\hline
+Junio      & 30 & 8 & 0 & 22 & 4 & 88  \\
+\hline
+Julio      & 31 & 9 & 0 & 22 & 4 & 88  \\
+\hline
+Agosto     & 31 & 9 & 0 & 22 & 4 & 88  \\
+\hline
+Septiembre & 30 & 8 & 1 & 21 & 4 & 84  \\
+\hline
+\textbf{Total} & & & & \textbf{190} & & \textbf{760} \\
+\hline
+\end{tabularx}
+\end{table}
+ 
+Es necesaria la definición de roles en el desarrollo del proyecto para llevar una organización eficiente donde cada integrante desempeñe sus actividades sin generar retrasos. Dado que el equipo de trabajo cuenta con tres personas, es necesario que los integrantes desempeñen más de un rol a lo largo del proyecto.
+ 
+\begin{table}[H]
+\centering
+\caption{Roles de trabajo del proyecto.}
+\label{tab:roles}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|l|X|r|}
+\hline
+\textbf{Rol} & \textbf{Descripción} & \textbf{Personas necesarias} \\
+\hline
+Líder de proyecto       & Encargado de la coordinación y planeación del proyecto.                                          & 1 \\
+\hline
+Analista / Arquitecto   & Realiza el análisis e diseño de la arquitectura del sistema y sus módulos.                       & 1 \\
+\hline
+Desarrollador Front-End & Desarrolla la interfaz de usuario con React/Next.js: paneles de tutor y alumno, lienzo digital.  & 1 \\
+\hline
+Desarrollador Back-End  & Implementa los endpoints REST con FastAPI, lógica de negocio, autenticación JWT y BCrypt.        & 1 \\
+\hline
+Especialista IA         & Integra y ajusta los módulos de OCR y NLP para análisis caligráfico y corrección ortográfica.    & 1 \\
+\hline
+Tester / QA             & Realiza las pruebas funcionales y de integración para validar el correcto funcionamiento.        & 1 \\
+\hline
+\end{tabularx}
+\end{table}
+ 
+A continuación se muestra la distribución del porcentaje de participación para cada rol y el promedio de días laborales correspondiente, tomando como base 190 días hábiles de desarrollo.
+ 
+\begin{table}[H]
+\centering
+\caption{Porcentaje de participación de cada rol del proyecto.}
+\label{tab:participacion}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|X|r|r|}
+\hline
+\textbf{Rol} & \textbf{Porcentaje de participación} & \textbf{Días laborales} \\
+\hline
+Líder de proyecto       & 15\% & 28.5 días \\
+\hline
+Analista / Arquitecto   & 15\% & 28.5 días \\
+\hline
+Desarrollador Front-End & 20\% & 38.0 días \\
+\hline
+Desarrollador Back-End  & 20\% & 38.0 días \\
+\hline
+Especialista IA (OCR + NLP) & 20\% & 38.0 días \\
+\hline
+Tester / QA             & 10\% & 19.0 días \\
+\hline
+\end{tabularx}
+\end{table}
+ 
+La factibilidad operativa del proyecto se muestra positiva. Los días totales calculados son una estimación considerando una dedicación de 4 horas diarias promedio por integrante. Consideramos que el tiempo para el desarrollo tiene suficiente holgura siempre y cuando se sigan las actividades y los calendarios acordados, y se priorice la integración temprana entre módulos para detectar problemas antes de la prueba piloto con 25 alumnos.
+ 
+% ─────────────────────────────────────────────
+\subsubsection{Factibilidad Económica}
+% ─────────────────────────────────────────────
+ 
+Se toma en consideración el capital disponible para invertir en el desarrollo del proyecto. Se determina el presupuesto de costos de los recursos técnicos, humanos y materiales tanto para el desarrollo como para la implantación. El sueldo de referencia utilizado es de \$20{,}000 MXN mensuales por desarrollador de nivel junior a intermedio en México para el año 2025 \cite{occmundial2025salarios}.
+ 
+En primer lugar, se presentan los costos de las herramientas de software, los cuales son en su totalidad de costo cero para el equipo de desarrollo.
+ 
+\begin{table}[H]
+\centering
+\caption{Estimación de costos de herramientas de software.}
+\label{tab:costos-software}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|X|r|r|}
+\hline
+\textbf{Herramienta} & \textbf{Costo mensual (MXN)} & \textbf{Costo por 9 meses (MXN)} \\
+\hline
+React / Next.js, FastAPI, SQL Server Express, Docker, VS Code, Figma, Postman, GitHub Free, GCP/AWS (tier gratuito) & \$0 & \$0 \\
+\hline
+\textbf{Total} & \textbf{\$0} & \textbf{\$0} \\
+\hline
+\end{tabularx}
+\end{table}
+ 
+A continuación se presentan los costos de los servicios necesarios para llevar a cabo el proyecto.
+ 
+\begin{table}[H]
+\centering
+\caption{Costos de servicios.}
+\label{tab:servicios}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|X|r|r|}
+\hline
+\textbf{Servicio} & \textbf{Costo por mes (MXN)} & \textbf{Costo por 9 meses (MXN)} \\
+\hline
+Electricidad e internet (3 integrantes × \$800) & \$2{,}400 & \$21{,}600 \\
+\hline
+Infraestructura en nube (GCP / AWS — tier gratuito en piloto) & \$0 & \$0 \\
+\hline
+\textbf{Total} & \textbf{\$2{,}400} & \textbf{\$21{,}600} \\
+\hline
+\end{tabularx}
+\end{table}
+ 
+Finalmente, se presenta el resumen de costos totales del proyecto.
+ 
+\begin{table}[H]
+\centering
+\caption{Resumen de costos totales del proyecto.}
+\label{tab:costos-total}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\textwidth}{|X|r|}
+\hline
+\textbf{Concepto} & \textbf{Costo total (MXN)} \\
+\hline
+Sueldos — costo comercial equivalente (3 personas × 9 meses × \$20{,}000) & \$540{,}000 \\
+\hline
+Equipo de cómputo (valor de referencia — ya en posesión del equipo)        & \$61{,}000 \\
+\hline
+Servicios (electricidad e internet, 9 meses)                               & \$21{,}600 \\
+\hline
+Herramientas de software                                                   & \$0        \\
+\hline
+Infraestructura en nube                                                    & \$0        \\
+\hline
+\textbf{Total}                                                             & \textbf{\$622{,}600} \\
+\hline
+\end{tabularx}
+\end{table}
+ 
+Con base en la tabla anterior, se puede concluir que el costo comercial equivalente del proyecto asciende a \$622{,}600 MXN. Sin embargo, al ser este un trabajo terminal, los sueldos (que representan el 86.7\% del total) son absorbidos por el propio equipo como parte de su formación académica, y el hardware ya se encuentra en posesión de los integrantes. El desembolso directo real del equipo se limita a los servicios básicos de electricidad e internet, estimados en \$21{,}600 MXN durante los 9 meses de desarrollo, siendo el resto de las herramientas completamente gratuitas.

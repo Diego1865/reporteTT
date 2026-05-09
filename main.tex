@@ -4,7 +4,9 @@
 \usepackage[spanish]{babel}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage{geometry}
+\usepackage[letterpaper, left=3cm, right=2cm, top=2cm, bottom=2cm]{geometry}
+\usepackage{mathptmx} 
+
 \usepackage{graphicx}
 \usepackage{listings}
 \usepackage{xcolor}
@@ -17,15 +19,13 @@
 \usepackage{seqsplit}
 \usepackage{float}
 \usepackage{multirow}
-\usepackage{graphicx}
 \usepackage{caption}
 \usepackage{amssymb}
-\usepackage[utf8]{inputenc}
 \usepackage{array}
 \usepackage{ltablex}
 \usepackage{pdflscape}
 \usepackage[table]{xcolor}
-\usepackage{multirow}
+
 \definecolor{RiskGreen}{RGB}{92,184,92}
 \definecolor{RiskYellow}{RGB}{255,193,7}
 \definecolor{RiskOrange}{RGB}{255,140,0}
@@ -33,8 +33,9 @@
 \keepXColumns
 
 \newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+
+
 %------------------ CONFIGURACIÓN ------------------
-\geometry{a4paper, margin=2.5cm}
 \lstset{
     backgroundcolor=\color{gray!10},
     basicstyle=\ttfamily\small,
@@ -47,7 +48,6 @@
 \colorlet{punct}{red!60!black}
 \definecolor{delim}{RGB}{20,105,176}
 \colorlet{numb}{magenta!60!black}
-
 
 \lstdefinelanguage{JSON}{
     basicstyle=\normalfont\ttfamily\small,
@@ -112,20 +112,16 @@
 \setlength{\parskip}{6pt}
 \setlength{\parindent}{0pt}
 
-% 
-
 \addto\captionsspanish{
     \renewcommand{\tablename}{Tabla}
 }
 \captionsetup[longtable]{name=Tabla}
 
 \AtBeginDocument{
-    % Define la numeración como Sección.Número (ej. 5.1)
     \renewcommand{\thelstlisting}{\thesection.\arabic{lstlisting}}
 }
 
 \renewcommand{\lstlistingname}{Código}
-
 %------------------ DOCUMENTO ------------------
 \begin{document}
 \onehalfspacing
@@ -142,7 +138,7 @@
     \begin{minipage}[c]{0.58\textwidth}
         \centering
         {\large\bfseries INSTITUTO POLITÉCNICO NACIONAL}\\[0.3em]
-        {\large\itshape ESCUELA SUPERIOR DE CÓMPUTO}
+        {\large\bfseries ESCUELA SUPERIOR DE CÓMPUTO}
     \end{minipage}
     \hfill
     \begin{minipage}[c]{0.18\textwidth}
@@ -150,33 +146,39 @@
         \includegraphics[width=\linewidth]{Imagenes/escom.png}
     \end{minipage}
 
-    \vspace{4cm}
+    \vspace{1.5cm}
 
-    {\large\itshape Trabajo Terminal}\\[0.8em]
+    {\LARGE\bfseries ESCOM}\\[1.5em]
 
-    {\large\bfseries
+    {\large\itshape Trabajo Terminal}\\[0.5em]
+    {\large 2026-B172}
+
+    \vspace{1.5cm}
+
+    {\Large\bfseries
         ``Aplicación Web para la práctica de escritura a mano y\\
         detección automática de errores ortográficos con IA en tercer y\\
         cuarto grado de educación primaria.''
     }
 
-    \vspace{4cm}
+    \vspace{2.0cm}
 
     {\large\itshape Presentan}\\[0.5em]
-    {\large
-        Ayala Chacón David\\[0.2em]
-        Barragán Osorio Diego José María\\[0.2em]
-        Giles Macias Alexis
+    % Los nombres deben estar alfabéticamente por apellido
+    {\normalsize
+        David Ayala Chacón\\[0.2em]
+        Diego José María Barragán Osorio\\[0.2em]
+        Alexis Giles Macias
     }
 
-    \vspace{2.5cm}
+    \vspace{2.0cm}
 
     {\large\itshape Director}\\[0.5em]
-    {\large Enrique Torres González}
+    {\normalsize Dr. Enrique Torres González} % Asegúrate de agregar el grado (Ej. M. en C.)
 
     \vfill
 
-    {\large CDMX a \today}
+    {\normalsize CDMX, \today}
 
 \end{titlepage}
 
@@ -184,7 +186,7 @@
 
 %------------------ RESUMEN ------------------
 \newpage
-\vspace*{3cm}
+\vspace*{1cm}
 \section*{Resumen}
 
 Escribir de forma legible y ortográficamente correcta es una habilidad fundamental para los alumnos
@@ -227,30 +229,6 @@ sustancial.
 \renewcommand{\listfigurename}{Índice de figuras}
 \listoffigures
 
-%------------------ GLOSARIO ------------------
-\newpage
-\section*{Glosario}
-
-\begin{description}
-    \item[API REST (Representational State Transfer Application Programming Interface):] Interfaz de programación que permite la comunicación y el intercambio de datos entre diferentes aplicaciones de software a través del protocolo HTTP, siguiendo una arquitectura sin estado.
-    \item[Back-end:] Capa lógica y de acceso a datos de una aplicación web. Se encarga de procesar las peticiones del usuario, interactuar con la base de datos y ejecutar la lógica de negocio en el servidor.
-    \item[Base64:] Sistema de codificación que traduce datos binarios (como imágenes) a una cadena de texto basada en caracteres ASCII. Facilita la transmisión de medios a través de redes y su almacenamiento en bases de datos.
-    \item[Canvas (Lienzo digital):] Elemento estandarizado de HTML5 que permite la renderización dinámica de gráficos 2D y mapas de bits mediante el uso de JavaScript. En este proyecto, sirve como la superficie interactiva donde el alumno realiza el trazo manuscrito.
-    \item[CNN (Convolutional Neural Network / Red Neuronal Convolucional):] Arquitectura de aprendizaje profundo especializado en el procesamiento de datos con estructura de cuadrícula, como las imágenes, siendo fundamental para la extracción de características visuales en modelos OCR.
-    \item[Endpoint:] Punto final de comunicación en una API web. Representa una URL específica mediante la cual un cliente (front-end) puede acceder a los recursos o funciones del servidor (por ejemplo, guardar un intento o consultar métricas).
-    \item[Front-end:] Capa de presentación o interfaz gráfica de usuario de una aplicación. Es la parte visual con la que interactúan directamente los alumnos y tutores desde sus navegadores web.
-    \item[JSON (JavaScript Object Notation):] Formato de texto ligero y estructurado utilizado para el intercambio de datos entre el cliente y el servidor, caracterizado por ser legible tanto para humanos como para máquinas.
-    \item[JWT (JSON Web Token):] Estándar de la industria utilizado para la creación de tokens de acceso que permiten la autenticación segura y el intercambio de información verificable entre el cliente y el servidor, evitando la necesidad de mantener sesiones en memoria.
-    \item[MVC (Model-View-Controller / Modelo-Vista-Controlador):] Patrón de arquitectura de software que organiza el código separando la representación de la información (Modelo), la interfaz de usuario (Vista) y la lógica que maneja las interacciones (Controlador).
-    \item[NLP (Natural Language Processing / Procesamiento de Lenguaje Natural):] Rama de la inteligencia artificial que permite a las computadoras interpretar, analizar y manipular el lenguaje humano. En el sistema, se utiliza para evaluar la ortografía y coherencia de las palabras detectadas.
-    \item[OCR (Optical Character Recognition / Reconocimiento Óptico de Caracteres):] Tecnología de visión computacional que permite convertir imágenes que contienen texto (manuscrito, impreso o tipografiado) en formatos de texto digital procesables por un equipo informático.
-    \item[Otsu (Método de Otsu):] Algoritmo utilizado en el procesamiento de imágenes para realizar una binarización automática. Calcula el umbral óptimo para separar los píxeles de primer plano (el trazo) de los del fondo, eliminando ruido visual.
-    \item[Pangrama:] Frase o texto breve que utiliza todas (o la gran mayoría) de las letras del alfabeto de un idioma. Se emplea didácticamente para practicar el trazo general de la caligrafía.
-    \item[Payload (Carga útil):] Conjunto de datos reales y esenciales que se transmiten en el cuerpo de una petición o respuesta de red entre el cliente y el servidor, excluyendo las cabeceras de protocolo.
-    \item[Tokenización:] Proceso analítico utilizado en NLP que consiste en dividir una cadena de texto continuo en unidades semánticas más pequeñas llamadas ``tokens'' (que pueden ser palabras, caracteres o sílabas) para facilitar su evaluación sintáctica y ortográfica.
-\end{description}
-
-
 %------------------ INTRODUCCIÓN ------------------
 \newpage
 \pagenumbering{arabic}
@@ -288,6 +266,29 @@ su funcionamiento real mediante una prueba piloto que permita medir, ajustar y a
 \include{Capitulo3}
 \include{Capitulo4}
 \include{Capitulo5}
+
+%------------------ GLOSARIO ------------------
+\newpage
+\section*{Glosario}
+
+\begin{description}
+    \item[API REST (Representational State Transfer Application Programming Interface):] Interfaz de programación que permite la comunicación y el intercambio de datos entre diferentes aplicaciones de software a través del protocolo HTTP, siguiendo una arquitectura sin estado.
+    \item[Back-end:] Capa lógica y de acceso a datos de una aplicación web. Se encarga de procesar las peticiones del usuario, interactuar con la base de datos y ejecutar la lógica de negocio en el servidor.
+    \item[Base64:] Sistema de codificación que traduce datos binarios (como imágenes) a una cadena de texto basada en caracteres ASCII. Facilita la transmisión de medios a través de redes y su almacenamiento en bases de datos.
+    \item[Canvas (Lienzo digital):] Elemento estandarizado de HTML5 que permite la renderización dinámica de gráficos 2D y mapas de bits mediante el uso de JavaScript. En este proyecto, sirve como la superficie interactiva donde el alumno realiza el trazo manuscrito.
+    \item[CNN (Convolutional Neural Network / Red Neuronal Convolucional):] Arquitectura de aprendizaje profundo especializado en el procesamiento de datos con estructura de cuadrícula, como las imágenes, siendo fundamental para la extracción de características visuales en modelos OCR.
+    \item[Endpoint:] Punto final de comunicación en una API web. Representa una URL específica mediante la cual un cliente (front-end) puede acceder a los recursos o funciones del servidor (por ejemplo, guardar un intento o consultar métricas).
+    \item[Front-end:] Capa de presentación o interfaz gráfica de usuario de una aplicación. Es la parte visual con la que interactúan directamente los alumnos y tutores desde sus navegadores web.
+    \item[JSON (JavaScript Object Notation):] Formato de texto ligero y estructurado utilizado para el intercambio de datos entre el cliente y el servidor, caracterizado por ser legible tanto para humanos como para máquinas.
+    \item[JWT (JSON Web Token):] Estándar de la industria utilizado para la creación de tokens de acceso que permiten la autenticación segura y el intercambio de información verificable entre el cliente y el servidor, evitando la necesidad de mantener sesiones en memoria.
+    \item[MVC (Model-View-Controller / Modelo-Vista-Controlador):] Patrón de arquitectura de software que organiza el código separando la representación de la información (Modelo), la interfaz de usuario (Vista) y la lógica que maneja las interacciones (Controlador).
+    \item[NLP (Natural Language Processing / Procesamiento de Lenguaje Natural):] Rama de la inteligencia artificial que permite a las computadoras interpretar, analizar y manipular el lenguaje humano. En el sistema, se utiliza para evaluar la ortografía y coherencia de las palabras detectadas.
+    \item[OCR (Optical Character Recognition / Reconocimiento Óptico de Caracteres):] Tecnología de visión computacional que permite convertir imágenes que contienen texto (manuscrito, impreso o tipografiado) en formatos de texto digital procesables por un equipo informático.
+    \item[Otsu (Método de Otsu):] Algoritmo utilizado en el procesamiento de imágenes para realizar una binarización automática. Calcula el umbral óptimo para separar los píxeles de primer plano (el trazo) de los del fondo, eliminando ruido visual.
+    \item[Pangrama:] Frase o texto breve que utiliza todas (o la gran mayoría) de las letras del alfabeto de un idioma. Se emplea didácticamente para practicar el trazo general de la caligrafía.
+    \item[Payload (Carga útil):] Conjunto de datos reales y esenciales que se transmiten en el cuerpo de una petición o respuesta de red entre el cliente y el servidor, excluyendo las cabeceras de protocolo.
+    \item[Tokenización:] Proceso analítico utilizado en NLP que consiste en dividir una cadena de texto continuo en unidades semánticas más pequeñas llamadas ``tokens'' (que pueden ser palabras, caracteres o sílabas) para facilitar su evaluación sintáctica y ortográfica.
+\end{description}
 
 %------------------ REFERENCIAS ------------------
 
