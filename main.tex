@@ -10,6 +10,7 @@
 \usepackage{tcolorbox}
 \usepackage{graphicx}
 \usepackage{listings}
+\usepackage{chngcntr}
 \usepackage{xcolor}
 \usepackage[hyphens]{url}
 \usepackage[hidelinks]{hyperref}
@@ -117,10 +118,6 @@
     \renewcommand{\tablename}{Tabla}
 }
 \captionsetup[longtable]{name=Tabla}
-
-\AtBeginDocument{
-    \renewcommand{\thelstlisting}{\thesection.\arabic{lstlisting}}
-}
 
 \renewcommand{\lstlistingname}{Código}
 %------------------ DOCUMENTO ------------------

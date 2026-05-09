@@ -138,7 +138,11 @@ A continuación se describen las restricciones implementadas agrupadas por categ
 
 Se establecieron restricciones \texttt{UNIQUE} en los campos que deben identificar de forma exclusiva a cada registro dentro del sistema, evitando duplicados que comprometan la integridad de la información.
 
-\begin{lstlisting}[language=SQL, caption={Restricciones de unicidad en campos críticos}]
+\begin{lstlisting}[
+    language=SQL,
+    caption={Restricciones de unicidad en campos críticos},
+    label={lst:restricciones_unicidad}
+]
 CONSTRAINT UQ_Usuarios_usuario 
     UNIQUE (usuario),
 
@@ -429,3 +433,4 @@ GO
 \end{lstlisting}
 
 \input{Capitulo5/AuthDev.tex}
+\input{Capitulo5/EjeDev.tex}

@@ -1,0 +1,131 @@
+\subsection{Desarrollo del módulo de ejercicios}
+
+En esta sección se describe el desarrollo del módulo de ejercicios, 
+el cual gestiona la consulta del catálogo, la asignación de ejercicios 
+a los alumnos y el monitoreo de su progreso. Se implementaron 
+funcionalidades diferenciadas por rol: el tutor puede consultar el 
+catálogo, asignar ejercicios y gestionar sus fechas límite, mientras 
+que el alumno accede únicamente a los ejercicios que le han sido 
+asignados.
+
+
+\subsubsection{Implementación del catálogo}
+ 
+El catálogo de ejercicios se implementó como una tabla de solo lectura en la base de datos, donde cada registro contiene atributos como título, descripción y tipo de ejercicio. Los tutores no pueden crear ni modificar ejercicios, únicamente consultarlos y seleccionarlos para asignarlos a sus alumnos.
+ 
+El endpoint \texttt{GET api/ejercicios/tutor/\{id\_usuario\}} retorna los ejercicios activos asignados por el tutor autenticado. La consulta realiza un \texttt{JOIN} entre \texttt{Ejercicios\_Tutor} y \texttt{Ejercicios}, filtrando únicamente las asignaciones con \texttt{id\_estatus = 1}. Incorpora una validación de autorización que impide que un tutor consulte los ejercicios de otro, retornando un error \texttt{HTTP 403} cuando el \texttt{id\_usuario} del token no coincide con el parámetro de la ruta.
+ 
+\begin{lstlisting}[language=SQL, caption={Consulta de ejercicios asignados por el tutor}]
+SELECT et.id_ejercicio_tutor, e.id_ejercicio, 
+       e.titulo, e.descripcion, e.tipo
+FROM Ejercicios_Tutor et
+JOIN Ejercicios e ON et.id_ejercicio = e.id_ejercicio
+WHERE et.id_usuario = ? AND et.id_estatus = 1
+\end{lstlisting}
+
+\subsubsection{Implementación de asignación de ejercicios}
+ 
+La asignación de ejercicios se implementó mediante el endpoint \texttt{POST /api/ejercicios/tutor}, el cual permite al tutor seleccionar un ejercicio del catálogo y asignarlo a sus alumnos con una fecha límite de entrega opcional. Antes de registrar la asignación, el endpoint verifica que el tutor no cuente ya con una asignación activa del mismo ejercicio, retornando un error \texttt{HTTP 400} en caso de duplicado. Esta validación complementa la restricción \texttt{UQ\_ET\_activo} definida en el Código~\ref{lst:restricciones_unicidad}, garantizando que el mensaje de error sea descriptivo para el cliente.
+ 
+\begin{lstlisting}[language=SQL, caption={Validación e inserción de asignación de ejercicio}]
+
+SELECT id_ejercicio_tutor FROM Ejercicios_Tutor
+WHERE id_ejercicio = ? AND id_usuario = ? AND id_estatus = 1
+ 
+INSERT INTO Ejercicios_Tutor 
+    (id_ejercicio, id_usuario, id_estatus, fecha_desactivacion)
+VALUES (?, ?, 1, ?)
+\end{lstlisting}
+
+\subsubsection{Implementación de ejercios para alumnos}
+
+Los alumnos pueden ver los ejercicios pendientes, completados y vencidos, se implemetó esta función mediante los endpoints:
+
+\begin{itemize}
+    \item \texttt{GET api/ejercicios/alumno/\{id\_alumno\}/pendientes}
+    \item \texttt{GET api/ejercicios/alumno/\{id\_alumno\}/completados}
+    \item \texttt{GET api/ejercicios/alumno/\{id\_alumno\}/vencidos}
+\end{itemize}
+    
+
+Los cuales permiten visualizar los ejercicios clasificados y tener mayor control en sus ejercicios, mediante las siguientes consultas SQL:
+
+\begin{lstlisting}[language=SQL, caption={Consulta de ejercicios pendientes}]
+
+    SELECT 
+        et.id_ejercicio_tutor, e.id_ejercicio, e.titulo, 
+        e.descripcion, e.tipo, e.contenido_base, et.fecha_desactivacion as fecha_fin
+    FROM Ejercicios_Tutor et
+    JOIN Ejercicios e ON et.id_ejercicio = e.id_ejercicio
+    JOIN Usuario a ON a.id_tutor = et.id_usuario AND a.tipo_usuario = 'alumno'
+    WHERE a.id_usuario = ?
+        AND et.id_estatus = 1
+        AND et.id_ejercicio_tutor NOT IN (
+    SELECT id_ejercicio_tutor FROM Intentos WHERE id_usuario = ? )
+
+\end{lstlisting}
+
+
+\begin{lstlisting}[language=SQL, caption={Consulta de ejercicios completados}]
+
+    SELECT *
+    FROM vw_historial_alumno
+    WHERE id_alumno = ?
+        AND tipo_intento = 'Original'
+    ORDER BY fecha_envio DESC
+
+\end{lstlisting}
+
+Para gestionar automáticamente los ejercicios vencidos, se implementó un proceso programado utilizando la librería \texttt{APScheduler}. Este proceso tiene como objetivo actualizar periódicamente el estado de las asignaciones cuya fecha límite ha expirado, evitando que dicha validación tenga que realizarse manualmente desde el cliente o mediante consultas complejas en tiempo real.
+
+La funcionalidad se implementó mediante dos funciones principales: 
+
+\begin{itemize}
+    \item \texttt{cerrar\_ejercicios\_vencidos()}
+    \item \texttt{iniciar\_scheduler()}.
+\end{itemize}
+
+La función \texttt{cerrar\_ejercicios\_vencidos()} establece una conexión con la base de datos y ejecuta una consulta \texttt{UPDATE} sobre la tabla \texttt{Ejercicios\_Tutor}. La consulta modifica el campo \texttt{id\_estatus} de las asignaciones activas (\texttt{id\_estatus = 1}) cuya fecha de desactivación ya expiró, cambiando su valor a \texttt{2}, correspondiente al estado de ejercicio vencido.
+
+Por otra parte, la función \texttt{iniciar\_scheduler()} registra la tarea automática dentro del programador asíncrono, configurando su ejecución periódica cada hora. De esta manera, el sistema mantiene actualizados los estados de las asignaciones sin intervención manual.
+
+\begin{lstlisting}[language=Python, caption={Proceso automático para cierre de ejercicios vencidos}]
+scheduler = AsyncIOScheduler()
+
+def cerrar_ejercicios_vencidos():
+    conn = connect_to_database()
+    if not conn:
+        print("Cron: Error de conexion")
+        return
+
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            UPDATE Ejercicios_Tutor
+            SET id_estatus = 2
+            WHERE id_estatus = 1
+            AND fecha_desactivacion IS NOT NULL
+            AND fecha_desactivacion < GETDATE()
+        """)
+
+        conn.commit()
+        print(f"Cron: {cursor.rowcount} ejercicios cerrados")
+
+    except Exception as e:
+        print("Cron error:", e)
+
+    finally:
+        cursor.close()
+        conn.close()
+
+def iniciar_scheduler():
+    scheduler.add_job(
+        cerrar_ejercicios_vencidos,
+        'interval',
+        hours=1
+    )
+    scheduler.start()
+\end{lstlisting}
+
+La implementación de este proceso automático permite optimizar las consultas realizadas por el sistema, mantener consistencia en los estados de las asignaciones y garantizar que los alumnos visualicen correctamente los ejercicios vencidos en tiempo real.
