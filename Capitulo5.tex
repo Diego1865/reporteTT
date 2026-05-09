@@ -14,118 +14,47 @@ Durante esta etapa, se implementaron restricciones de integridad y definición d
 
 Este módulo está compuesto por las tablas \texttt{Usuarios}, \texttt{Tutor} y \texttt{Alumno}, las cuales representan la estructura principal de acceso y perfiles del sistema. La tabla \texttt{Estatus} actúa como catálogo compartido y debe crearse previamente, ya que es referenciada por \texttt{Usuarios} mediante una clave foránea.
 
-\begin{lstlisting}[language=SQL, caption={Implementacion de entidades de usuario en la base de datos}]
-IF OBJECT_ID('Estatus', 'U') IS NULL
-CREATE TABLE Estatus (
-    id_estatus    INT           IDENTITY(1,1) NOT NULL,
-    descripcion   VARCHAR(30)   NOT NULL,
-    CONSTRAINT PK_Estatus PRIMARY KEY (id_estatus),
-    CONSTRAINT UQ_Estatus_descripcion UNIQUE (descripcion)
-);
-GO
-
-IF OBJECT_ID('Usuarios', 'U') IS NULL
-CREATE TABLE Usuarios (
-    id_usuario            INT           IDENTITY(1,1) NOT NULL,
-    nombre                VARCHAR(50)   NOT NULL,
-    usuario               VARCHAR(50)   NOT NULL,
-    contrasena_cifrada    VARCHAR(255)  NOT NULL,
-    tipo_usuario          VARCHAR(30)   NOT NULL,
-    fecha_registro        DATETIME      NOT NULL DEFAULT GETDATE(),
-    id_estatus            INT           NOT NULL,
-    CONSTRAINT PK_Usuarios PRIMARY KEY (id_usuario),
-    CONSTRAINT UQ_Usuarios_usuario UNIQUE (usuario),
-    CONSTRAINT FK_Usuarios_Estatus
+\begin{lstlisting}[language=SQL, caption={Implementación simplificada de entidades de usuario}]
+    CREATE TABLE Usuarios (
+        id_usuario INT IDENTITY(1,1) PRIMARY KEY,
+        usuario VARCHAR(50) NOT NULL UNIQUE,
+        contrasena_cifrada VARCHAR(255) NOT NULL,
+        tipo_usuario VARCHAR(30) NOT NULL,
+        id_estatus INT NOT NULL,
         FOREIGN KEY (id_estatus)
-        REFERENCES Estatus(id_estatus)
-);
-GO
-
-IF OBJECT_ID('Tutor', 'U') IS NULL
-CREATE TABLE Tutor (
-    id_tutor      INT           NOT NULL,
-    correo        VARCHAR(100)  NOT NULL,
-    id_usuario    INT           NOT NULL,
-    CONSTRAINT PK_Tutor PRIMARY KEY (id_tutor),
-    CONSTRAINT UQ_Tutor_correo UNIQUE (correo),
-    CONSTRAINT FK_Tutor_Usuario
-        FOREIGN KEY (id_usuario)
-        REFERENCES Usuarios(id_usuario)
-);
-GO
-
-IF OBJECT_ID('Alumno', 'U') IS NULL
-CREATE TABLE Alumno (
-    id_alumno     INT           IDENTITY(1,1) NOT NULL,
-    grado         VARCHAR(15)   NOT NULL,
-    grupo         VARCHAR(15)   NOT NULL,
-    id_tutor      INT           NOT NULL,
-    id_usuario    INT           NOT NULL,
-    CONSTRAINT PK_Alumno PRIMARY KEY (id_alumno),
-    CONSTRAINT FK_Alumno_Tutor
+            REFERENCES Estatus(id_estatus)
+    );
+    
+    CREATE TABLE Alumno (
+        id_alumno INT IDENTITY(1,1) PRIMARY KEY,
+        grado VARCHAR(15) NOT NULL,
+        grupo VARCHAR(15) NOT NULL,
+        id_tutor INT NOT NULL,
         FOREIGN KEY (id_tutor)
-        REFERENCES Tutor(id_tutor),
-    CONSTRAINT FK_Alumno_Usuario
-        FOREIGN KEY (id_usuario)
-        REFERENCES Usuarios(id_usuario)
-);
-GO
-\end{lstlisting}
+            REFERENCES Tutor(id_tutor)
+    );
+    \end{lstlisting}
 
 \textbf{B. Proceso de evaluación}
 
 Este módulo agrupa las tablas centrales del flujo de evaluación: \texttt{Ejercicio\_Tutor}, \texttt{Intento} y \texttt{Analisis\_ortografico}. La tabla \texttt{Ejercicio\_Tutor} materializa la relación M:N entre tutores y ejercicios del catálogo, incorporando atributos propios de la asignación. La tabla \texttt{Intento} registra cada ejecución de un ejercicio por parte del alumno, almacenando la imagen capturada y el texto reconocido por el módulo OCR. La tabla \texttt{Analisis\_ortografico} almacena los resultados del procesamiento NLP, utilizando un campo JSON para representar las sugerencias de corrección de forma flexible.
 
-\begin{lstlisting}[language=SQL, caption={Implementación de entidades del proceso de evaluación}]
-IF OBJECT_ID('Ejercicio_Tutor', 'U') IS NULL
-CREATE TABLE Ejercicio_Tutor (
-    id_ejercicio_tutor    INT           IDENTITY(1,1) NOT NULL,
-    id_tutor              INT           NOT NULL,
-    id_ejercicio          INT           NOT NULL,
-    fecha_asignacion      DATETIME      NOT NULL DEFAULT GETDATE(),
-    fecha_limite          DATETIME      NULL,
-    id_estatus            INT           NOT NULL,
-    CONSTRAINT PK_Ejercicio_Tutor PRIMARY KEY (id_ejercicio_tutor),
-    CONSTRAINT FK_EjercicioTutor_Tutor
-        FOREIGN KEY (id_tutor)
-        REFERENCES Tutor(id_tutor),
-    CONSTRAINT FK_EjercicioTutor_Ejercicio
-        FOREIGN KEY (id_ejercicio)
-        REFERENCES Ejercicio(id_ejercicio),
-    CONSTRAINT FK_EjercicioTutor_Estatus
-        FOREIGN KEY (id_estatus)
-        REFERENCES Estatus(id_estatus)
-);
-GO
-
-IF OBJECT_ID('Intentos', 'U') IS NULL
-CREATE TABLE Intentos (
-    id_intento           INT         IDENTITY(1,1) NOT NULL,
-    id_alumno            INT         NOT NULL,         
-    id_ejercicio_tutor   INT         NOT NULL,
-    imagen_codificada    VARCHAR(MAX) NOT NULL,            
-    texto_detectado_ocr  VARCHAR(MAX)    NULL,           
-    fecha_envio          DATETIME2   NOT NULL DEFAULT GETDATE(),
-    retroalimentacion    VARCHAR(MAX)    NULL,
-    CONSTRAINT PK_Intentos          PRIMARY KEY (id_intento),
-    CONSTRAINT FK_Intentos_alumno  FOREIGN KEY (id_alumno)    REFERENCES Alumno(id_alumno),
-    CONSTRAINT FK_Intentos_ET       FOREIGN KEY (id_ejercicio_tutor) REFERENCES Ejercicios_Tutor(id_ejercicio_tutor)
-);
-GO
-
-IF OBJECT_ID('Analisis_Ortografico', 'U') IS NULL
-CREATE TABLE Analisis_Ortografico (
-    id_analisis_ortografico INT            NOT NULL IDENTITY(1,1),
-    id_intento              INT            NOT NULL,     
-    cantidad_errores        INT            NOT NULL DEFAULT 0,
-    sugerencias_json        NVARCHAR(MAX)      NULL,       
-    ortografia_score        DECIMAL(5,2)       NULL,
-    CONSTRAINT PK_Analisis_Ortografico  PRIMARY KEY (id_analisis_ortografico),
-    CONSTRAINT UQ_Analisis_Ort_intento  UNIQUE      (id_intento),
-    CONSTRAINT FK_Analisis_Ort_intento  FOREIGN KEY (id_intento) REFERENCES Intentos(id_intento),
-    CONSTRAINT CK_sugerencias_json      CHECK (sugerencias_json IS NULL OR ISJSON(sugerencias_json) = 1)
-);
-GO
+\begin{lstlisting}[language=SQL, caption={Estructura simplificada del proceso de evaluación}]
+    CREATE TABLE Ejercicio_Tutor (
+        id_ejercicio_tutor INT IDENTITY(1,1) PRIMARY KEY,
+        id_tutor INT NOT NULL,
+        id_ejercicio INT NOT NULL,
+        fecha_limite DATETIME NULL,
+        id_estatus INT NOT NULL
+    );
+    
+    CREATE TABLE Intentos (
+        id_intento INT IDENTITY(1,1) PRIMARY KEY,
+        id_alumno INT NOT NULL,
+        id_ejercicio_tutor INT NOT NULL,
+        texto_detectado_ocr VARCHAR(MAX),
+        fecha_envio DATETIME2 DEFAULT GETDATE()
+    );
 \end{lstlisting}
 
 \subsubsection{Implementación de restricciones e integridad referencial}

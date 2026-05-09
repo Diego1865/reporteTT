@@ -50,76 +50,48 @@ A continuación, se muestra un ejemplo de validación de rol en un endpoint del 
         )
     \end{lstlisting}
 
-\subsubsection{Implementación de APIs}
+    \subsubsection{Implementación de APIs}
 
-El endpoint de inicio de sesión se encarga de validar las credenciales del usuario y generar el token correspondiente. Este proceso incluye la verificación del estatus del usuario, así como la validación de la contraseña cifrada.
-
-Una vez autenticado, se construye el payload del token con la información del usuario y se genera el JWT que será utilizado para futuras solicitudes.
-
-El siguiente fragmento muestra la implementación del endpoint de autenticación:
-
-\begin{lstlisting}[language=Python, caption={Endpoint de autenticación y generación de JWT}, label={lst:jwt_login}]
-    @router.post("/login", response_model=LoginResponse)
+    El endpoint de autenticación se implementó utilizando FastAPI y JWT. Su función consiste en validar las credenciales del usuario, verificar que la cuenta se encuentre activa y generar un token de acceso para futuras solicitudes autenticadas.
+    
+    El proceso de autenticación contempla las siguientes etapas:
+    
+    \begin{itemize}
+        \item Consulta del usuario en la base de datos.
+        \item Verificación del estatus de la cuenta.
+        \item Validación de la contraseña cifrada.
+        \item Generación del token JWT con la información del usuario.
+    \end{itemize}
+    
+    El Código~\ref{lst:jwt_login} muestra la implementación simplificada del endpoint de inicio de sesión.
+    
+    \begin{lstlisting}[language=Python, caption={Implementación simplificada del endpoint de autenticación}, label={lst:jwt_login}]
+    @router.post("/login")
     async def login(credentials: LoginRequest):
-        conn = connect_to_database()
-        if not conn:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
-                detail="Error de conexion a la base de datos"
-            )
     
-        cursor = conn.cursor()
+        query = """
+            SELECT id_usuario, contrasena_cifrada,
+                   nombre, tipo_usuario, id_estatus
+            FROM Usuario
+            WHERE username = ?
+        """
     
-        try:
-            query = """
-                SELECT id_usuario, contrasena_cifrada, nombre, tipo_usuario, id_estatus 
-                FROM Usuario
-                WHERE username = ?
-            """
-            cursor.execute(query, credentials.username)
-            user = cursor.fetchone()
+        cursor.execute(query, credentials.username)
+        user = cursor.fetchone()
     
-            if not user:
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Usuario o contrasena incorrectos"
-                )
+        if not user:
+            raise HTTPException(status_code=401)
     
-            id_usuario, contrasena_cifrada, nombre, tipo_usuario, id_estatus = user
+        if not verify_password(
+            credentials.password,
+            user.contrasena_cifrada
+        ):
+            raise HTTPException(status_code=401)
     
-            if id_estatus != 1:
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="El usuario no se encuentra activo"
-                )
+        token = create_access_token({
+            "id_usuario": user.id_usuario,
+            "tipo_usuario": user.tipo_usuario
+        })
     
-            if not verify_password(credentials.password, contrasena_cifrada):
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Usuario o contrasena incorrectos"
-                )
-    
-            token_payload = {
-                "id_usuario": id_usuario,
-                "nombre": nombre,
-                "tipo_usuario": tipo_usuario
-            }
-    
-            token = create_access_token(token_payload)
-    
-            return {
-                "message": "Inicio de sesion exitoso",
-                "token": token
-            }
-    
-        except HTTPException:
-            raise
-        except Exception as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
-                detail=f"Error: {str(e)}"
-            )
-        finally:
-            cursor.close()
-            conn.close()
+        return {"token": token}
 \end{lstlisting}
