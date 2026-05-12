@@ -76,71 +76,55 @@ Los objetivos específicos del proyecto se centran en:
 
 
 \subsection{Estado del arte}
-Para comprender el panorama actual de las herramientas de asistencia a la escritura y el reconocimiento de texto, se realizó un estado del arte que permitió identificar soluciones existentes con funcionalidades similares a las propuestas en este proyecto. A continuación, se presenta la Tabla \ref{tab:herramientas} que compara aplicaciones comerciales y herramientas de código abierto detallando su descripción, características y un costo aproximado de su desarrollo.
 
-\begin{longtable}{|p{3cm}|p{3.5cm}|p{4cm}|p{3.5cm}|}
-\caption{Herramientas de asistencia a la escritura y el reconocimiento de texto.}
-\label{tab:herramientas} \\
+Para comprender el panorama actual de las herramientas de asistencia a la escritura y el reconocimiento de texto, se realizó un estado del arte que permitió identificar soluciones existentes con funcionalidades similares a las propuestas en este proyecto.
 
-\hline
-\centering\textbf{Proyecto} & 
-\centering\textbf{Descripción} & 
-\centering\textbf{Características} & 
-\centering\arraybackslash\textbf{Precio Aproximado} \\
-\hline
-\endfirsthead
+\subsubsection{Google Handwriting Input}
+Google Handwriting Input \cite{google2024handwriting} es una aplicación desarrollada para dispositivos Android que permite a los usuarios escribir a mano y convertir la escritura automáticamente a texto. Esta herramienta destaca por su compatibilidad con múltiples idiomas, su capacidad de escribir en cualquier campo de texto de forma seamless, y su reconocimiento en tiempo real que facilita la entrada de texto de manera intuitiva en dispositivos móviles.
 
-\hline
-\centering\textbf{Proyecto} & 
-\centering\textbf{Descripción} & 
-\centering\textbf{Características} & 
-\centering\arraybackslash\textbf{Precio Aproximado} \\
-\hline
-\endhead
+\subsubsection{Tesseract OCR}
+Tesseract OCR \cite{smith2007overview} es un motor de reconocimiento óptico de caracteres de código abierto que convierte imágenes de texto manuscrito o tipografiado en texto editable. Su fortaleza radica en el soporte de más de 100 idiomas, su compatibilidad con imágenes escaneadas o fotografías, y su capacidad de ser utilizado para entrenar modelos personalizados de OCR. Sin embargo, requiere configuraciones específicas para mejorar su precisión en documentos con manuscritos complejos.
 
-\hline
-\endfoot
+\subsubsection{Grammarly}
+Grammarly \cite{grammarly2024} es una plataforma de corrección gramatical y ortográfica basada en inteligencia artificial, disponible como extensión de navegador, aplicación web y complemento para Microsoft Word y Google Docs. Ofrece corrección gramatical y ortográfica avanzada, recomendaciones de estilo personalizadas, y una versión gratuita con funciones limitados. Su amplia compatibilidad multiplataforma la convierte en una solución integral para la mejora de escritura en diversos contextos.
 
-% Fila 1
-\centering Google Handwriting Input \cite{google2024handwriting} &
-\centering Aplicación para escribir a mano en dispositivos Android y convertir la escritura a texto. &
-\centering -Compatible con Android. -Soporta múltiples idiomas. -Escribe en cualquier campo de texto. -Reconocimiento en tiempo real. &
-\centering\arraybackslash El costo de desarrollo de una app similar sería de \$20,000 a \$50,000 USD. \\
-\hline
+\subsubsection{Calligrapher}
+Calligrapher \cite{calligraphr2024} es una aplicación especializada en la mejora de la caligrafía que proporciona retroalimentación en tiempo real sobre la calidad de la letra. Su enfoque está centrado en la evaluación de la legibilidad y la calidad caligráfica, con compatibilidad en dispositivos móviles y tabletas. La aplicación ofrece ejercicios estructurados y personalizados diseñados para mejorar progresivamente las habilidades de escritura manual del usuario.
 
-% Fila 2
-\centering Tesseract OCR \cite{smith2007overview} &
-\centering Motor OCR de código abierto que convierte imágenes de texto manuscrito o tipografiado en texto editable. &
-\centering - Soporta más de 100 idiomas. - Compatible con imágenes escaneadas o fotos. - Usado para entrenar modelos de OCR. - Requiere configuraciones para mejorar precisión en manuscritos. &
-\centering\arraybackslash Proyecto similar costaría entre \$50,000 a \$150,000 USD dependiendo de la personalización. \\
-\hline
+\subsubsection{WriteApp}
+WriteApp \cite{writeapp2024} es una plataforma educativa gamificada que combina elementos lúdicos con la mejora de la escritura manual. Proporciona un juego interactivo que permite el seguimiento de la calidad de letra y puntuación, genera reportes detallados para padres y maestros, y permite la personalización de ejercicios según el perfil de cada usuario, fomentando un aprendizaje adaptativo y motivador.
 
-% Fila 3
-\centering Grammarly \cite{grammarly2024} &
-\centering Plataforma de corrección gramatical y ortográfica basada en inteligencia artificial, disponible como extensión o en la web. &
-\centering - Corrección gramatical y ortográfica. - Recomendaciones de estilo. - Compatible con múltiples plataformas (navegadores, MS Word, Google Docs). - Versión gratuita con funciones limitadas. &
-\centering\arraybackslash \$12 USD/mes (versión premium). Desarrollo similar podría costar \$500,000 USD. \\
-\hline
+\subsection{Tabla comparativa}
 
-% Fila 4
-\centering Calligrapher \cite{calligraphr2024} &
-\centering Aplicación para mejorar la caligrafía, proporcionando retroalimentación en tiempo real sobre la calidad de la letra. &
-\centering - Evaluación en tiempo real de escritura. - Enfoque en caligrafía y legibilidad. - Compatible con dispositivos móviles y tabletas. - Ofrece ejercicios estructurados y personalizados. &
-\centering\arraybackslash \$30,000 a \$100,000 USD para desarrollo de plataforma similar. \\
-\hline
+La siguiente tabla presenta una comparación detallada entre las herramientas analizadas en el estado del arte y la aplicación web propuesta en este proyecto. Se utiliza $\checkmark$ para indicar que la herramienta posee la característica, $\times$ para indicar que no la posee, y $\Delta$ para indicar compatibilidad parcial.
 
-% Fila 5
-\centering WriteApp \cite{writeapp2024} &
-\centering Plataforma educativa gamificada que mejora la escritura manual, ofreciendo retroalimentación sobre ortografía y calidad de letra. &
-\centering - Juego interactivo para mejorar la escritura. - Seguimiento de la calidad de letra y puntuación. - Genera informes para padres y maestros. - Personalización de ejercicios para cada usuario. &
-\centering\arraybackslash \$50,000 a \$200,000 USD para desarrollo de plataforma similar. \\
+\begin{table}[h]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\caption{Comparativa de herramientas de asistencia a la escritura y reconocimiento de texto.}
+\label{tab:comparativa}
+\begin{tabular}{|l|c|c|c|c|c|c|}
 \hline
-
-% Fila 6
-\centering Aplicación Web para la práctica de escritura manual y detección automática de errores ortográficos &
-\centering Aplicación educativa enfocada en la mejora de la escritura manual y la corrección ortográfica para estudiantes de primaria, con retroalimentación automática y evaluación de la calidad de la letra. &
-\centering - Integración de módulos de escritura manual, OCR y NLP. - Evaluación de calidad de letra (legibilidad, tamaño, alineación). - Detección de errores ortográficos. - Aplicación web interactiva. - Uso en dispositivos de escritorio y móviles. &
-\centering\arraybackslash En desarrollo. \\
+\textbf{Característica} & \textbf{Google HW} & \textbf{Tesseract} & \textbf{Grammarly} & \textbf{Calligrapher} & \textbf{WriteApp} & \textbf{Propuesta} \\
 \hline
-
-\end{longtable}
+Reconocimiento manual & $\checkmark$ & $\checkmark$ & $\times$ & $\checkmark$ & $\checkmark$ & $\checkmark$ \\
+\hline
+Corrección ortográfica & $\times$ & $\times$ & $\checkmark$ & $\times$ & $\checkmark$ & $\checkmark$ \\
+\hline
+Evaluación de caligrafía & $\times$ & $\times$ & $\times$ & $\checkmark$ & $\checkmark$ & $\checkmark$ \\
+\hline
+Retroalimentación real & $\checkmark$ & $\times$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ \\
+\hline
+Compatible móvil & $\checkmark$ & $\Delta$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ \\
+\hline
+Compatible web & $\times$ & $\times$ & $\checkmark$ & $\Delta$ & $\Delta$ & $\checkmark$ \\
+\hline
+Múltiples idiomas & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\Delta$ & $\Delta$ & - \\
+\hline
+Gamificación & $\times$ & $\times$ & $\times$ & $\times$ & $\checkmark$ & - \\
+\hline
+Reportes educadores & $\times$ & $\times$ & $\times$ & $\checkmark$ & $\checkmark$ & $\checkmark$ \\
+\hline
+\end{tabular}
+\end{table}
