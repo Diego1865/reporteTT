@@ -13,31 +13,32 @@ La factibilidad técnica estudia la posibilidad tecnológica para que el proyect
 El software es una parte esencial en la elaboración del proyecto, ya que con este se desarrollará la aplicación web y el servidor. Todas las herramientas seleccionadas tienen costo cero para el equipo, incluyendo GitHub en su plan gratuito, el cual cubre repositorios privados ilimitados, colaboradores ilimitados y 2{,}000 minutos mensuales de CI/CD, suficientes para un equipo de tres personas.
  
 \begin{table}[H]
-\centering
-\caption{Herramientas de software para el desarrollo del proyecto.}
-\label{tab:software}
-\renewcommand{\arraystretch}{1.3}
-\begin{tabularx}{\textwidth}{|l|X|l|r|r|}
-\hline
-\textbf{Herramienta} & \textbf{Uso en el proyecto} & \textbf{Tipo} & \textbf{Costo/mes} & \textbf{11 meses} \\
-\hline
-React / Next.js   & Front-End: panel tutor, panel alumno, lienzo digital  & Libre & \$0 & N/A \\
-\hline
-FastAPI (Python)  & Back-End: endpoints REST, lógica de negocio, JWT      & Libre & \$0 & N/A \\
-\hline
-SQL Server Express & Base de datos: tablas, triggers, vistas, restricciones & Libre & \$0 & N/A \\
-\hline
-Docker            & Contenedorización y despliegue                        & Libre & \$0 & N/A \\
-\hline
-VS Code           & Editor de código fuente                               & Libre & \$0 & N/A \\
-\hline
-GitHub (Free)     & Control de versiones, repos privados, CI/CD           & Libre & \$0 & N/A \\
-\hline
-GCP / AWS         & Hosting: prueba piloto en tier gratuito               & Libre & \$0 & N/A \\
-\hline
-\multicolumn{3}{|r|}{\textbf{Total}} & \multicolumn{2}{r|}{\textbf{\$0 MXN}} \\
-\hline
-\end{tabularx}
+    \centering
+    \caption{Herramientas de software para el desarrollo del proyecto.}
+    \label{tab:software}
+    \renewcommand{\arraystretch}{1.4}
+    \begin{tabularx}{\textwidth}{|p{3.8cm}|X|p{1.8cm}|p{2cm}|p{2.8cm}|}
+    \hline
+    \textbf{Herramienta} & \textbf{Uso en el proyecto} & \textbf{Tipo} & \textbf{Costo/mes} & \textbf{10 meses} \\
+    \hline
+    React / Next.js & Front-End: panel tutor, panel alumno, lienzo digital & Libre & \$0 & N/A \\
+    \hline
+    FastAPI (Python) & Back-End: endpoints REST, lógica de negocio, JWT & Libre & \$0 & N/A \\
+    \hline
+    SQL Server Express & Base de datos: tablas, triggers, vistas, restricciones & Libre & \$0 & N/A \\
+    \hline
+    Docker & Contenedorización y despliegue & Libre & \$0 & N/A \\
+    \hline
+    VS Code & Editor de código fuente & Libre & \$0 & N/A \\
+    \hline
+    GitHub (Free) & Control de versiones, repos privados, CI/CD & Libre & \$0 & N/A \\
+    \hline
+    GCP (Compute Engine e2-medium ×3) & Hosting con escalamiento horizontal: VM-1 Front-End, VM-2 Back-End OCR/NLP, VM-3 Base de datos & Pago por uso & \$1,316.80 MXN & \$2,633.60 MXN (2 meses) \\
+    \hline
+    \multicolumn{3}{|r|}{\textbf{Total}} & \multicolumn{2}{r|}{\textbf{\$2,633.60 MXN}} \\
+    \hline
+    \end{tabularx}
+    \footnotesize\textit{Nota: El costo de GCP aplica únicamente durante los 2 meses de prueba piloto. Las demás herramientas operan en entorno local sin costo durante los 10 meses del proyecto.}
 \end{table}
  
 \paragraph{Hardware}
@@ -61,7 +62,7 @@ HP Spectre x360 & Intel Core i7 & 16 GB & 512 GB SSD & Windows 11 & \$25,000 \\
 \hline
 iPad / Tablets  & N/A & N/A & N/A & iPadOS/Android & \$10,000 \\
 \hline
-\multicolumn{5}{|r|}{\textbf{Total (valor de referencia — ya en posesión del equipo)}} & \textbf{\$81,000} \\
+\multicolumn{5}{|r|}{\textbf{Total}} & \textbf{\$81,000} \\
 \hline
 \end{tabularx}
 \end{table}
@@ -101,7 +102,9 @@ Agosto     & 31 & 9 & 0 & 22 & 4 & 88  \\
 \hline
 Septiembre & 30 & 8 & 1 & 21 & 4 & 84  \\
 \hline
-\textbf{Total} & & & & \textbf{190} & & \textbf{760} \\
+Octubre    & 31 & 9 & 0 & 22 & 4 & 88  \\
+\hline
+\textbf{Total} & & & & \textbf{212} & & \textbf{848} \\
 \hline
 \end{tabularx}
 \end{table}
@@ -143,17 +146,17 @@ A continuación se muestra la distribución del porcentaje de participación par
 \hline
 \textbf{Rol} & \textbf{Porcentaje de participación} & \textbf{Días laborales} \\
 \hline
-Líder de proyecto       & 15\% & 28.5 días \\
+Líder de proyecto       & 15\% & 31.8 días \\
 \hline
-Analista / Arquitecto   & 15\% & 28.5 días \\
+Analista / Arquitecto   & 15\% & 31.8 días \\
 \hline
-Desarrollador Front-End & 20\% & 38.0 días \\
+Desarrollador Front-End & 20\% & 42.4 días \\
 \hline
-Desarrollador Back-End  & 20\% & 38.0 días \\
+Desarrollador Back-End  & 20\% & 42.4 días \\
 \hline
-Especialista IA (OCR + NLP) & 20\% & 38.0 días \\
+Especialista IA (OCR + NLP) & 20\% & 42.4 días \\
 \hline
-Tester / QA             & 10\% & 19.0 días \\
+Tester / QA             & 10\% & 21.2 días \\
 \hline
 \end{tabularx}
 \end{table}
@@ -175,7 +178,7 @@ En primer lugar, se presentan los costos de las herramientas de software, los cu
 \renewcommand{\arraystretch}{1.3}
 \begin{tabularx}{\textwidth}{|X|r|r|}
 \hline
-\textbf{Herramienta} & \textbf{Costo mensual (MXN)} & \textbf{Costo por 9 meses (MXN)} \\
+\textbf{Herramienta} & \textbf{Costo mensual (MXN)} & \textbf{Costo por 10 meses (MXN)} \\
 \hline
 React / Next.js, FastAPI, SQL Server Express, Docker, VS Code, Figma, Postman, GitHub Free, GCP/AWS (tier gratuito) & \$0 & \$0 \\
 \hline
@@ -193,13 +196,13 @@ A continuación se presentan los costos de los servicios necesarios para llevar 
 \renewcommand{\arraystretch}{1.3}
 \begin{tabularx}{\textwidth}{|X|r|r|}
 \hline
-\textbf{Servicio} & \textbf{Costo por mes (MXN)} & \textbf{Costo por 9 meses (MXN)} \\
+\textbf{Servicio} & \textbf{Costo por mes (MXN)} & \textbf{Costo por 10 meses (MXN)} \\
 \hline
-Electricidad e internet (3 integrantes × \$800) & \$2{,}400 & \$21{,}600 \\
+Electricidad e internet (3 integrantes × \$800) & \$2{,}400 & \$24{,}000 \\
 \hline
-Infraestructura en nube (GCP / AWS — tier gratuito en piloto) & \$0 & \$0 \\
+Infraestructura en nube (GCP) & \$1316.80 & \$2633.60 (2 meses) \\
 \hline
-\textbf{Total} & \textbf{\$2{,}400} & \textbf{\$21{,}600} \\
+\textbf{Total} & \textbf{\$3{,}716.80} & \textbf{\$26{,}633.60} \\
 \hline
 \end{tabularx}
 \end{table}
@@ -215,19 +218,19 @@ Finalmente, en la Tabla \ref{tab:costos-total} se presenta el resumen de costos 
 \hline
 \textbf{Concepto} & \textbf{Costo total (MXN)} \\
 \hline
-Sueldos — costo comercial equivalente (3 personas × 9 meses × \$20{,}000) & \$540{,}000 \\
+Sueldos — costo comercial equivalente (3 personas × 10 meses × \$20{,}000) & \$600{,}000 \\
 \hline
 Equipo de cómputo (valor de referencia — ya en posesión del equipo)        & \$61{,}000 \\
 \hline
-Servicios (electricidad e internet, 9 meses)                               & \$21{,}600 \\
+Servicios (electricidad e internet, 9 meses)                               & \$24{,}000 \\
 \hline
 Herramientas de software                                                   & \$0        \\
 \hline
-Infraestructura en nube                                                    & \$0        \\
+Infraestructura en nube                                                    & \$2{,}633.60        \\
 \hline
-\textbf{Total}                                                             & \textbf{\$622{,}600} \\
+\textbf{Total}                                                             & \textbf{\$687{,}633.60} \\
 \hline
 \end{tabularx}
 \end{table}
  
-Con base en la tabla anterior, se puede concluir que el costo comercial equivalente del proyecto asciende a \$622{,}600 MXN. Sin embargo, al ser este un trabajo terminal, los sueldos (que representan el 86.7\% del total) son absorbidos por el propio equipo como parte de su formación académica, y el hardware ya se encuentra en posesión de los integrantes. El desembolso directo real del equipo se limita a los servicios básicos de electricidad e internet, estimados en \$21{,}600 MXN durante los 9 meses de desarrollo, siendo el resto de las herramientas completamente gratuitas.
+Con base en la tabla anterior, se puede concluir que el costo comercial equivalente del proyecto asciende a \$687{,}633.60 MXN. Sin embargo, al ser este un trabajo terminal, los sueldos (que representan el 86.7\% del total) son absorbidos por el propio equipo como parte de su formación académica, y el hardware ya se encuentra en posesión de los integrantes. El desembolso directo real del equipo se limita a los servicios básicos de electricidad e internet e infraestructura en nube (GCP) , estimados en \$26{,}633.60 MXN durante los 10 meses de desarrollo y , siendo el resto de las herramientas completamente gratuitas.
