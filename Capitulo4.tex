@@ -121,9 +121,7 @@ En la Tabla \ref{tab:entidades_SR} se describen las entidades asociadas al segui
 \endhead
 
 Recomendación & Sugerencia generada automáticamente. &
-id\_recomendación, FK Id\_intento, FK Actividad\_sugerida, fecha\_generación, estado, prioridad. \\ \hline
-
-Actividad\_sugerida & Catalogo de ejercicios propuestos para corregir errores. & id\_actividad, descripcion, tipo\_error, tipo\_ejercicio, contenido, FK id\_estatus \\ \hline
+id\_recomendacion, FK Id\_intento, FK id\_ejercicio, fecha\_generación, estado, prioridad. \\ \hline
 
 Progreso\_alumno & Indicadores acumulados del desempeño. &
 id\_progreso\_alumno,FK id\_alumno,promedio\_orto-
@@ -198,7 +196,7 @@ Esta relación nos permite obtener un promedio global para el análisis ortográ
 En la Figura \ref{fig:rel} se presenta el diagrama relacional de la aplicación web, donde se definen las tablas, sus atributos, así como las relaciones mediante llaves primarias y foráneas.
 
 \begin{landscape}
-
+    
 \begin{figure}[H]
     \centering
     \includegraphics[

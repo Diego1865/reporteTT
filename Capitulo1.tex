@@ -4,7 +4,7 @@
 
 En este capítulo presentamos el contexto que da origen al desarrollo de una aplicación web orientada
 al fortalecimiento de la escritura en educación primaria. Se describe la situación actual relacionada
-con las dificultades en ortografía y calidad del trazo manuscrito en tercer y cuarto grado, así como la
+con las dificultades en ortografía y legibilidad del trazo manuscrito en tercer y cuarto grado, así como la
 necesidad de incorporar herramientas tecnológicas que apoyen el proceso de retroalimentación
 académica. Además, se establecen los objetivos del proyecto y se revisan antecedentes que permiten
 comprender el panorama educativo y tecnológico en el que se enmarca la propuesta.
@@ -29,7 +29,7 @@ Paralelamente, la incorporación de tecnologías digitales en el ámbito educati
 
 Ante este panorama, surge la necesidad de explorar alternativas que permitan analizar textos manuscritos y ofrecer retroalimentación automatizada en un entorno educativo supervisado. En consecuencia, el problema central que da origen al presente trabajo se formula de la siguiente manera:
 
-\textbf{¿Cómo apoyar el fortalecimiento de la escritura en letra de molde en alumnos de tercer y cuarto grado de primaria mediante una herramienta tecnológica que permita la detección automatizada de errores ortográficos y la evaluación básica de la calidad del trazo?
+\textbf{¿Cómo apoyar el fortalecimiento de la escritura en letra de molde en alumnos de tercer y cuarto grado de primaria mediante una herramienta tecnológica que permita la detección automatizada de errores ortográficos y la evaluación básica de la legibilidad del trazo?
 }
 
 \subsection{Propuesta de solución}
@@ -37,7 +37,7 @@ Para atender la problemática identificada, se propone el desarrollo e implement
 
 La aplicación permitirá la captura de ejercicios mediante escritura directa en pantalla o carga de imágenes digitalizadas. Posteriormente, se emplearán técnicas de OCR para convertir el texto manuscrito en formato digital, y herramientas de NLP para detectar posibles errores ortográficos y sugerir correcciones.
 
-Asimismo, se evaluarán parámetros básicos relacionados con la calidad del trazo, alineación, tamaño, espaciado e inclinación. La aplicación será desplegada en un servidor funcional y validado mediante una prueba piloto, con el fin de analizar su impacto preliminar en el fortalecimiento de la escritura.
+Asimismo, se evaluarán parámetros básicos relacionados con la legibilidad del trazo, alineación, tamaño, espaciado e inclinación. La aplicación será desplegada en un servidor funcional y validado mediante una prueba piloto, con el fin de analizar su impacto preliminar en el fortalecimiento de la escritura.
 
 \subsection{Justificación}
 La práctica de las habilidades de escritura en educación primaria representa una necesidad prioritaria dentro del proceso formativo, debido a su impacto directo en el desempeño académico y en el desarrollo integral del estudiante. La alfabetización efectiva en etapas tempranas se asocia con mejores resultados educativos a largo plazo y mayor capacidad de aprendizaje en distintas áreas del conocimiento \cite{worldbank2018promise}.
@@ -66,9 +66,9 @@ Los objetivos específicos del proyecto se centran en:
     \item OE-01. Seleccionar y adaptar datasets existentes de escritura manuscrita con letra de molde, incorporando muestras con caracteres acentuados para garantizar la variabilidad necesaria en el entrenamiento y validación de los modelos.
     \item OE-02. Desarrollar el módulo de captura digital de escritura manuscrita con letra de molde, con validaciones de calidad de imagen en el cliente.
     \item OE-03. Desarrollar un sistema de OCR especializado en escritura infantil, que alcance una precisión mínima del 85\% en un conjunto de validación representativo.
-    \item OE-04. Desarrollar un módulo de extracción de métricas caligráficas (alineación, tamaño, espaciado e inclinación) que permita evaluar la calidad de la escritura con criterios cuantificables.
+    \item OE-04. Desarrollar un módulo de extracción de métricas caligráficas (alineación, tamaño, espaciado e inclinación) que permita evaluar la legibilidad de la escritura con criterios cuantificables.
     \item OE-05. Implementar un módulo de análisis ortográfico basado en NLP que identifique errores y genere sugerencias de corrección con una tasa de detección mayor o igual al 85\% en pruebas controladas.
-    \item OE-06. Diseñar e implementar un módulo de ejercicios correctivos que asigne actividades de refuerzo a partir de las métricas caligráficas y el análisis ortográfico.
+    \item OE-06. Diseñar e implementar un módulo de ejercicios que asigne actividades de refuerzo a partir de las métricas caligráficas y el análisis ortográfico.
     \item OE-07. Desarrollar el Front-End interactivo y responsivo, adecuado al nivel cognitivo de estudiantes de primaria y compatible con distintos dispositivos.
     \item OE-08. Desarrollar el Back-End y la Base de Datos del sistema, incluyendo autenticación y gestión de usuarios.
     \item OE-09. Integrar todos los módulos desarrollados y realizar pruebas de aceptación con estudiantes reales de tercer y cuarto grado.
@@ -89,7 +89,7 @@ Tesseract OCR \cite{smith2007overview} es un motor de reconocimiento óptico de 
 Grammarly \cite{grammarly2024} es una plataforma de corrección gramatical y ortográfica basada en inteligencia artificial, disponible como extensión de navegador, aplicación web y complemento para Microsoft Word y Google Docs. Ofrece corrección gramatical y ortográfica avanzada, recomendaciones de estilo personalizadas, y una versión gratuita con funciones limitados. Su amplia compatibilidad multiplataforma la convierte en una solución integral para la mejora de escritura en diversos contextos.
 
 \subsubsection{Calligrapher}
-Calligrapher \cite{calligraphr2024} es una aplicación especializada en la mejora de la caligrafía que proporciona retroalimentación en tiempo real sobre la calidad de la letra. Su enfoque está centrado en la evaluación de la legibilidad y la calidad caligráfica, con compatibilidad en dispositivos móviles y tabletas. La aplicación ofrece ejercicios estructurados y personalizados diseñados para mejorar progresivamente las habilidades de escritura manual del usuario.
+Calligrapher \cite{calligraphr2024} es una aplicación especializada en la mejora de la caligrafía que proporciona retroalimentación en tiempo real sobre la legibilidad de la letra. Su enfoque está centrado en la evaluación de la legibilidad y la calidad caligráfica, con compatibilidad en dispositivos móviles y tabletas. La aplicación ofrece ejercicios estructurados y personalizados diseñados para mejorar progresivamente las habilidades de escritura manual del usuario.
 
 \subsubsection{WriteApp}
 WriteApp \cite{writeapp2024} es una plataforma educativa gamificada que combina elementos lúdicos con la mejora de la escritura manual. Proporciona un juego interactivo que permite el seguimiento de la calidad de letra y puntuación, genera reportes detallados para padres y maestros, y permite la personalización de ejercicios según el perfil de cada usuario, fomentando un aprendizaje adaptativo y motivador.
