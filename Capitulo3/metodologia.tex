@@ -1,0 +1,193 @@
+\subsection{Metodología de Desarrollo: Modelo en Espiral}
+
+El Modelo en Espiral, propuesto por Barry W. Boehm en 1986, es un modelo de proceso
+de software de naturaleza iterativa e incremental que combina elementos del modelo en
+cascada con el prototipado, incorporando de manera explícita la gestión de riesgos en
+cada ciclo de desarrollo. A diferencia de los modelos lineales, la espiral no asume que
+los requisitos son completamente conocidos desde el inicio, sino que permite refinarlos
+y ampliarlos en cada vuelta del ciclo. \cite{boehm1988spiral}
+
+Cada iteración del modelo sigue cuatro cuadrantes fundamentales:
+
+\begin{enumerate}
+    \item \textbf{Determinación de objetivos, alternativas y restricciones.} Se definen
+    las metas del ciclo, se identifican las alternativas de solución y se establecen las
+    restricciones técnicas, económicas y de tiempo.
+
+    \item \textbf{Evaluación de alternativas e identificación y resolución de riesgos.}
+    Se analizan los posibles riesgos asociados a cada alternativa y se diseñan estrategias
+    de mitigación antes de comprometer recursos.
+
+    \item \textbf{Desarrollo y verificación del producto.} Se implementa el incremento
+    correspondiente al ciclo y se valida mediante pruebas y revisiones.
+
+    \item \textbf{Planificación de la siguiente fase.} Con base en los resultados
+    obtenidos, se planifica la siguiente iteración y se ajustan objetivos y alcance de la próxima iteración.
+\end{enumerate}
+
+\subsubsection{Justificación de la elección}
+
+La metodología en Espiral es la más adecuada para este proyecto debido a la naturaleza
+de sus componentes de Inteligencia Artificial y Visión por Computadora, los cuales
+requieren iteraciones de entrenamiento, validación y ajuste que una metodología lineal
+no permite gestionar eficazmente. En cada vuelta de la espiral se construye un
+incremento del sistema, se prueba y se reduce el riesgo acumulado.
+
+Entre las razones específicas que justifican esta elección destacan:
+
+\begin{itemize}
+    \item \textbf{Alta incertidumbre técnica.} La integración de OCR especializado en
+    escritura infantil en español y de módulos de NLP implica decisiones tecnológicas —
+    selección de modelos, datasets, estrategias de \textit{fine-tuning} — cuyo resultado
+    no puede garantizarse desde el inicio del proyecto.
+
+    \item \textbf{Gestión explícita de riesgos.} Dado que el proyecto presenta riesgos en múltiples dimensiones: técnicos (precisión del OCR
+    ante trazos irregulares o inmaduros), operativos (adopción por parte de docentes),
+    legales (protección de datos de menores) y de disponibilidad (dependencia de APIs
+    externas). El modelo en Espiral sitúa la evaluación de riesgos como actividad
+    central de cada ciclo.
+
+    \item \textbf{Requisitos evolutivos.} El sistema atiende a un público con necesidades
+    pedagógicas específicas, por lo que los requisitos funcionales y de usabilidad debían
+    validarse progresivamente conforme avanzaba el levantamiento de información con
+    representantes del dominio educativo.
+
+    \item \textbf{Desarrollo incremental por módulos.} La arquitectura contempla
+    componentes claramente diferenciados — autenticación, captura de escritura, OCR,
+    NLP y retroalimentación — que pueden desarrollarse y validarse de manera independiente
+    en iteraciones sucesivas.
+\end{itemize}
+
+\subsubsection{Estructura de las iteraciones}
+
+El desarrollo se estructuró en cuatro ciclos evolutivos distribuidos en las dos etapas
+del Trabajo Terminal. Las iteraciones 1 y 2 (correspondientes a TT1) se enfocaron en
+la construcción de la infraestructura web, la recolección del dataset y el
+preprocesamiento de imágenes, mitigando tempranamente los riesgos asociados a la
+calidad de la entrada. Las iteraciones 3 y 4 (correspondientes a TT2) abordarán la
+implementación de los modelos de Inteligencia Artificial (OCR y NLP) y la validación
+final con usuarios, asegurando que los componentes críticos se desarrollen sobre una
+base de datos validada y estable.
+
+\paragraph{Etapa 1 — Trabajo Terminal I: Fundamentos y Procesamiento Visual}
+
+El objetivo de esta etapa fue establecer la infraestructura tecnológica, recolectar el
+corpus de datos necesario y validar los algoritmos de preprocesamiento de imágenes.
+
+\textbf{Iteración 1: Infraestructura Web y Módulo de Captura}
+
+\textit{Objetivo:} Desarrollar la arquitectura base de la aplicación web (Frontend y
+Backend) y el módulo de digitalización de escritura.
+
+\textit{Actividades principales:}
+\begin{itemize}
+    \item Diseño y creación de la base de datos relacional.
+    \item Implementación de mecanismos de autenticación y gestión de usuarios.
+    \item Desarrollo de la interfaz de carga y captura de imágenes.
+\end{itemize}
+
+\textit{Gestión de riesgos:}
+\begin{itemize}
+    \item \textbf{Riesgo:} Variabilidad en la calidad de las imágenes capturadas
+    (iluminación, resolución) que impida su procesamiento futuro.
+    \item \textbf{Mitigación:} Implementación de validadores de calidad en el cliente
+    y normalización básica de imágenes al momento de la subida o permitir subir por el lienzo digital.
+\end{itemize}
+
+\textbf{Iteración 2: Conformación del Conjunto de Datos y Preprocesamiento}
+
+\textit{Objetivo:} Seleccionar y adaptar datasets existentes de escritura manuscrita
+con letra de molde e incorporar muestras adicionales, incluyendo caracteres con tilde,
+para completar la variabilidad necesaria en el entrenamiento y validación de los modelos
+de reconocimiento.
+
+\textit{Actividades principales:}
+\begin{itemize}
+    \item Recolección y etiquetado de muestras de escritura manuscrita de tercer y
+    cuarto grado.
+    \item Implementación de algoritmos de binarización, eliminación de ruido y
+    corrección de perspectiva.
+    \item Desarrollo de algoritmos de segmentación para identificar renglones y palabras
+    individuales.
+\end{itemize}
+
+\textit{Gestión de riesgos:}
+\begin{itemize}
+    \item \textbf{Riesgo:} Insuficiencia de datos públicos en español para el
+    entrenamiento de modelos.
+    \item \textbf{Mitigación:} Creación de un dataset propio validado para integrarlo
+    con un conjunto existente, asegurando la diversidad caligráfica necesaria para el
+    siguiente ciclo.
+\end{itemize}
+
+\paragraph{Etapa 2 — Trabajo Terminal II: Inteligencia Artificial e Integración}
+
+En esta etapa se integran los modelos de aprendizaje profundo y procesamiento de
+lenguaje natural, utilizando los datos procesados en la etapa anterior.
+
+\textbf{Iteración 3: Implementación de Modelos OCR y Métricas Caligráficas}
+
+\textit{Objetivo:} Integrar el motor de Reconocimiento Óptico de Caracteres (OCR) y
+los algoritmos de evaluación de calidad del trazo, así como la generación del módulo
+de retroalimentación mediante ejercicios correctivos.
+
+\textit{Actividades principales:}
+\begin{itemize}
+    \item Entrenamiento y \textit{fine-tuning} del modelo OCR (TrOCR/Tesseract)
+    utilizando el corpus generado en la Iteración 2.
+    \item Programación de métricas geométricas para evaluar inclinación, espaciado y
+    tamaño de letra.
+    \item Validación técnica de la precisión de la transcripción.
+    \item Desarrollo del módulo de retroalimentación con ejercicios correctivos.
+\end{itemize}
+
+\textit{Gestión de riesgos:}
+\begin{itemize}
+    \item \textbf{Riesgo:} Baja precisión del modelo ante trazos irregulares o
+    inmaduros.
+    \item \textbf{Mitigación:} Reentrenamiento iterativo y ajuste de hiperparámetros
+    específicos para la morfología de la letra infantil.
+\end{itemize}
+
+\textbf{Iteración 4: Análisis Lingüístico (NLP), Integración y Despliegue}
+
+\textit{Objetivo:} Implementar la detección semántica de errores ortográficos y la
+generación de reportes pedagógicos, culminando con el despliegue del sistema completo.
+
+\textit{Actividades principales:}
+\begin{itemize}
+    \item Desarrollo del módulo de NLP para la corrección ortográfica contextual y
+    gramatical.
+    \item Generación automática de retroalimentación para el alumno y reportes de
+    progreso para el docente.
+    \item Pruebas de aceptación con usuarios finales y despliegue del sistema.
+\end{itemize}
+
+\textit{Gestión de riesgos:}
+\begin{itemize}
+    \item \textbf{Riesgo:} Generación de falsos positivos en la corrección ortográfica.
+    \item \textbf{Mitigación:} Calibración de umbrales de confianza y validación
+    cruzada con evaluaciones docentes manuales.
+\end{itemize}
+
+La Tabla~\ref{tab:espiral} resume la correspondencia entre cada iteración, su etapa
+del Trabajo Terminal y los entregables principales asociados.
+
+\begin{table}[H]
+\centering
+\caption{Correspondencia entre iteraciones del modelo en espiral y entregables del proyecto.}
+\label{tab:espiral}
+\begin{tabular}{|p{1.5cm}|p{2.5cm}|p{3.5cm}|p{5cm}|}
+\hline
+\textbf{Iteración} & \textbf{Etapa} & \textbf{Enfoque} & \textbf{Entregables principales} \\
+\hline
+1 & TT1 & Infraestructura web y captura & Base de datos, autenticación, módulo de captura de imágenes \\
+\hline
+2 & TT1 & Dataset y preprocesamiento & Corpus etiquetado, algoritmos de binarización y segmentación \\
+\hline
+3 & TT2 & OCR y métricas caligráficas & Modelo OCR ajustado, métricas geométricas, módulo de retroalimentación \\
+\hline
+4 & TT2 & NLP, integración y despliegue & Módulo NLP, reportes de progreso, sistema integrado desplegado \\
+\hline
+\end{tabular}
+\end{table}
