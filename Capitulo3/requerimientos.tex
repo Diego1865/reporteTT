@@ -1186,15 +1186,15 @@ El alumno utiliza únicamente una de las dos modalidades por intento.
 \textbf{Prioridad de desarrollo:} Alta &
 \multicolumn{1}{p{8cm}|}{} \\ \hline
 \textbf{Entrada:} Resultados del análisis ortográfico (RF-27) y caligráfico (RF-26) generados a partir del intento de escritura del alumno. &
-\textbf{Salida:} Lista de actividades de mejora sugeridas ordenadas por prioridad y enfocadas en las áreas de oportunidad detectadas. \\ \hline
+\textbf{Salida:} Lista de actividades de refuerzo sugeridas enfocadas en las áreas de oportunidad detectadas. \\ \hline
 \multicolumn{2}{|p{15cm}|}{
-\textbf{Descripción:} La aplicación web genera recomendaciones de actividades de mejora personalizadas para el alumno. Cada recomendación cuenta con un atributo de prioridad que permite al alumno identificar sus debilidades ortografía y caligrafía. 
+\textbf{Descripción:} La aplicación web genera recomendaciones de actividades de mejora personalizadas para el alumno. 
 
 \vspace{0.2cm}
 \textbf{Precondición:} El alumno debe haber completado y enviado al menos un intento con resultados de análisis OCR y NLP disponibles (RF-26, RF-27).
 
 \vspace{0.2cm}
-\textbf{Postcondición:} Las actividades sugeridas quedan registradas y disponibles para que el alumno las consulte por orden de prioridad.
+\textbf{Postcondición:} Las actividades sugeridas quedan registradas y disponibles para que el alumno las consulte.
 } \\ \hline
 \end{tabular}
 \label{tab:rf30}
@@ -1204,29 +1204,31 @@ El alumno utiliza únicamente una de las dos modalidades por intento.
 % RF-31: Realización de actividades sugeridas
 % =========================
 \begin{longtable}{|p{7cm}|p{8cm}|}
-\caption{Especificación de requerimiento RF-31}
-\label{tab:rf31} \\ \hline
-
-\multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web permitirá al alumno realizar las actividades sugeridas, generando un nuevo intento evaluado por los módulos OCR y NLP para medir el progreso en las áreas de ortografía y caligrafía identificadas.} \\ \hline
-
-\textbf{Identificador:} RF-31 &
-\textbf{Nombre:} Realización de actividades sugeridas. \\ \cline{1-1}
-
-\textbf{Prioridad de desarrollo:} Alta &
-\multicolumn{1}{p{8cm}|}{} \\ \hline
-
-\textbf{Entrada:} Actividad sugerida seleccionada por el alumno desde su lista de recomendaciones ordenadas por prioridad (RF-30). &
-\textbf{Salida:} Nuevo intento evaluado con resultados de análisis ortográfico o caligráfico, reflejando el progreso del alumno respecto al intento que originó la recomendación. \\ \hline
-
-\multicolumn{2}{|p{15cm}|}{
-\textbf{Descripción:} El alumno selecciona una actividad sugerida y la realiza mediante el módulo de captura de escritura (RF-17 al RF-25), generando un nuevo intento que es evaluado por los módulos OCR (RF-26) y NLP (RF-27) según el tipo de la actividad. 
-
-\vspace{0.2cm}
-\textbf{Precondición:} El alumno debe estar autenticado y tener actividades sugeridas disponibles con prioridad asignada (RF-30).
-
-\vspace{0.2cm}
-\textbf{Postcondición:} El nuevo intento queda registrado y evaluado, el progreso del alumno queda actualizado y se generan nuevas recomendaciones si el análisis identifica áreas de oportunidad adicionales. La actividad realizada se marca como completada en el historial del alumno.
-} \\ \hline
+    \caption{Especificación de requerimiento RF-31}
+    \label{tab:rf31} \\ \hline
+    
+    \multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web permitirá al alumno realizar actividades de refuerzo sugeridas a partir de las áreas de oportunidad detectadas previamente en ortografía y caligrafía.} \\ \hline
+    
+    \textbf{Identificador:} RF-31 &
+    \textbf{Nombre:} Realización de actividades sugeridas. \\ \cline{1-1}
+    
+    \textbf{Prioridad de desarrollo:} Alta &
+    \multicolumn{1}{p{8cm}|}{} \\ \hline
+    
+    \textbf{Entrada:} Actividad sugerida seleccionada por el alumno desde su lista de recomendaciones. &
+    \textbf{Salida:} Registro de la actividad de refuerzo realizada por el alumno y disponible para validación por parte del profesor. \\ \hline
+    
+    \multicolumn{2}{|p{15cm}|}{
+    \textbf{Descripción:} El alumno selecciona una actividad sugerida y la realiza mediante el módulo de captura de escritura (RF-17 al RF-25) con el propósito de reforzar las áreas de oportunidad identificadas previamente por el sistema.
+    
+    Las actividades de refuerzo tendrán un carácter complementario y de práctica autónoma, por lo que no generarán un nuevo intento evaluado ni serán sometidas nuevamente a análisis por los módulos OCR (RF-26) y NLP (RF-27). La realización de la actividad podrá ser consultada y validada posteriormente por el profesor.
+    
+    \vspace{0.2cm}
+    \textbf{Precondición:} El alumno debe estar autenticado y tener actividades sugeridas disponibles.
+    
+    \vspace{0.2cm}
+    \textbf{Postcondición:} La actividad realizada queda registrada en el historial del alumno como actividad de práctica completada y disponible para revisión o validación docente.
+    } \\ \hline
 
 \end{longtable}
 
