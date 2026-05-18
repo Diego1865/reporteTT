@@ -12,5 +12,5 @@
 *.fls
 *.nav
 *.snm
-*.synctex
-.synctex(busy)
+*.synctex.DS_Store
+*.synctex(busy)
