@@ -110,10 +110,9 @@ En la Figura \ref{fig:OCR} se presenta el flujo general del proceso OCR, el cual
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{Imagenes/procesoOCR.png}
-    \caption{Flujo general del proceso OCR adaptado.}
+    \caption{Flujo general del proceso OCR. Adaptado de \cite{otsu1979threshold, smith2007overview}.}
     \label{fig:OCR}
 \end{figure}
-Adaptado de \cite{otsu1979threshold, smith2007overview}
 
 Como se observa en la Figura \ref{fig:OCR}, el proceso comienza con la entrada de una imagen, que puede provenir de una fotografía o de un lienzo digital. Posteriormente, en la etapa de preprocesamiento, se realizan ajustes como conversión a escala de grises, binarización y eliminación de ruido, con el fin de mejorar la calidad visual para su análisis \cite{otsu1979threshold}. Estas técnicas permiten reducir variaciones no deseadas en la imagen, facilitando el reconocimiento posterior de los caracteres.
 
@@ -148,7 +147,7 @@ El proceso general de detección de errores ortográficos mediante NLP puede rep
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{Imagenes/procesoNLP.png}
-    \caption{Flujo básico del proceso de corrección ortográfica mediante NLP. Elaboración con base en \cite{jurafsky2023speech}}
+    \caption{Flujo básico del proceso de corrección ortográfica mediante NLP. Elaboración con base en \cite{jurafsky2023speech}.}
     \label{fig:NLP}
 \end{figure}
 
@@ -167,7 +166,7 @@ Asimismo, el uso de modelos más avanzados basados en arquitecturas modernas ha 
 
 \subsection{Evaluación del trazo manuscrito}
 
-El trazo manuscrito constituye un elemento relevante dentro del proceso de adquisición de la escritura en educación primaria. La legibilidad de un texto no depende únicamente de la ortografía correcta, sino también de factores visuales y espaciales que permiten interpretar adecuadamente el contenido escrito \cite{mikolov2013distributed, goodfellow2016deep}. Entre estos factores se encuentran la alineación sobre la línea base, la proporción del tamaño de las letras, el espaciado entre palabras y la uniformidad del trazo, los cuales influyen directamente en la claridad y comprensión del texto.
+El trazo manuscrito constituye un elemento relevante dentro del proceso de adquisición de la escritura en educación primaria. La legibilidad de un texto no depende únicamente de la ortografía correcta, sino también de factores visuales y espaciales que permiten interpretar adecuadamente el contenido escrito \cite{mikolov2013distributed, oecd2021indicators}. Entre estos factores se encuentran la alineación sobre la línea base, la proporción del tamaño de las letras, el espaciado entre palabras y la uniformidad del trazo, los cuales influyen directamente en la claridad y comprensión del texto.
 
 Diversos estudios sobre desarrollo de la escritura señalan que la evaluación de la letra manuscrita puede abordarse mediante parámetros observables que permitan identificar patrones de mejora o dificultad en los estudiantes \cite{berninger2010teaching, graham2010handwriting}. En contextos educativos tradicionales, esta evaluación es realizada por el docente de forma visual y cualitativa; sin embargo, con el apoyo de herramientas digitales es posible establecer métricas básicas que complementen dicha valoración, aportando un enfoque más objetivo al análisis del desempeño.
 
@@ -196,7 +195,7 @@ Como se observa en la Tabla \ref{tab:parametros_evaluacion}, los parámetros sel
 La incorporación de estos indicadores dentro del sistema propuesto busca complementar el análisis ortográfico realizado mediante NLP, ofreciendo una visión más integral del proceso de escritura. De esta manera, el sistema no solo evalúa la corrección del texto, sino también la calidad del trazo manuscrito, integrando así componentes visuales y lingüísticos dentro de una misma solución tecnológica.
 
 \subsection{Arquitectura de la aplicación web}
-El desarrollo de aplicaciones web modernas suele estructurarse bajo patrones de diseño que permiten organizar de manera eficiente los componentes del sistema. Uno de los modelos más utilizados es la arquitectura Modelo Vista Controlador(Model-View-Controller, MVC por sus siglas en inglés), la cual divide la aplicación en tres capas principales: modelo, vista y controlador \cite{sommerville2015software}.
+El desarrollo de aplicaciones web modernas suele estructurarse bajo patrones de diseño que permiten organizar de manera eficiente los componentes del sistema. Uno de los modelos más utilizados es la arquitectura Modelo Vista Controlador (Model-View-Controller, MVC por sus siglas en inglés), la cual divide la aplicación en tres capas principales: modelo, vista y controlador \cite{sommerville2015software}.
 
 En la Figura \ref{fig:MVC} se presenta el esquema general de la arquitectura MVC aplicada al sistema propuesto.
 
@@ -217,7 +216,7 @@ Además, el despliegue del sistema en un servidor web funcional permite su acces
 
 \subsection{Experiencia de Usuario y Diseño de Interfaces Educativas}
 
-El diseño de interfaces para aplicaciones educativas destinadas a niños de entre 8 y 10 años requiere un enfoque especializado que considere sus capacidades cognitivas, motoras y de alfabetización en desarrollo \cite{gelman2014design, nngroup2019children}. La Experiencia de Usuario (UX) en este rango de edad no solo busca la eficiencia en la ejecución de tareas, sino también fomentar el compromiso y minimizar la frustración durante el proceso de aprendizaje \cite{gelman2014design}. Es vital entender que el diseño debe facilitar la transición entre lo digital y lo manual, preservando los beneficios cognitivos que la neurociencia atribuye al trazo físico sobre el teclado \cite{james2012effects, berninger2010teaching}.
+El diseño de interfaces para aplicaciones educativas destinadas a niños de entre 6 y 7 años requiere un enfoque especializado que considere sus capacidades cognitivas, motoras y de alfabetización en desarrollo \cite{gelman2014design, nngroup2019children}. La Experiencia de Usuario (UX) en este rango de edad no solo busca la eficiencia en la ejecución de tareas, sino también fomentar el compromiso y minimizar la frustración durante el proceso de aprendizaje \cite{gelman2014design}. Es vital entender que el diseño debe facilitar la transición entre lo digital y lo manual, preservando los beneficios cognitivos que la neurociencia atribuye al trazo físico sobre el teclado \cite{james2012effects, berninger2010teaching}.
 
 \subsubsection{Consideraciones Cognitivas y Carga Visual}
 
