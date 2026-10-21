@@ -1,0 +1,30 @@
+\subsection{Implementación del reconocimiento con Google Cloud Vision}
+\label{sec:vision-implementacion}
+La integración se distribuye entre \texttt{Servicios/ocr.py}, \texttt{Servicios/evaluacion.py}, \texttt{Modelo/dao\_alumno.py} y \texttt{Control/alumno.py}. El flujo de captura existente se conserva: tanto el lienzo como la fotografía envían una imagen codificada al mismo endpoint. El servicio de reconocimiento se carga de forma diferida para permitir que la aplicación inicie con el OCR desactivado.
+
+El Código~\ref{lst:vision-call} reproduce la llamada central implementada, omitiendo la validación y el manejo de excepciones que la rodean:
+\begin{lstlisting}[language=Python, caption={Llamada implementada al servicio de reconocimiento}, label={lst:vision-call}]
+cliente = vision.ImageAnnotatorClient()
+try:
+    respuesta = cliente.document_text_detection(
+        image=vision.Image(content=imagen),
+        image_context=vision.ImageContext(
+            language_hints=idiomas),
+        timeout=30,
+        retry=None,
+    )
+finally:
+    cliente.transport.close()
+anotacion = vision.TextAnnotation.to_dict(
+    respuesta.full_text_annotation)
+texto = anotacion.get("text", "")
+\end{lstlisting}
+
+La migración \texttt{001\_google\_vision.sql} incorpora \texttt{resultado\_ocr\_json} y el almacenamiento Unicode de la transcripción. El DAO guarda el objeto de reconocimiento con \texttt{json.dumps(..., ensure\_ascii=False)} y añade la comparación textual preliminar antes de insertar el intento. La migración \texttt{002\_evaluacion\_preliminar.sql} configura referencias de ejercicios conocidos; las bases existentes requieren aplicar las migraciones de manera explícita.
+
+En el panel del tutor, el detalle de intentos muestra la imagen, la transcripción y la evaluación preliminar. El docente puede revisar las diferencias y redactar su retroalimentación antes de guardar la calificación. El resultado automático no reemplaza esa decisión.
+
+\subsubsection{Estado de avance}
+Se encuentran implementadas la validación de imágenes, la integración opcional con Cloud Vision, la persistencia de la anotación completa y la comparación de transcripciones con respuestas configuradas. La disponibilidad efectiva del servicio requiere credenciales, permisos y habilitación en el entorno de ejecución. La existencia de este código no acredita por sí sola la precisión objetivo ni la realización del piloto.
+
+Permanecen pendientes el cálculo de alineación, tamaño, separación y uniformidad del trazo, su calibración con una rúbrica docente y la integración de esas mediciones en el progreso. El procedimiento propuesto se detalla en la Sección~\ref{sec:vision-metricas}. Los ejemplos SQL anteriores documentan la estructura prevista para análisis y agregaciones; no demuestran que el flujo OCR actual genere puntuaciones caligráficas.

@@ -20,7 +20,7 @@ Asimismo, se consideraron posibles riesgos relacionados con la seguridad de la i
 
 Con el objetivo de clasificar los riesgos identificados, se empleó una matriz de evaluación 5x5 basada en la probabilidad de ocurrencia y el impacto potencial sobre el sistema.
 
-La matriz permite determinar visualmente el nivel de prioridad de cada riesgo y establecer criterios para definir las estrategias de mitigación correspondientes.
+La matriz de la Tabla~\ref{tab:matriz_riesgos} permite determinar visualmente el nivel de prioridad de cada riesgo y establecer criterios para definir las estrategias de mitigación correspondientes.
 
 \begin{table}[H]
 \centering
@@ -100,6 +100,8 @@ Los riesgos moderados y bajos, representados en amarillo y verde respectivamente
 \subsubsection{Evaluación de riesgos}
 
 Con base en la matriz de evaluación presentada anteriormente, se clasificaron los principales riesgos identificados durante el análisis del sistema, considerando su probabilidad de ocurrencia, impacto potencial y las medidas de contingencia propuestas para reducir sus efectos sobre la aplicación.
+En la Tabla~\ref{tab:evaluacion_riesgos} se presenta la evaluación de los riesgos del proyecto junto con las medidas de contingencia propuestas.
+
 \begin{table}[H]
 \centering
 \caption{Evaluación de riesgos del proyecto}
@@ -122,7 +124,7 @@ Baja precisión del OCR &
 La escritura infantil puede generar errores de reconocimiento debido a variaciones en el trazo. &
 Alta &
 Alto &
-Aplicar preprocesamiento de imagen y ajustar datasets de entrenamiento. &
+Validar capturas y configuración de Cloud Vision con transcripciones manuales. &
 \cellcolor{RiskOrange} Alto \\
 \hline
 
@@ -204,3 +206,4 @@ Por otra parte, los riesgos asociados al análisis ortográfico mediante NLP ser
 Respecto a la seguridad de la información, se consideran mecanismos de autenticación mediante JWT, cifrado de contraseñas y control de acceso por roles para reducir riesgos relacionados con accesos no autorizados o exposición de datos almacenados en la plataforma.
 
 Finalmente, para disminuir riesgos relacionados con la experiencia de usuario, se contempla la realización de pruebas de usabilidad orientadas a estudiantes de educación primaria, permitiendo identificar posibles problemas de interacción y mejorar la accesibilidad de la aplicación.
+El uso de Cloud Vision introduce dependencia de conectividad, credenciales, cuota y disponibilidad del proveedor. Se deberán registrar fallos y latencias y mostrar al usuario cuándo debe reenviar la entrega. Actualmente la llamada no realiza reintentos automáticos; una cola de procesamiento requeriría implementación adicional.

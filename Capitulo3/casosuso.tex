@@ -4,6 +4,8 @@ En esta sección se describen los requerimientos del usuario, los cuales represe
 
 Los requerimientos del usuario se definen, de manera general, qué debe hacer la aplicación web desde la perspectiva del usuario en un lenguaje natural, sin entregar detalles técnicos de implementación. Estos servirán como base para la definición de requerimientos funcionales y no funcionales. 
 
+En la Tabla~\ref{tab:ru} se presentan los requerimientos del usuario, con su identificador, descripción y prioridad.
+
 \begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}m{2cm}|m{3.6cm}|Y|>{\centering\arraybackslash}m{2.0cm}|}
 \caption{Requerimientos del usuario.}
 \label{tab:ru} \\
@@ -160,6 +162,8 @@ Media \\
 
 \subsection{Reglas de negocio}
 
+En la Tabla~\ref{tab:rn} se especifican las reglas de negocio que rigen el registro de usuarios, la realización de ejercicios y el procesamiento de sus resultados.
+
 \begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}m{2cm}|m{3.6cm}|Y|>{\centering\arraybackslash}m{2.0cm}|}
 \caption{Reglas de negocio.}
 \label{tab:rn} \\
@@ -269,13 +273,18 @@ Cada caso de uso representa una tarea discreta que implica interacción externa 
 
 \subsubsection{Diagrama de casos de uso }
 
+En la Figura~\ref{fig:casos_uso} se muestra el diagrama de casos de uso, que relaciona a los actores con las funcionalidades de la aplicación.
+
 \begin{figure}[H]
   \centering
   \includegraphics[height=0.82\textheight,keepaspectratio]{Imagenes/DiagramaCU-3.png}
   \caption{Diagrama de casos de uso}
+  \label{fig:casos_uso}
 \end{figure}
 
 \subsubsection{Especificación de los casos de uso}
+
+De la Tabla~\ref{tab:cu01} a la Tabla~\ref{tab:cu22} se especifican los casos de uso del sistema, incluidos sus subcasos, mediante la descripción de los actores, las precondiciones, los flujos de interacción y las postcondiciones correspondientes.
 
 \begin{longtable}{|p{4cm}|p{11cm}|}
 \caption{Tabla de especificación CU-01}
@@ -965,7 +974,7 @@ Datos & Imagen del intento enviado (trazo digital o fotografía), identificador 
 \hline
 Estímulo & El módulo de análisis se activa automáticamente una vez que el alumno confirma el envío del ejercicio en CU-15. \\
 \hline
-Respuesta & El módulo procesa la imagen mediante OCR para extraer el contenido escrito y aplica NLP para evaluar la ortografía y caligrafía. Los resultados del análisis se almacenan y quedan disponibles para el alumno en CU-16 y para el tutor en CU-17. \\
+Respuesta & Google Cloud Vision transcribe la imagen y el módulo textual compara la respuesta cuando existe una referencia. Se almacenan los resultados para su revisión. El análisis caligráfico complementario permanece pendiente de implementación; su integración permitirá consultar esas métricas en CU-16 y CU-17. \\
 \hline
 Comentarios & Este caso de uso es un \textit{\textlangle\textlangle include\textrangle\textrangle} de CU-15, ya que el análisis siempre ocurre tras cada envío sin excepción. Al tratarse de un proceso interno, no requiere intervención del usuario.  \\
 \hline

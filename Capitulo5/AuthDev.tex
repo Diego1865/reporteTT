@@ -14,7 +14,7 @@ El token generado es enviado al cliente, quien deberá incluirlo en las solicitu
 
 El proceso de generación del token se realiza mediante una función que recibe los datos del usuario y construye la carga útil (payload) del token. Posteriormente, se agrega el campo de expiración y se codifica utilizando una clave secreta y un algoritmo de cifrado.
 
-A continuación, se muestra el fragmento de código utilizado para la generación del token JWT:
+En el Código~\ref{lst:jwt_token} se muestra la función utilizada para generar el token JWT:
 
 \begin{lstlisting}[language=Python, caption={Generación del token JWT}, label={lst:jwt_token}]
     def create_access_token(data: dict):
@@ -28,7 +28,7 @@ A continuación, se muestra el fragmento de código utilizado para la generació
 
 \subsubsection{Implementación del control de acceso por rol}
 
-El sistema implementa un mecanismo de control de acceso basado en roles (RBAC, por sus siglas en inglés), con el objetivo de restringir el acceso a los recursos y funcionalidades según el tipo de usuario autenticado.
+El sistema implementa un mecanismo de RBAC, con el objetivo de restringir el acceso a los recursos y funcionalidades según el tipo de usuario autenticado.
 
 Cada usuario posee un rol definido dentro del sistema, el cual se encuentra almacenado en la base de datos y es incluido dentro del token JWT generado durante el proceso de autenticación. Este rol es utilizado posteriormente para validar los permisos de acceso a los diferentes endpoints del sistema.
 
@@ -40,9 +40,9 @@ Este enfoque permite mantener la seguridad del sistema, evitando accesos no auto
 
 El rol del usuario es incluido dentro del payload del token JWT durante el proceso de autenticación, permitiendo que sea utilizado en cada solicitud para validar los permisos de acceso sin necesidad de consultar constantemente la base de datos.
 
-A continuación, se muestra un ejemplo de validación de rol en un endpoint del sistema:
+En el Código~\ref{lst:validacion_rol} se muestra un ejemplo de validación del rol de tutor en un endpoint del sistema:
 
-\begin{lstlisting}[language=Python, caption={Validación de acceso por rol}]
+\begin{lstlisting}[language=Python, caption={Validación de acceso por rol}, label={lst:validacion_rol}]
     if current_user["tipo_usuario"] != "tutor":
         raise HTTPException(
             status_code=403,

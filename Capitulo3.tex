@@ -10,9 +10,9 @@ El propósito de este apartado es establecer de manera precisa el ámbito de des
 
 La aplicación web está dirigida exclusivamente a estudiantes de primer grado de educación primaria. La plataforma permitirá la recolección de textos manuscritos en letra de molde mediante la escritura directa en un lienzo en pantalla o a través de la carga de imágenes.
 
-Una vez capturado, el texto será procesado mediante algoritmos de OCR para su digitalización, seguido por la intervención de un módulo de NLP encargado de analizar el contenido, detectar errores ortográficos y generar sugerencias automáticas de corrección.
+Una vez capturada la imagen, Google Cloud Vision transcribe la escritura. La implementación actual compara ese texto con las respuestas de referencia configuradas para el ejercicio y presenta las diferencias al tutor. El análisis lingüístico contextual y la generación de sugerencias más amplias forman parte del alcance por completar.
 
-Además, el sistema evaluará métricas cuantitativas del trazo manuscrito, considerando parámetros como la legibilidad, alineación, tamaño y espaciado.
+Como trabajo pendiente, el sistema incorporará métricas de alineación, tamaño, separación y uniformidad del trazo, calculadas mediante análisis de imagen y calibradas con criterios docentes.
 
 \subsubsection{Límites de la aplicación web}
 

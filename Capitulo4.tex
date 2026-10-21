@@ -8,14 +8,14 @@ En este capítulo se presenta la fase de diseño técnico y arquitectónico de l
 
 El diseño de la base de datos define la capa de persistencia necesaria para soportar las operaciones de la plataforma, garantizando la integridad, seguridad y disponibilidad de la información. Siguiendo las formas normales para el modelado de bases de datos relacionalesw, el esquema ha sido normalizado hasta la Tercera Forma Normal (3NF), lo que permite mitigar anomalías de inserción, actualización y borrado, asegurando que la información de los usuarios y los resultados del análisis se almacenen de manera eficiente y sin redundancias innecesarias. 
 
-En este apartado se detalla el modelo estructurado para gestionar la interacción entre los actores del sistema (tutores y alumnos), el almacenamiento del catálogo de ejercicios y la trazabilidad de la actividad académica. Asimismo, se describe la estrategia de almacenamiento empleada para registrar de forma eficiente las cargas útiles de imágenes y los resultados derivados del procesamiento asíncrono de los módulos de Inteligencia Artificial (OCR y NLP), fundamentando así la generación de recomendaciones personalizadas dentro de la arquitectura del sistema.
+En este apartado se detalla el modelo estructurado para gestionar la interacción entre los actores del sistema (tutores y alumnos), el almacenamiento del catálogo de ejercicios y la trazabilidad de la actividad académica. Asimismo, se describe la estrategia de almacenamiento empleada para registrar de forma eficiente las cargas útiles de imágenes y los resultados del reconocimiento con Cloud Vision y del análisis textual, fundamentando así la generación de recomendaciones personalizadas dentro de la arquitectura del sistema.
 
 \subsubsection{Diagrama entidad-relación}
 El diagrama entidad–relación constituye un elemento fundamental dentro del diseño de la aplicación web, ya que permite estructurar de manera formal la organización, almacenamiento y relación de los datos involucrados en el proceso de captura, procesamiento y evaluación de la escritura manuscrita.
 
 La aplicación web propuesta gestiona el proceso de aprendizaje y evaluación de la escritura en alumnos de educación primaria. En este contexto, un tutor es responsable de supervisar a múltiples alumnos, asignándoles ejercicios orientados al desarrollo de habilidades de escritura.
 
-El núcleo del sistema se encuentra en la entidad Intento, la cual representa cada ejecución de un ejercicio por parte del alumno. A partir de este intento, se procesa una imagen mediante OCR para obtener el texto digital, el cual es posteriormente analizado mediante NLP para evaluar la ortografía. De forma complementaria, se realiza un análisis caligráfico basado en características del trazo manuscrito.
+El núcleo del sistema se encuentra en la entidad Intento, la cual representa cada ejecución de un ejercicio por parte del alumno. A partir de este intento, se procesa una imagen mediante Google Cloud Vision para obtener el texto digital, el cual es posteriormente analizado mediante NLP para evaluar la ortografía. De forma complementaria, se prevé un análisis caligráfico todavía pendiente de implementación.
 
 Los resultados de estos análisis permiten generar recomendaciones personalizadas y actualizar el progreso del alumno, facilitando el seguimiento continuo de su desempeño.
 
@@ -175,7 +175,7 @@ Cada intento genera exactamente un análisis ortográfico, el cual contiene la e
     \item \textbf{Intento -- Análisis caligráfico (1:1)}
 \end{itemize}
 
-Cada intento genera un único análisis caligráfico, el cual evalúa características del trazo manuscrito como alineación, tamaño y espaciado.
+El modelo contempla un análisis caligráfico asociado a cada intento cuando se implemente su extracción. Actualmente el reconocimiento no genera automáticamente ese registro.
 
 \begin{itemize}
     \item \textbf{Intento -- Recomendación (1:N)}
@@ -214,18 +214,18 @@ En la Figura \ref{fig:rel} se presenta el diagrama relacional de la aplicación 
 
 \paragraph{Gestión del texto detectado (OCR)}
 
-El atributo texto\_detectado\_ocr en la entidad Intento representa un elemento crítico dentro de la aplicación web, ya que corresponde a la salida generada por el módulo de reconocimiento óptico de caracteres (OCR). Este dato constituye la entrada principal para el procesamiento mediante técnicas de procesamiento de lenguaje natural (NLP), por lo que su correcta generación y almacenamiento es fundamental para garantizar la calidad del análisis ortográfico.
+El atributo texto\_detectado\_ocr en la entidad Intento representa un elemento crítico dentro de la aplicación web, ya que corresponde a la salida generada por el módulo de OCR. Este dato constituye la entrada principal para el procesamiento mediante técnicas de NLP, por lo que su correcta generación y almacenamiento es fundamental para garantizar la calidad del análisis ortográfico.
 
 El uso de este formato proporciona flexibilidad y evita la rigidez de un esquema relacional estrictamente normalizado, facilitando futuras ampliaciones del sistema.
 
 \paragraph{Cálculo del progreso del alumno}
 
-La entidad \textit{Progreso\_alumno} funciona como una tabla de agregación que almacena indicadores globales del desempeño del estudiante. Su actualización se realiza mediante triggers a nivel de base de datos, los cuales recalculan automáticamente los promedios de ortografía y caligrafía al registrar un nuevo inteno.
+La entidad \textit{Progreso\_alumno} se plantea como una tabla de agregación de indicadores del estudiante. Los triggers de análisis descritos en el reporte recalculan promedios al registrar evaluaciones; el flujo actual de Cloud Vision únicamente almacena la transcripción y la comparación preliminar, por lo que todavía no alimenta esos promedios caligráficos.
 
 Este enfoque se justifica por las siguientes razones:
 
 \begin{itemize}
-    \item \textbf{Atomicidad:} el trigger se ejecuta dentro de la misma transacción que el INSERT del intento, garantizando que \textit{Progreso\_alumno} siempre refleje el estado actualizado sin depender de una llamada adicional desde el controlador.
+    \item \textbf{Atomicidad:} el trigger de análisis se ejecuta dentro de la misma transacción que la inserción de la evaluación correspondiente, permitiendo actualizar el progreso sin una llamada adicional desde el controlador.
 
     \item \textbf{Consistencia:} se elimina el riesgo de inconsistencia de datos ante un fallo del backend posterior a la inserción del intento pero previo a la actualización del progreso.
 
@@ -239,6 +239,7 @@ La vista \textit{vw\_historial\_alumno} permite mantener un registro cronológic
 
 \input{Capitulo4/diagramas.tex}
 %\input{Capitulo4/ejercicios}
+\input{Capitulo4/ocrnlp.tex}
 \input{Capitulo4/progreso.tex}
 \input{Capitulo4/dataset.tex}
 \input{Capitulo4/Vistas.tex}

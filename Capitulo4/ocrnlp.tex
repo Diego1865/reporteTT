@@ -1,271 +1,105 @@
-% ─────────────────────────────────────────────────────────────────────────────
-%  Sección 4.X  Diseño Preliminar del Módulo de Análisis OCR y NLP
-%  NOTA PARA EL EQUIPO: Esta sección corresponde al diseño de la iteración
-%  siguiente (TT2). Se presenta a nivel arquitectónico y conceptual, dejando
-%  abiertas las decisiones de implementación que serán tomadas conforme al
-%  proceso de desarrollo en espiral adoptado por el proyecto.
-% ─────────────────────────────────────────────────────────────────────────────
+\subsection{Integración de Google Cloud Vision y diseño del análisis del trazo}
+\label{sec:vision-metricas}
 
-\subsection{Diseño Preliminar del Módulo de Análisis OCR y NLP}
+El reconocimiento manuscrito está integrado en el Back-End mediante Google Cloud Vision. La implementación utiliza el servicio de detección de texto en documentos; no ejecuta un modelo OCR propio. La extracción automática de alineación, tamaño, separación y uniformidad del trazo permanece pendiente. Este apartado distingue el flujo existente de la metodología propuesta para completar esa evaluación.
 
-\textit{El presente apartado constituye un diseño preliminar enmarcado en
-la metodología de desarrollo en espiral adoptada por el proyecto. Dado que
-la implementación completa de este módulo corresponde a la siguiente
-iteración (TT2), las decisiones que se presentan a continuación tienen
-carácter arquitectónico y conceptual: establecen las interfaces, los
-contratos de datos y la posición del módulo dentro del sistema, pero dejan
-abiertas las decisiones de modelo, hiperparámetros y bibliotecas específicas,
-las cuales serán evaluadas y refinadas con base en las pruebas de la iteración
-actual. Esto es consistente con el enfoque en espiral, cuya característica
-distintiva es precisamente diferir las decisiones de alto riesgo técnico hasta
-que se cuente con evidencia empírica suficiente para tomarlas.}
-
-\vspace{0.5em}
-
-El módulo de análisis OCR y NLP constituye el núcleo de procesamiento
-inteligente de la plataforma. Su función es transformar la imagen de escritura
-manuscrita capturada por el alumno en dos conjuntos de resultados cuantitativos
-y cualitativos: las métricas caligráficas (alineación, tamaño, espaciado e
-inclinación) y el análisis ortográfico del texto detectado. Los fundamentos
-teóricos de ambas tecnologías han sido descritos en las Secciones~2.3 y~2.4
-del presente documento; esta sección se limita a su diseño de integración
-dentro de la arquitectura del sistema.
-
-La arquitectura de este módulo sigue el patrón MVC establecido para el
-sistema y se divide en tres componentes principales:
-
+\subsubsection{Flujo implementado en el proyecto}
 \begin{enumerate}
-    \item \textbf{Capa de Procesamiento (Back-End):} Un controlador dedicado
-    \texttt{analisis.py} recibirá como entrada la imagen en formato Base64
-    almacenada en la tabla \texttt{Intentos} y orquestará la ejecución
-    secuencial del sub-módulo OCR y del sub-módulo NLP. Este controlador
-    será invocado de forma \textbf{diferida} respecto al registro del intento,
-    es decir, el alumno recibe confirmación inmediata de envío y el
-    procesamiento ocurre de manera asíncrona en segundo plano, evitando
-    tiempos de espera perceptibles en la interfaz.
-
-    \item \textbf{Sub-módulo OCR:} Responsable de preprocesar la imagen y
-    extraer el texto manuscrito en formato digital, así como de calcular las
-    métricas caligráficas del trazo.
-
-    \item \textbf{Sub-módulo NLP:} Responsable de analizar el texto producido
-    por el OCR, detectar errores ortográficos y generar sugerencias de
-    corrección contextualizadas al nivel léxico de primer grado de
-    primaria.
+    \item El alumno envía una fotografía o la imagen del lienzo mediante \texttt{POST /api/alumno/intento}, con autenticación JWT, \texttt{id\_ejercicio\_tutor} e \texttt{imagen\_codificada}.
+    \item El controlador \texttt{Control/alumno.py} delega el registro a \texttt{registrar\_intento\_dao}. El DAO verifica al alumno, la asignación al tutor y el estado activo del ejercicio antes de llamar a \texttt{reconocer\_escritura} en \texttt{Servicios/ocr.py}.
+    \item \texttt{preparar\_imagen} valida y decodifica la imagen. La composición sobre blanco conserva los trazos del lienzo transparente; el PNG resultante mantiene sus dimensiones. No se aplican actualmente binarización, corrección de perspectiva ni segmentación caligráfica.
+    \item Si \texttt{GOOGLE\_VISION\_ENABLED} vale \texttt{true}, el servicio crea un \texttt{ImageAnnotatorClient} y llama a \texttt{document\_text\_detection}. La operación corresponde a \texttt{DOCUMENT\_TEXT\_DETECTION}, que admite reconocimiento manuscrito \cite{googlevisionHandwriting}. La llamada utiliza un tiempo de espera de 30 segundos y \texttt{retry=None}; el transporte se cierra al finalizar.
+    \item Se convierte \texttt{full\_text\_annotation} a un diccionario y se extrae su campo \texttt{text}. Después, \texttt{Servicios/evaluacion.py} compara la transcripción con las respuestas de referencia del ejercicio cuando están configuradas.
+    \item Se guarda el intento en \texttt{Intentos}, incluyendo la imagen, \texttt{texto\_detectado\_ocr} y \texttt{resultado\_ocr\_json}. La respuesta HTTP 201 contiene el mensaje de registro y el objeto \texttt{ocr}.
 \end{enumerate}
 
-% ─────────────────────────────────────────────────────────
-\subsubsection{Diseño del Flujo de Procesamiento}
+El procesamiento actual ocurre durante la solicitud de registro y antes de insertar el intento. No existe en este flujo una cola de análisis en segundo plano. Si el servicio produce una excepción, el registro no llega a insertarse. Cuando el OCR está desactivado, se permite registrar la entrega con transcripción nula; una respuesta válida sin texto también permite guardarla con el estado correspondiente.
 
-El flujo general del módulo, desde la captura del intento hasta el
-almacenamiento de resultados, se describe a continuación:
+\subsubsection{Configuración y manejo de resultados}
+El cliente se autentica con credenciales predeterminadas de aplicación (ADC) disponibles en el servidor. Se requiere un proyecto con Cloud Vision habilitado, facturación y permisos apropiados \cite{googlevisionSetup}. La variable \texttt{GOOGLE\_VISION\_LANGUAGE\_HINTS} admite pistas opcionales de idioma; su valor predeterminado es vacío. Probar \texttt{es} es una decisión de configuración que deberá validarse con muestras, no una corrección de la ortografía del alumno.
+
+El servicio retorna un objeto con \texttt{proveedor}, \texttt{estado}, \texttt{texto} y \texttt{full\_text\_annotation}. Los estados implementados son \texttt{desactivado}, \texttt{procesado} y \texttt{sin\_texto}. La anotación conserva páginas, bloques, párrafos, palabras y símbolos, con geometría y confianza cuando están disponibles \cite{googlevisionAnnotation}. El diccionario del SDK usa nombres como \texttt{bounding\_box}; estas regiones son aproximaciones del reconocimiento, no máscaras exactas del trazo.
+
+El Código~\ref{lst:ocr-output} muestra un ejemplo de la estructura almacenada cuando el OCR está desactivado; el DAO añade después la evaluación preliminar.
+\begin{lstlisting}[language=JSON, caption={Contrato del servicio OCR: ejemplo con reconocimiento desactivado}, label={lst:ocr-output}]
+{
+  "proveedor": "google_cloud_vision",
+  "estado": "desactivado",
+  "texto": null,
+  "full_text_annotation": null
+}
+\end{lstlisting}
+
+La validación local devuelve errores 422 ante formato o contenido inválido y 413 si se exceden los límites de tamaño. Los problemas de credenciales o disponibilidad se comunican como 503; una respuesta del proveedor con error interno se traduce en 502. La aplicación no envía credenciales al navegador. La imagen se transmite desde el servidor a Google, por lo que su tratamiento debe contemplarse en la autorización de uso de las muestras.
+
+\subsubsection{Evaluación textual preliminar implementada}
+El módulo \texttt{Servicios/evaluacion.py} utiliza la configuración \texttt{contenido\_base.evaluacion}, con modo \texttt{copia} o \texttt{completar} y una lista de \texttt{respuestas\_aceptadas}. Normaliza Unicode a NFC, separa palabras y signos y alinea tokens mediante \texttt{SequenceMatcher}. Si existen varias referencias, selecciona la de mayor similitud y señala posibles omisiones, adiciones, sustituciones y diferencias de acentuación, mayúsculas o puntuación.
+
+El resultado se incorpora a \texttt{resultado\_ocr\_json.evaluacion\_preliminar}. Siempre solicita revisión; no asigna una nota automática ni calcula caligrafía. La coincidencia con la referencia tampoco demuestra una escritura correcta en la imagen. El conteo de símbolos con confianza inferior a 0.8 es una heurística de revisión pendiente de validación, no una probabilidad de error del alumno. Los ejercicios sin referencia configurada quedan fuera de esta comparación. La corrección lingüística contextual más amplia continúa como trabajo posterior.
+
+\subsubsection{Preparación propuesta para las métricas caligráficas}
+\label{sec:preparacion-metricas}
+La metodología siguiente constituye un diseño pendiente de implementación y validación. Se propone combinar la geometría de Cloud Vision con procesamiento local de imagen. El texto reconocido orientará la agrupación de símbolos; los píxeles originales permitirán medir el trazo. La API no proporciona directamente las cuatro puntuaciones pedagógicas.
 
 \begin{enumerate}
-    \item El alumno envía su intento mediante el endpoint
-    \texttt{/api/intentos/registrar}. El Back-End almacena la imagen en
-    Base64 en la tabla \texttt{Intentos} con los campos
-    \texttt{texto\_detectado\_ocr} y los registros de análisis en estado
-    nulo, confirmando el envío al cliente de forma inmediata.
-
-    \item Un proceso en segundo plano —cuyo mecanismo de programación
-    será definido en TT2, ya sea mediante un scheduler como el ya
-    utilizado en \texttt{cerrar\_ejercicio.py}, una cola de tareas o una
-    llamada asíncrona— detecta el nuevo intento pendiente de análisis.
-
-    \item El \textbf{sub-módulo OCR} recibe la imagen en Base64, la
-    decodifica y ejecuta la siguiente secuencia de procesamiento:
-    \begin{enumerate}
-        \item \textbf{Preprocesamiento:} conversión a escala de grises,
-        binarización (método de Otsu \cite{otsu1979threshold}),
-        eliminación de ruido y corrección de inclinación
-        (\textit{deskewing}), conforme a las técnicas descritas en la
-        Sección~2.3.
-        \item \textbf{Extracción de métricas caligráficas:} cálculo de
-        los cuatro parámetros definidos en el sistema:
-        \texttt{alineacion\_score}, \texttt{tamano\_letra\_score},
-        \texttt{espaciado\_score} e \texttt{inclinacion\_score}. La
-        metodología exacta de cálculo será determinada en TT2.
-        \item \textbf{Reconocimiento de texto:} aplicación del modelo de
-        reconocimiento para obtener el texto digital. La elección del
-        modelo (TrOCR, Tesseract u otro) queda abierta a la iteración
-        siguiente, sujeta a las pruebas de precisión sobre escritura
-        infantil descritas en el objetivo específico OE-03.
-    \end{enumerate}
-
-    \item El texto reconocido se escribe en el campo
-    \texttt{texto\_detectado\_ocr} de la tabla \texttt{Intentos} y los
-    scores caligráficos se persisten en la tabla
-    \texttt{Analisis\_Caligrafico}.
-
-    \item El \textbf{sub-módulo NLP} recibe el texto digitalizado y
-    ejecuta:
-    \begin{enumerate}
-        \item \textbf{Tokenización:} división del texto en unidades
-        léxicas individuales.
-        \item \textbf{Detección de errores ortográficos:} comparación de
-        cada token contra el modelo lingüístico, considerando el nivel
-        cognitivo y vocabulario de tercer y cuarto grado de primaria.
-        \item \textbf{Generación de sugerencias:} producción de
-        correcciones contextualizadas mediante algoritmos de similitud
-        o modelos estadísticos, conforme a lo descrito en la
-        Sección~2.4.
-    \end{enumerate}
-
-    \item Los resultados del análisis ortográfico se persisten en la tabla
-    \texttt{Analisis\_Ortografico}: el \texttt{ortografia\_score}, la
-    \texttt{cantidad\_errores} y el campo \texttt{sugerencias\_json} con
-    la estructura definida en la Sección~4.2.2.
-
-    \item Con ambos análisis completados, el proceso actualiza el registro
-    de \texttt{Progreso\_Alumno} mediante el trigger de base de datos
-    descrito en la Sección~4.4, reflejando el nuevo promedio acumulado
-    del alumno.
+    \item Conservar la imagen enviada al OCR y sus dimensiones. En fotografías, rectificar la perspectiva utilizando los bordes de la hoja o referencias de la plantilla cuando puedan identificarse. Aplicar la misma transformación a los vértices del OCR, sin deformar cada letra de manera independiente.
+    \item Obtener una copia en escala de grises y una máscara de tinta mediante Otsu o umbral adaptativo según la iluminación \cite{otsu1979threshold,opencvMetricas}. Retirar ruido y líneas de guía con cautela para conservar puntos, acentos y trazos finos. Para el lienzo, excluir las guías si forman parte de la imagen exportada.
+    \item Agrupar palabras y símbolos por renglón mediante su posición y los saltos de línea detectados. Refinar las cajas con componentes conexos y proyecciones de la máscara, sin asumir que cada componente equivale a una letra: una letra puede tener partes separadas o tocar a otra.
+    \item Estimar la altura de referencia $h_{\mathrm{ref}}>0$ con la mediana de alturas válidas de letras comparables. Separar mayúsculas, minúsculas y letras con ascendentes o descendentes. Normalizar las distancias por esta altura para reducir su dependencia de la resolución.
 \end{enumerate}
 
-% ─────────────────────────────────────────────────────────
-\subsubsection{Contratos de Datos entre Módulos}
+Se considerarán no evaluables las imágenes sin trazo suficiente, la segmentación ambigua o las referencias geométricas insuficientes. Los umbrales y mínimos de muestras se fijarán durante la calibración. La ausencia de medición se representará con \texttt{null} y una observación; no se interpretará como puntuación cero.
 
-Dado que el diseño de integración se establece en TT1 para orientar el
-desarrollo de TT2, se definen a continuación los contratos de datos que
-las interfaces entre módulos deben respetar. Estos contratos son fijos
-y no están sujetos a cambio en la iteración siguiente, pues representan
-el acuerdo entre la base de datos ya implementada y el módulo por
-desarrollar.
+\subsubsection{Métrica de alineación}
+Para cada renglón se estimará una línea base $y=ax+b$ mediante un ajuste robusto a puntos inferiores de letras sin descendentes. Si la plantilla tiene un renglón conocido, se usará como referencia después de rectificar la captura. Para $n$ puntos válidos $(x_i,y_i)$ se propone:
+\begin{equation}
+ A=\frac{1}{n h_{\mathrm{ref}}}\sum_{i=1}^{n}
+ \frac{|y_i-(ax_i+b)|}{\sqrt{1+a^2}}.
+\end{equation}
+Un menor valor representa menor dispersión respecto de la línea base. Cuando exista guía, se registrarán también el desplazamiento y el ángulo respecto a ella. Sin guía, un renglón recto pero inclinado puede tener dispersión baja; por ello no se confundirá regularidad de alineación con horizontalidad. No se corregirá artificialmente la posición de cada letra antes de medir.
 
-\paragraph{Entrada del sub-módulo OCR}
+\subsubsection{Métrica de tamaño}
+Se medirán las alturas $h_i$ de cajas refinadas sobre la máscara, agrupando caracteres comparables. Se reportarán la altura mediana y una dispersión robusta:
+\begin{equation}
+ T=\frac{\operatorname{mediana}_i\left(|h_i-\operatorname{mediana}(h)|\right)}
+ {\operatorname{mediana}(h)}.
+\end{equation}
+Un valor bajo indica mayor regularidad del tamaño dentro del grupo. Si se conoce la altura útil del renglón, se calculará además su proporción de ocupación para valorar si las letras se ajustan a la plantilla. Sin una escala física o plantilla conocida solo se informará tamaño relativo; los píxeles de una fotografía no se convertirán directamente a milímetros.
 
-El sub-módulo OCR recibirá la imagen codificada en Base64 directamente
-del campo \texttt{imagen\_codificada} de la tabla \texttt{Intentos},
-identificada por su \texttt{id\_intento}. No se requiere ningún endpoint
-adicional, ya que el proceso opera sobre datos ya persistidos.
+\subsubsection{Métrica de separación}
+En el sistema de coordenadas de cada renglón, se calculará la distancia horizontal entre el extremo derecho de una caja y el extremo izquierdo de la siguiente:
+\begin{equation}
+ g_i=x^{\min}_{i+1}-x^{\max}_i, \qquad s_i=\frac{g_i}{h_{\mathrm{ref}}}.
+\end{equation}
+Se analizarán por separado espacios entre letras de una palabra y entre palabras, usando la agrupación del OCR y la máscara como apoyo. Se reportarán la mediana, la dispersión robusta y la proporción de separaciones negativas o nulas, que pueden señalar contacto o solapamiento y requieren revisión. Los valores esperados dependerán del ejercicio y de la rúbrica: una separación pequeña no es siempre mejor. Cuando no puedan distinguirse letras contiguas se evitará producir una medida individual ficticia.
 
-\textbf{\textit{Salida del sub-módulo OCR hacia la base de datos}}
+\subsubsection{Métrica de uniformidad del trazo}
+La uniformidad se operacionalizará inicialmente como consistencia del grosor visible. Sobre la máscara binaria se obtendrá un esqueleto de un píxel de ancho y una transformada de distancia euclidiana $D$, que mide la distancia de cada píxel de tinta al fondo \cite{opencvMetricas}. En puntos interiores del esqueleto, el grosor local se aproximará por $w_j=2D(j)$. Se excluirán extremos, intersecciones y fragmentos demasiado cortos, donde esta aproximación puede sesgarse. Se propone:
+\begin{equation}
+ U=\frac{\operatorname{mediana}_j\left(|w_j-\operatorname{mediana}(w)|\right)}
+ {\operatorname{mediana}(w)}.
+\end{equation}
+Un valor bajo representa grosor más uniforme. Se registrarán además fragmentaciones visibles como observaciones, sin atribuirles automáticamente una causa motriz. Esta medición no estima presión del lápiz, velocidad ni orden de los movimientos. En un lienzo con pincel de ancho fijo puede aportar poca información sobre el alumno; se identificará esta limitación al interpretar resultados. La regularidad de la forma requeriría comparar repeticiones del mismo carácter y queda fuera de esta primera definición.
 
-Actualización del campo \texttt{texto\_detectado\_ocr} en la tabla \texttt{Intentos}:
+\subsubsection{Puntuaciones, almacenamiento e integración pendientes}
+Las medidas anteriores se conservarán junto con el número de observaciones válidas, la versión del algoritmo y los motivos de exclusión. Para convertir una desviación no negativa $d$ a la escala de 0 a 10 del reporte se propone, una vez calibradas dos tolerancias $t_{\mathrm{bueno}}<t_{\mathrm{malo}}$:
+\begin{equation}
+ Q(d)=10\max\left(0,\min\left(1,
+ \frac{t_{\mathrm{malo}}-d}{t_{\mathrm{malo}}-t_{\mathrm{bueno}}}\right)\right).
+\end{equation}
+En tamaño y separación se valorará también la distancia al intervalo adecuado de la plantilla cuando exista. Las tolerancias, los pesos de agregación y su correspondencia con la rúbrica docente todavía deben validarse; la fórmula no constituye una escala pedagógica demostrada.
 
-\begin{lstlisting}[language=json, caption={Estructura de resultados del sub-módulo OCR hacia la BD}, label={lst:ocr-output}]
+El esquema descrito previamente en el reporte reserva \texttt{inclinacion\_score}; ese atributo no representa uniformidad. Para incorporar esta última deberá agregarse \texttt{uniformidad\_score} y actualizar consultas, esquemas, vistas y cálculos de progreso mediante una migración explícita. La inclinación podrá mantenerse como indicador complementario, sin reutilizar su columna para otra magnitud. El Código~\ref{lst:caligrafia-output} presenta un contrato propuesto, todavía no emitido por la aplicación:
+\begin{lstlisting}[language=JSON, caption={Contrato propuesto para métricas pendientes de implementación}, label={lst:caligrafia-output}]
 {
-  "texto_detectado_ocr": "string (texto reconocido)"
-}
-
-Registro a insertar en la tabla \texttt{Analisis\_Caligrafico}:
-
-\begin{lstlisting}[language=json]
-{
-  "id_intento":          <integer>,
-  "alineacion_score":    <decimal(5,2)>,
-  "tamano_letra_score":  <decimal(5,2)>,
-  "espaciado_score":     <decimal(5,2)>,
-  "inclinacion_score":   <decimal(5,2)>,
-  "observaciones":       "string | null"
-}
-\end{lstlisting}
-
-\textbf{\textit{Salida del sub-módulo NLP hacia la base de datos}}
-
-Registro a insertar en la tabla \texttt{Analisis\_Ortografico}:
-
-\begin{lstlisting}[language=json, caption={Estructura de resultados del sub-módulo NLP hacia la BD}, label={lst:nlp-output}]
-{
-  "id_intento":        <integer>,
-  "cantidad_errores":  <integer>,
-  "ortografia_score":  <decimal(5,2)>,
-  "errores_detectados": "string | null",
-  "sugerencias_json": [
-    {
-      "palabra_incorrecta": "string",
-      "posicion":           <integer>,
-      "sugerencia":         "string",
-      "contexto":           "string"
-    }
-  ]
+  "estado": "pendiente",
+  "version_metricas": null,
+  "alineacion_score": null,
+  "tamano_letra_score": null,
+  "espaciado_score": null,
+  "uniformidad_score": null,
+  "observaciones": []
 }
 \end{lstlisting}
 
-El campo \texttt{sugerencias\_json} es validado al momento de la
-inserción mediante la restricción \texttt{CK\_sugerencias\_json}
-definida en el esquema de base de datos, la cual verifica que el
-contenido sea JSON válido mediante la función \texttt{ISJSON()} de
-SQL Server.
-
-% ─────────────────────────────────────────────────────────
-\subsubsection{Diseño del Endpoint de Consulta de Resultados}
-
-Para que el Front-End pueda presentar los resultados del análisis al
-alumno y al tutor, se contempla el siguiente endpoint en el controlador
-\texttt{analisis.py}:
-
-\paragraph{Endpoint: Consulta de Análisis por Intento}
-
-El endpoint \texttt{/api/analisis/\{id\_intento\}} operará mediante el
-método \texttt{GET} y requerirá autenticación JWT con rol de tutor o
-alumno. Su propósito es retornar de forma consolidada los resultados
-del análisis OCR y NLP asociados a un intento específico.
-
-\begin{lstlisting}[language=json, caption={Estructura de respuesta del endpoint de análisis}, label={lst:analisis-response}]
-{
-  "id_intento":          <integer>,
-  "texto_detectado_ocr": "string | null",
-  "caligrafia": {
-    "alineacion_score":   <decimal>,
-    "tamano_letra_score": <decimal>,
-    "espaciado_score":    <decimal>,
-    "inclinacion_score":  <decimal>,
-    "observaciones":      "string | null"
-  },
-  "ortografia": {
-    "ortografia_score":   <decimal>,
-    "cantidad_errores":   <integer>,
-    "sugerencias": [
-      {
-        "palabra_incorrecta": "string",
-        "posicion":           <integer>,
-        "sugerencia":         "string",
-        "contexto":           "string"
-      }
-    ]
-  }
-}
-\end{lstlisting}
-
-Si el análisis aún no ha sido procesado (campos nulos en la BD), el
-endpoint retornará los campos de \texttt{caligrafia} y
-\texttt{ortografia} como \texttt{null}, indicando al cliente que el
-procesamiento se encuentra pendiente.
-
-% ─────────────────────────────────────────────────────────
-\subsubsection{Decisiones Abiertas para TT2}
-
-En concordancia con el desarrollo en espiral, las siguientes decisiones
-técnicas de alto riesgo se posponen deliberadamente a la siguiente
-iteración, donde serán evaluadas mediante pruebas controladas:
-
-\begin{itemize}
-    \item \textbf{Modelo OCR:} la elección entre TrOCR, Tesseract
-    \cite{smith2007overview} u otro motor queda condicionada a las
-    pruebas de precisión sobre muestras de escritura infantil en letra
-    de molde (tipografía Century) \cite{troncoso2009sindrome}, conforme al objetivo específico OE-03
-    que establece una precisión mínima del 85\%.
-
-    \item \textbf{Metodología de métricas caligráficas:} la definición
-    de los algoritmos de cálculo de \texttt{alineacion\_score},
-    \texttt{tamano\_letra\_score}, \texttt{espaciado\_score} e
-    \texttt{inclinacion\_score} depende del análisis de las
-    características del trazo reconocido por el motor OCR elegido.
-
-    \item \textbf{Modelo NLP:} la selección entre un corrector basado en
-    diccionario, distancia de Levenshtein o un modelo estadístico más
-    avanzado \cite{jurafsky2023speech} queda sujeta a la evaluación de
-    su desempeño con el vocabulario del nivel educativo objetivo.
-
-    \item \textbf{Mecanismo de ejecución diferida:} la decisión de
-    implementar el procesamiento asíncrono mediante un scheduler,
-    una cola de tareas (como Celery) o corutinas de FastAPI queda
-    abierta a la iteración siguiente, donde se evaluará el impacto
-    en el rendimiento del servidor.
-\end{itemize}
-
-Lo que sí queda definido y es inmutable para TT2 son los contratos de
-datos descritos en la Sección~4.2.2 y el esquema de base de datos
-ya implementado, que garantizan la integración sin fricciones del
-módulo una vez desarrollado.
+La futura integración deberá guardar el resultado por intento y exponerlo a alumno y tutor. Solo se incorporarán a los promedios mediciones válidas con una regla explícita de completitud. La implementación actual conserva la evaluación textual preliminar en JSON y la calificación del tutor; no genera estas puntuaciones ni actualiza automáticamente el progreso a partir de ellas.

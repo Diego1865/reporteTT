@@ -45,6 +45,8 @@ contiene exclusivamente los campos necesarios para que cualquier
 controlador pueda tomar decisiones de autorización sin consultar la base
 de datos en cada petición:
  
+En el Código~\ref{lst:jwt-payload} se muestra la estructura del payload JWT emitido por el servidor.
+
 \begin{lstlisting}[language=json, caption={Estructura del payload JWT emitido por el Back-End}, label={lst:jwt-payload}]
 {
   "id_usuario": <integer>,
@@ -132,6 +134,8 @@ El endpoint \texttt{/api/auth/login} opera mediante el método
 JSON con \texttt{username} y \texttt{password} y, ante credenciales
 válidas, retorna el token JWT.
  
+En el Código~\ref{lst:login-payload} se muestra la estructura de la solicitud y la respuesta del endpoint de inicio de sesión.
+
 \begin{lstlisting}[language=json, caption={Payload de solicitud y respuesta del endpoint de login}, label={lst:login-payload}]
 /* Solicitud */
 {
@@ -153,6 +157,8 @@ El endpoint \texttt{/api/auth/register} opera mediante el método
 nuevo tutor y aplica las validaciones de unicidad y complejidad de
 contraseña descritas en el flujo anterior.
  
+En el Código~\ref{lst:register-payload} se muestra la estructura de la solicitud de registro de un tutor.
+
 \begin{lstlisting}[language=json, caption={Payload de solicitud del endpoint de registro}, label={lst:register-payload}]
 /* Solicitud */
 {

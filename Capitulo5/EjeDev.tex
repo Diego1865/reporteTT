@@ -15,7 +15,9 @@ El catálogo de ejercicios se implementó como una tabla de solo lectura en la b
  
 El endpoint \texttt{GET api/ejercicios/tutor/\{id\_usuario\}} retorna los ejercicios activos asignados por el tutor autenticado. La consulta realiza un \texttt{JOIN} entre \texttt{Ejercicios\_Tutor} y \texttt{Ejercicios}, filtrando únicamente las asignaciones con \texttt{id\_estatus = 1}. Incorpora una validación de autorización que impide que un tutor consulte los ejercicios de otro, retornando un error \texttt{HTTP 403} cuando el \texttt{id\_usuario} del token no coincide con el parámetro de la ruta.
  
-\begin{lstlisting}[language=SQL, caption={Consulta de ejercicios asignados por el tutor}]
+En el Código~\ref{lst:ejercicios_asignados} se presenta la consulta SQL de los ejercicios activos asignados por el tutor.
+
+\begin{lstlisting}[language=SQL, caption={Consulta de ejercicios asignados por el tutor}, label={lst:ejercicios_asignados}]
 SELECT et.id_ejercicio_tutor, e.id_ejercicio, 
        e.titulo, e.descripcion, e.tipo
 FROM Ejercicios_Tutor et
@@ -27,7 +29,9 @@ WHERE et.id_usuario = ? AND et.id_estatus = 1
  
 La asignación de ejercicios se implementó mediante el endpoint \texttt{POST /api/ejercicios/tutor}, el cual permite al tutor seleccionar un ejercicio del catálogo y asignarlo a sus alumnos con una fecha límite de entrega opcional. Antes de registrar la asignación, el endpoint verifica que el tutor no cuente ya con una asignación activa del mismo ejercicio, retornando un error \texttt{HTTP 400} en caso de duplicado. Esta validación complementa la restricción \texttt{UQ\_ET\_activo} definida en el Código~\ref{lst:restricciones_unicidad}, garantizando que el mensaje de error sea descriptivo para el cliente.
  
-\begin{lstlisting}[language=SQL, caption={Validación e inserción de asignación de ejercicio}]
+En el Código~\ref{lst:asignacion_ejercicio} se presenta la validación de asignaciones existentes y la inserción de una nueva asignación de ejercicio.
+
+\begin{lstlisting}[language=SQL, caption={Validación e inserción de asignación de ejercicio}, label={lst:asignacion_ejercicio}]
 
 SELECT id_ejercicio_tutor FROM Ejercicios_Tutor
 WHERE id_ejercicio = ? AND id_usuario = ? AND id_estatus = 1
@@ -50,7 +54,9 @@ Los alumnos pueden ver los ejercicios pendientes, completados y vencidos, se imp
 
 Los cuales permiten visualizar los ejercicios clasificados y tener mayor control en sus ejercicios, mediante las siguientes consultas SQL:
 
-\begin{lstlisting}[language=SQL, caption={Consulta de ejercicios pendientes}]
+En el Código~\ref{lst:ejercicios_pendientes} se presenta la consulta de ejercicios activos para los que el alumno aún no ha registrado un intento.
+
+\begin{lstlisting}[language=SQL, caption={Consulta de ejercicios pendientes}, label={lst:ejercicios_pendientes}]
 
     SELECT 
         et.id_ejercicio_tutor, e.id_ejercicio, e.titulo, 
@@ -66,7 +72,9 @@ Los cuales permiten visualizar los ejercicios clasificados y tener mayor control
 \end{lstlisting}
 
 
-\begin{lstlisting}[language=SQL, caption={Consulta de ejercicios completados}]
+En el Código~\ref{lst:ejercicios_completados} se presenta la consulta de ejercicios completados a partir del historial del alumno.
+
+\begin{lstlisting}[language=SQL, caption={Consulta de ejercicios completados}, label={lst:ejercicios_completados}]
 
     SELECT *
     FROM vw_historial_alumno
@@ -89,7 +97,9 @@ La función \texttt{cerrar\_ejercicios\_vencidos()} establece una conexión con 
 
 Por otra parte, la función \texttt{iniciar\_scheduler()} registra la tarea automática dentro del programador asíncrono, configurando su ejecución periódica cada hora. De esta manera, el sistema mantiene actualizados los estados de las asignaciones sin intervención manual.
 
-\begin{lstlisting}[language=Python, caption={Proceso automático para cierre de ejercicios vencidos}]
+En el Código~\ref{lst:cierre_ejercicios} se presenta el proceso programado que actualiza el estado de las asignaciones cuya fecha de entrega ha vencido.
+
+\begin{lstlisting}[language=Python, caption={Proceso automático para cierre de ejercicios vencidos}, label={lst:cierre_ejercicios}]
 scheduler = AsyncIOScheduler()
 
 def cerrar_ejercicios_vencidos():

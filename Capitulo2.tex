@@ -100,41 +100,29 @@ Brecha digital & Puede generar desigualdades de acceso \\
 
 El análisis de estos factores permite comprender que la tecnología, cuando se implementa como herramienta complementaria y supervisada, puede contribuir significativamente al fortalecimiento de competencias académicas fundamentales, favoreciendo tanto el aprendizaje individual como el desarrollo de habilidades digitales necesarias en el contexto actual.
 
-\subsection{OCR}
+\subsection{Reconocimiento manuscrito mediante Google Cloud Vision}
+El OCR convierte el contenido textual de una imagen en texto procesable. En este proyecto se implementa mediante Google Cloud Vision, cuya operación de detección de texto en documentos admite escritura manuscrita \cite{googlevisionHandwriting}. El servicio se consume desde el Back-End; el equipo desarrolla la integración, la validación de entradas y el tratamiento de resultados.
 
-El OCR es una tecnología que permite convertir imágenes que contienen texto impreso o manuscrito en información digital procesable por un sistema computacional \cite{smith2007overview}. Su aplicación se ha extendido en distintos ámbitos, como la digitalización de documentos, la automatización de formularios y el procesamiento de información textual a partir de imágenes escaneadas, facilitando la gestión y análisis de grandes volúmenes de información.
-
-El funcionamiento del OCR se basa en una serie de etapas secuenciales que permiten transformar la imagen original en texto estructurado. De manera general, el proceso inicia con la adquisición de una imagen que contiene caracteres y continúa con procedimientos de análisis y reconocimiento automatizado, los cuales permiten interpretar la información visual de forma sistemática.
-En la Figura \ref{fig:OCR} se presenta el flujo general del proceso OCR, el cual describe las etapas principales involucradas en la transformación de una imagen en texto digital.
-
+La Figura~\ref{fig:OCR} resume el flujo utilizado. El reconocimiento y el análisis caligráfico tienen responsabilidades distintas: la transcripción sirve para comparar el contenido escrito, mientras que las métricas pendientes requieren medir geometría y píxeles de la imagen.
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{Imagenes/procesoOCR.png}
-    \caption{Flujo general del proceso OCR. Adaptado de \cite{otsu1979threshold, smith2007overview}.}
-    \label{fig:OCR}
+\centering
+\begin{tikzpicture}[every node/.style={draw, rounded corners, align=center, text width=10cm, minimum height=0.75cm}]
+\node (a) at (0,0) {Captura: lienzo o fotografía};
+\node (b) at (0,-1.15) {Back-End: validación y composición sobre blanco};
+\node (c) at (0,-2.3) {Google Cloud Vision: detección de texto en documentos};
+\node (d) at (0,-3.45) {Transcripción y anotaciones de la escritura};
+\node (e) at (0,-4.6) {Comparación textual, almacenamiento y revisión del tutor};
+\draw[->] (a)--(b); \draw[->] (b)--(c); \draw[->] (c)--(d); \draw[->] (d)--(e);
+\end{tikzpicture}
+\caption{Flujo de reconocimiento integrado en el proyecto. Elaboración propia.}
+\label{fig:OCR}
 \end{figure}
 
-Como se observa en la Figura \ref{fig:OCR}, el proceso comienza con la entrada de una imagen, que puede provenir de una fotografía o de un lienzo digital. Posteriormente, en la etapa de preprocesamiento, se realizan ajustes como conversión a escala de grises, binarización y eliminación de ruido, con el fin de mejorar la calidad visual para su análisis \cite{otsu1979threshold}. Estas técnicas permiten reducir variaciones no deseadas en la imagen, facilitando el reconocimiento posterior de los caracteres.
+La anotación completa representa el texto mediante páginas, bloques, párrafos, palabras y símbolos, e incluye regiones delimitadoras y valores de confianza \cite{googlevisionAnnotation}. Estos datos permiten asociar la transcripción con zonas de la imagen. Una región reconocida no equivale a un contorno exacto de tinta, y la confianza del proveedor no es una medida pedagógica de legibilidad.
 
-En la fase de segmentación, el sistema identifica y separa los caracteres individuales o grupos de caracteres dentro de la imagen. Este proceso resulta crítico, ya que una segmentación incorrecta puede afectar directamente la precisión del reconocimiento. A continuación, durante la extracción de características, se analizan propiedades específicas como contornos, formas y patrones estructurales que permiten diferenciar un carácter de otro.
+La escritura infantil presenta variaciones de forma, tamaño y separación que pueden afectar la transcripción. También influyen el desenfoque, la iluminación y la perspectiva de las fotografías. Por ello, el proyecto conserva la imagen para revisión y deberá validar el servicio con muestras representativas. La meta de desempeño se evaluará con referencias manuales que mantengan lo realmente escrito, sin corregir sus faltas de ortografía.
 
-Finalmente, en la etapa de clasificación, el sistema compara las características extraídas con modelos previamente entrenados para determinar a qué carácter corresponde cada patrón identificado, generando como resultado el texto digital final \cite{smith2007overview}. Esta etapa constituye el núcleo del sistema OCR, donde se realiza la toma de decisiones basada en modelos de reconocimiento.
-
-Históricamente, los motores OCR se basaban en la comparación de plantillas estáticas y en la extracción de características geométricas como contornos y proyecciones de píxeles. Sin embargo, los enfoques contemporáneos han migrado hacia arquitecturas de aprendizaje profundo que logran tasas de reconocimiento significativamente superiores. En particular, las redes neuronales convolucionales (Convolutional Neural Networks, CNN por sus siglas en inglés) han demostrado ser especialmente efectivas en la extracción automática de rasgos visuales de caracteres sin requerir ingeniería manual de características \cite{lecun1998gradient}. Una evolución relevante es la arquitectura CRNN (Convolutional Recurrent Neural Network), que combina capas convolucionales para la extracción de características visuales con capas recurrentes para modelar dependencias secuenciales entre caracteres, permitiendo el reconocimiento de texto como una secuencia continua en lugar de caracteres aislados \cite{shi2017crnn}.
-
-La etapa de preprocesamiento resulta determinante para la precisión del sistema. La binarización mediante el método de Otsu, que selecciona automáticamente un umbral óptimo de separación entre píxeles de fondo y trazo a partir del histograma de niveles de gris de la imagen, es una técnica ampliamente adoptada por su robustez ante variaciones de iluminación \cite{otsu1979threshold}. Complementariamente, técnicas de normalización del tamaño y corrección de inclinación (deskewing) contribuyen a reducir la variabilidad que enfrenta el clasificador.
-
-La escritura manuscrita infantil presenta desafíos adicionales en comparación con texto impreso o escritura adulta. La irregularidad en el tamaño de letras, la variabilidad en el espaciado, los trazos incompletos y la presión inconsistente sobre la superficie de escritura introducen ruido que degrada el desempeño de los modelos \cite{graves2009connectionist}. Por ello, en aplicaciones educativas orientadas a estudiantes de educación primaria resulta necesario considerar márgenes de error más amplios y mecanismos de validación complementarios, tal como se establece en los requerimientos no funcionales del presente sistema (RNF-03).
-
-En el caso de la escritura manuscrita, el OCR enfrenta desafíos adicionales debido a la variabilidad en estilos de letra, inclinación, tamaño y calidad del trazo. Estas variaciones incrementan la complejidad del reconocimiento y pueden generar errores si no se cuenta con modelos suficientemente robustos. Por ello, su integración en entornos educativos requiere considerar posibles márgenes de error y mecanismos complementarios de validación que permitan mejorar la confiabilidad del sistema.
-
-El desarrollo reciente de sistemas de reconocimiento de escritura manuscrita ha evolucionado hacia el uso de modelos basados en aprendizaje profundo, particularmente redes neuronales recurrentes (RNN) y arquitecturas tipo Transformer, las cuales permiten modelar secuencias completas de texto sin requerir segmentación explícita de caracteres individuales. Este enfoque resulta especialmente relevante en escenarios donde la escritura presenta variaciones significativas, como es el caso de la escritura infantil, en la cual existen inconsistencias en tamaño, inclinación y separación entre caracteres \cite{shi2017crnn, huggingface2024trocr}.
-
-Además, técnicas modernas como los mecanismos de atención han permitido mejorar la capacidad de los sistemas OCR para enfocarse en regiones relevantes de la imagen, incrementando la precisión en condiciones no ideales. Estas mejoras son particularmente útiles en aplicaciones educativas, donde las imágenes pueden presentar ruido, baja resolución o iluminación variable \cite{huggingface2024trocr}.
-
-Por otra parte, la integración de modelos preentrenados ha permitido aprovechar grandes volúmenes de datos para mejorar el desempeño del reconocimiento, reduciendo la necesidad de entrenamiento desde cero y facilitando su adaptación a dominios específicos como la escritura manuscrita en educación básica \cite{goodfellow2016deep, google2024tessdata}. Este tipo de enfoques contribuye a mejorar la escalabilidad del sistema y su capacidad de adaptación a diferentes contextos.
-
-No obstante, a pesar de estos avances, la precisión del OCR sigue dependiendo en gran medida de la calidad de la entrada, por lo que resulta fundamental garantizar condiciones adecuadas en la captura de la imagen y en el preprocesamiento, con el fin de maximizar el desempeño del sistema en aplicaciones reales.
+El análisis local del trazo utilizará una copia de la imagen para aislar tinta y medir características espaciales. La binarización de Otsu y los umbrales adaptativos son opciones de procesamiento que deberán evaluarse según la captura \cite{otsu1979threshold,opencvMetricas}. Estas operaciones pertenecen al diseño de las métricas; no se presentan como etapas internas conocidas del servicio de Google ni como procesamiento ya implementado en el proyecto.
 
 \subsection{NLP}
 El NLP es una rama de la inteligencia artificial que permite a los sistemas computacionales analizar, interpretar y generar lenguaje humano de manera automatizada \cite{jurafsky2023speech}. Esta disciplina combina conocimientos de lingüística, informática y aprendizaje automático para procesar texto y extraer información significativa, permitiendo transformar datos textuales en información útil para distintos tipos de aplicaciones.
@@ -182,11 +170,11 @@ Los principales parámetros considerados para la evaluación básica del trazo e
 \begin{tabular}{|>{\centering\arraybackslash}m{3cm}|>{\centering\arraybackslash}m{5.5cm}|>{\centering\arraybackslash}m{6cm}|}
 \hline
 \textbf{Parámetro} & \textbf{Descripción} & \textbf{Posible aproximación computacional} \\ \hline
-Legibilidad & Claridad visual de los caracteres & Porcentaje de reconocimiento correcto por OCR \\ \hline
+Legibilidad & Claridad visual de los caracteres & Valoración docente apoyada en medidas del trazo \\ \hline
 Alineación & Ubicación uniforme sobre línea base & Desviación vertical promedio \\ \hline
-Tamaño & Proporción consistente de las letras & Altura media de caracteres \\ \hline
-Espaciado & Separación adecuada entre letras & Distancia promedio entre segmentos \\ \hline
-Uniformidad & Consistencia en forma y grosor del trazo & Variación en contornos detectados \\ \hline
+Tamaño & Proporción consistente de las letras & Altura mediana y dispersión de letras comparables \\ \hline
+Espaciado & Separación adecuada entre letras & Separaciones normalizadas entre letras y palabras \\ \hline
+Uniformidad & Consistencia en forma y grosor del trazo & Dispersión del grosor estimado sobre el esqueleto \\ \hline
 \end{tabular}
 \end{table}
 
@@ -223,7 +211,7 @@ El diseño de interfaces para aplicaciones educativas destinadas a niños de ent
 A diferencia de los usuarios adultos, los estudiantes de primer grado poseen una capacidad limitada para procesar múltiples estímulos simultáneos, por lo que la interfaz debe minimizar la carga cognitiva mediante un diseño limpio y el uso de metáforas visuales claras \cite{nngroup2019children}. Esto implica la utilización de áreas de interacción amplias, botones de gran tamaño y tipografías legibles que cumplan con índices de lecturabilidad específicos para su nivel escolar, como el de Fernández-Huerta \cite{fernandez1959lecturabilidad}. Un diseño visualmente ordenado permite que el alumno mantenga la atención en el objetivo principal: la práctica de la escritura manuscrita \cite{gelman2014design}.
 
 \subsubsection{Arquitectura de Información y Navegación}
-La navegación en sistemas educativos infantiles debe ser sencilla y preferiblemente plana, ya que las estructuras jerárquicas profundas suelen confundir a los usuarios jóvenes \cite{gelman2014design}. Es recomendable que las funcionalidades principales sean accesibles con un mínimo de interacciones y que el uso de íconos representativos esté acompañado de etiquetas de texto sencillas que refuercen la autonomía del estudiante dentro de la plataforma \cite{nngroup2019children}. Además, la interfaz de captura debe ser lo suficientemente robusta para generar imágenes de alta calidad que permitan un procesamiento eficiente por parte de arquitecturas avanzadas de reconocimiento de texto como TrOCR \cite{huggingface2024trocr}.
+La navegación en sistemas educativos infantiles debe ser sencilla y preferiblemente plana, ya que las estructuras jerárquicas profundas suelen confundir a los usuarios jóvenes \cite{gelman2014design}. Es recomendable que las funcionalidades principales sean accesibles con un mínimo de interacciones y que el uso de íconos representativos esté acompañado de etiquetas de texto sencillas que refuercen la autonomía del estudiante dentro de la plataforma \cite{nngroup2019children}. Además, la interfaz de captura debe ser lo suficientemente robusta para generar imágenes de alta calidad que permitan un procesamiento eficiente por parte de el servicio de reconocimiento Google Cloud Vision.
 
 \subsubsection{Retroalimentación y Sistemas de Respuesta}
 La retroalimentación inmediata es un componente crítico para el aprendizaje guiado, especialmente en la detección de errores ortográficos y la evaluación de la calidad del trazo \cite{gelman2014design}. El sistema debe proporcionar respuestas multisensoriales que informen al niño sobre sus aciertos y áreas de mejora de manera constructiva, reduciendo la ansiedad ante el error y promoviendo la persistencia en la actividad académica \cite{gelman2014design}. Esta respuesta constante ayuda a consolidar las conexiones neuronales necesarias para el dominio de la escritura \cite{james2012effects}.

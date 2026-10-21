@@ -43,7 +43,7 @@ aplicación. La función \texttt{handleTomarFotoClick} encapsula esta
 bifurcación detectando el agente de usuario mediante una expresión
 regular; si el resultado es positivo activa el \texttt{<input>} nativo,
 de lo contrario solicita el stream de video con la cámara trasera como
-preferencia y una resolución ideal de 1\,280 píxeles de ancho:
+preferencia y una resolución ideal de 1\,280 píxeles de ancho, como se muestra en el Código~\ref{lst:deteccion_dispositivo}:
 
 \begin{lstlisting}[language=Python, caption={Detección de dispositivo y apertura de cámara}, label={lst:deteccion_dispositivo}]
 const handleTomarFotoClick = () => {
@@ -93,7 +93,7 @@ tipo MIME y rechaza archivos que superen los 10\,MB, con lo que
 proporciona retroalimentación inmediata antes de iniciar cualquier
 transferencia. Si la imagen es válida, se aplica un redimensionamiento
 proporcional que limita el lado mayor a 1\,200 píxeles, y el resultado
-se recodifica como JPEG con calidad 0.8:
+se recodifica como JPEG con calidad 0.8, como se muestra en el Código~\ref{lst:redimensionamiento}:
 
 \begin{lstlisting}[language=Python, caption={Redimensionamiento y normalización de la imagen capturada}, label={lst:redimensionamiento}]
 const procesarArchivo = (file) => {
@@ -202,7 +202,7 @@ propiedad \texttt{globalCompositeOperation} del contexto 2D. Con el
 lápiz activo se usa \texttt{'source-over'}, que superpone nuevos
 píxeles sobre los existentes; con la goma se usa
 \texttt{'destination-out'}, que elimina los píxeles del canvas de
-forma no destructiva sin reemplazarlos por ningún color de fondo:
+forma no destructiva sin reemplazarlos por ningún color de fondo. En el Código~\ref{lst:composicion} se muestra la configuración de esta operación según la herramienta activa:
 
 \begin{lstlisting}[language=Python, caption={Configuración de la operación de composición según herramienta activa}, label={lst:composicion}]
 if (esBorrador) {
@@ -258,7 +258,7 @@ que identifica la asignación a la que corresponde el intento, e
 \textit{data URL}. La cabecera \texttt{Authorization} transporta el
 token JWT para que el middleware del servidor pueda identificar al
 alumno y verificar que el ejercicio le fue asignado antes de persistir
-el intento:
+el intento. En el Código~\ref{lst:payload_intento} se muestra la estructura del cuerpo de esta petición:
 
 \begin{lstlisting}[language=JSON, caption={Estructura del cuerpo de la petición POST al endpoint de registro de intentos}, label={lst:payload_intento}]
 {

@@ -1,4 +1,7 @@
 
+
+\textit{Alcance de esta sección: las agregaciones de análisis automáticos describen el diseño del módulo. El flujo actual de Cloud Vision guarda una transcripción y una evaluación textual preliminar; no genera puntuaciones caligráficas. El esquema descrito conserva inclinación como indicador previo. La incorporación de uniformidad requerirá una migración y la revisión de estas agregaciones, según la Sección~\ref{sec:vision-metricas}.}
+
 \subsection{Arquitectura del Módulo de Progreso y Recomendaciones}
 
 El módulo de progreso y recomendaciones centraliza el seguimiento
@@ -167,6 +170,8 @@ siguientes endpoints distribuidos entre los controladores
 
 \paragraph{Endpoints de gestión de alumnos (tutor)}
 
+En la Tabla~\ref{tab:endpoints-alumnos} se describen los endpoints que permiten al tutor registrar, consultar y dar de baja a sus alumnos.
+
 \begin{table}[H]
 \centering
 \caption{Endpoints de gestión de alumnos}
@@ -190,6 +195,8 @@ Cada uno ejecuta la misma consulta CTE (\textit{Common Table Expression})
 sobre \texttt{Progreso\_Alumno}, variando únicamente el filtro de
 \texttt{promedio\_general} aplicado:
 
+En la Tabla~\ref{tab:endpoints-clasificacion} se describen los endpoints para consultar a los alumnos según su categoría de desempeño.
+
 \begin{table}[H]
 \centering
 \caption{Endpoints de clasificación de alumnos por desempeño}
@@ -211,6 +218,8 @@ del panel del tutor. Ejecuta dos consultas independientes: una sobre
 el promedio ortográfico y otra sobre el promedio de legibilidad,
 retornando para cada dimensión la cantidad de alumnos por categoría.
 
+En el Código~\ref{lst:progreso-response} se muestra la estructura de respuesta con las cantidades de alumnos por categoría para las gráficas de progreso.
+
 \begin{lstlisting}[language=json, caption={Estructura de respuesta del endpoint de progreso gráfico}, label={lst:progreso-response}]
 /* Respuesta 200 OK */
 {
@@ -228,6 +237,8 @@ retornando para cada dimensión la cantidad de alumnos por categoría.
 \end{lstlisting}
 
 \paragraph{Endpoints de perfil (tutor y alumno)}
+
+En la Tabla~\ref{tab:endpoints-perfil} se describen los endpoints para consultar y actualizar los perfiles de tutor y alumno.
 
 \begin{table}[H]
 \centering

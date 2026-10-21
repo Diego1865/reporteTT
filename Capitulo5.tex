@@ -14,7 +14,9 @@ Durante esta etapa, se implementaron restricciones de integridad y definición d
 
 Este módulo está compuesto por las tablas \texttt{Usuarios}, \texttt{Tutor} y \texttt{Alumno}, las cuales representan la estructura principal de acceso y perfiles del sistema. La tabla \texttt{Estatus} actúa como catálogo compartido y debe crearse previamente, ya que es referenciada por \texttt{Usuarios} mediante una clave foránea.
 
-\begin{lstlisting}[language=SQL, caption={Implementación simplificada de entidades de usuario}]
+En el Código~\ref{lst:entidades_usuario} se presenta la definición simplificada de las entidades de usuario mediante sentencias SQL.
+
+\begin{lstlisting}[language=SQL, caption={Implementación simplificada de entidades de usuario}, label={lst:entidades_usuario}]
     CREATE TABLE Usuarios (
         id_usuario INT IDENTITY(1,1) PRIMARY KEY,
         usuario VARCHAR(50) NOT NULL UNIQUE,
@@ -39,7 +41,9 @@ Este módulo está compuesto por las tablas \texttt{Usuarios}, \texttt{Tutor} y 
 
 Este módulo agrupa las tablas centrales del flujo de evaluación: \texttt{Ejercicio\_Tutor}, \texttt{Intento} y \texttt{Analisis\_ortografico}. La tabla \texttt{Ejercicio\_Tutor} materializa la relación M:N entre tutores y ejercicios del catálogo, incorporando atributos propios de la asignación. La tabla \texttt{Intento} registra cada ejecución de un ejercicio por parte del alumno, almacenando la imagen capturada y el texto reconocido por el módulo OCR. La tabla \texttt{Analisis\_ortografico} almacena los resultados del procesamiento NLP, utilizando un campo JSON para representar las sugerencias de corrección de forma flexible.
 
-\begin{lstlisting}[language=SQL, caption={Estructura simplificada del proceso de evaluación}]
+En el Código~\ref{lst:estructura_evaluacion} se presenta la estructura simplificada de las entidades que intervienen en el proceso de evaluación.
+
+\begin{lstlisting}[language=SQL, caption={Estructura simplificada del proceso de evaluación}, label={lst:estructura_evaluacion}]
     CREATE TABLE Ejercicio_Tutor (
         id_ejercicio_tutor INT IDENTITY(1,1) PRIMARY KEY,
         id_tutor INT NOT NULL,
@@ -67,6 +71,8 @@ A continuación se describen las restricciones implementadas agrupadas por categ
 
 Se establecieron restricciones \texttt{UNIQUE} en los campos que deben identificar de forma exclusiva a cada registro dentro del sistema, evitando duplicados que comprometan la integridad de la información.
 
+En el Código~\ref{lst:restricciones_unicidad} se muestran las restricciones de unicidad definidas para los campos críticos del modelo de datos.
+
 \begin{lstlisting}[
     language=SQL,
     caption={Restricciones de unicidad en campos críticos},
@@ -93,7 +99,9 @@ CONSTRAINT UQ_Analisis_Cal_intento
 
 Los atributos de puntuación en las tablas \texttt{Analisis\_Ortografico} y \texttt{Analisis\_Caligrafico} deben estar acotados en un rango de 0 a 10, representando la escala de evaluación del sistema. Se implementaron restricciones \texttt{CHECK} para garantizar que ningún valor fuera de este rango pueda ser insertado o actualizado.
 
-\begin{lstlisting}[language=SQL, caption={Restricciones de rango en atributos de puntuación}]
+En el Código~\ref{lst:restricciones_rango} se presentan las restricciones que limitan los valores de puntuación al rango permitido.
+
+\begin{lstlisting}[language=SQL, caption={Restricciones de rango en atributos de puntuación}, label={lst:restricciones_rango}]
 CONSTRAINT CK_ortografia_score
     CHECK (ortografia_score IS NULL 
         OR (ortografia_score >= 0 AND ortografia_score <= 10)),
@@ -117,7 +125,7 @@ CONSTRAINT CK_inclinacion_score
 
 \paragraph{Integridad referencial}
 
-Se definieron claves foráneas en todas las entidades que mantienen relaciones entre sí, garantizando que no puedan existir registros huérfanos en el sistema. La siguiente tabla resume las relaciones de integridad referencial implementadas.
+Se definieron claves foráneas en todas las entidades que mantienen relaciones entre sí, garantizando que no puedan existir registros huérfanos en el sistema. La Tabla~\ref{tab:integridad_referencial} resume las relaciones de integridad referencial implementadas.
 
 \begin{longtable}{|p{4.5cm}|p{4cm}|p{4cm}|}
 \caption{Relaciones de integridad referencial del sistema}
@@ -162,7 +170,7 @@ Analisis\_Caligrafico & Intentos & 1:1 \\
 
 \paragraph{Obligatoriedad de campos}
 
-Se establecieron restricciones \texttt{NOT NULL} en todos los atributos que son indispensables para el funcionamiento del sistema, garantizando que ningún registro pueda ser insertado sin la información mínima requerida. Los campos marcados como \texttt{NULL} corresponden a información opcional o generada de forma asíncrona, como el texto detectado por OCR o los scores de análisis, los cuales se completan una vez procesado el intento.
+Se establecieron restricciones \texttt{NOT NULL} en los atributos indispensables para el funcionamiento del sistema. Los valores nulos representan información opcional o aún no disponible. En el flujo actual, la transcripción puede ser nula cuando Cloud Vision está desactivado; las puntuaciones caligráficas permanecen sin cálculo automático hasta implementar el módulo correspondiente.
 
 \subsubsection{Implementación de la vista vw\_historial\_alumno}
 
@@ -174,9 +182,11 @@ La vista \texttt{vw\_historial\_alumno} se creó con el objetivo de consolidar e
     \item \textbf{Normalización:} permite mantener el modelo de datos normalizado sin sacrificar la facilidad de consulta, ya que la vista actúa como capa de abstracción sobre las relaciones existentes sin almacenar datos redundantes.
 \end{itemize}
 
-Se utilizaron \texttt{LEFT JOIN} en las tablas de análisis para contemplar el caso en que un intento recién enviado aún no haya sido procesado por los módulos OCR y NLP, mostrando \texttt{NULL} en los scores mientras el análisis está pendiente.
+Se utilizaron \texttt{LEFT JOIN} en las tablas de análisis para conservar en las consultas los intentos que todavía no tienen registros de evaluación asociados. Las puntuaciones ausentes se muestran como \texttt{NULL}; no equivalen a cero ni implican que exista un proceso de análisis en segundo plano.
 
-\begin{lstlisting}[language=SQL, caption={Implementación de la vista vw\_historial\_alumno}]
+En el Código~\ref{lst:vista_historial_alumno} se presenta la definición de la vista \texttt{vw\_historial\_alumno}, que integra los intentos y sus resultados de análisis.
+
+\begin{lstlisting}[language=SQL, caption={Implementación de la vista vw\_historial\_alumno}, label={lst:vista_historial_alumno}]
 CREATE VIEW vw_historial_alumno AS
 SELECT
     a.id_alumno,
@@ -217,7 +227,9 @@ GO
 Una vez creada la vista, el historial completo de un alumno se obtiene desde el controlador mediante una consulta directa, filtrando por \texttt{id\_alumno} y ordenando por fecha de envío descendente, sin necesidad de replicar la lógica de JOIN en cada petición.
 
 
-\begin{lstlisting}[language=SQL, caption={Consulta del historial de un alumno mediante la vista}]
+En el Código~\ref{lst:consulta_historial_alumno} se presenta la consulta del historial de un alumno, filtrada por su identificador y ordenada por fecha de envío.
+
+\begin{lstlisting}[language=SQL, caption={Consulta del historial de un alumno mediante la vista}, label={lst:consulta_historial_alumno}]
 SELECT *
 FROM vw_historial_alumno
 WHERE id_alumno = @id_alumno
@@ -232,7 +244,9 @@ Ambos triggers manejan dos escenarios: la creación del primer registro de progr
 
 \textbf{Trigger sobre Analisis\_Ortografico}
 \vspace{0.5cm}
-\begin{lstlisting}[language=SQL, caption={Trigger de actualización del promedio ortográfico}]
+En el Código~\ref{lst:trigger_ortografia} se presenta el trigger encargado de actualizar el promedio ortográfico del alumno.
+
+\begin{lstlisting}[language=SQL, caption={Trigger de actualización del promedio ortográfico}, label={lst:trigger_ortografia}]
 CREATE TRIGGER trg_actualizar_progreso_ortografia
 ON Analisis_Ortografico
 AFTER INSERT
@@ -288,7 +302,9 @@ GO
 \textbf{Trigger sobre Analisis\_Caligrafico}
 \vspace{0.5cm}
 
-\begin{lstlisting}[language=SQL, caption={Trigger de actualización de promedios caligráficos}]
+En el Código~\ref{lst:trigger_caligrafia} se presenta el trigger encargado de actualizar los promedios de las métricas caligráficas del alumno.
+
+\begin{lstlisting}[language=SQL, caption={Trigger de actualización de promedios caligráficos}, label={lst:trigger_caligrafia}]
 CREATE TRIGGER trg_actualizar_progreso_caligrafico
 ON Analisis_Caligrafico
 AFTER INSERT
@@ -360,3 +376,5 @@ GO
 \input{Capitulo5/AuthDev.tex}
 \input{Capitulo5/EjeDev.tex}
 \input{Capitulo5/CapturaDev.tex}
+
+\input{Capitulo5/VisionDev.tex}

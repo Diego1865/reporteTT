@@ -35,20 +35,18 @@ Ante este panorama, surge la necesidad de explorar alternativas que permitan ana
 \subsection{Propuesta de solución}
 Para atender la problemática identificada, se propone el desarrollo e implementación de una aplicación web orientada al fortalecimiento de la escritura en letra de molde en alumnos de primer grado de educación primaria. La solución integra herramientas tecnológicas que permiten analizar textos manuscritos y generar retroalimentación automatizada dentro de un entorno educativo supervisado.
 
-La aplicación permitirá la captura de ejercicios mediante escritura directa en pantalla o carga de imágenes digitalizadas. Posteriormente, se emplearán técnicas de OCR para convertir el texto manuscrito en formato digital, y herramientas de NLP para detectar posibles errores ortográficos y sugerir correcciones.
+La aplicación permitirá la captura de ejercicios mediante escritura directa en pantalla o carga de imágenes digitalizadas. Posteriormente, se utiliza la API de Google Cloud Vision para convertir el texto manuscrito en formato digital, y herramientas de NLP para detectar posibles errores ortográficos y sugerir correcciones.
 
-Asimismo, se evaluarán parámetros básicos relacionados con la legibilidad del trazo, alineación, tamaño, espaciado e inclinación. La aplicación será desplegada en un servidor funcional y validado mediante una prueba piloto, con el fin de analizar su impacto preliminar en el fortalecimiento de la escritura.
+Asimismo, se evaluarán parámetros básicos relacionados con la legibilidad del trazo, alineación, tamaño, separación y uniformidad del trazo. La aplicación será desplegada en un servidor funcional y validado mediante una prueba piloto, con el fin de analizar su impacto preliminar en el fortalecimiento de la escritura.
 
 \subsection{Justificación}
-La práctica de las habilidades de escritura en educación primaria representa una necesidad prioritaria dentro del proceso formativo, debido a su impacto directo en el desempeño académico y en el desarrollo integral del estudiante. La alfabetización efectiva en etapas tempranas se asocia con mejores resultados educativos a largo plazo y mayor capacidad de aprendizaje en distintas áreas del conocimiento \cite{worldbank2018promise}.
+El desarrollo de esta aplicación se justifica por la necesidad de apoyar la adquisición inicial de la escritura en estudiantes de primer grado de educación primaria. En esta etapa, el aprendizaje comprende el reconocimiento y trazado de letras, su relación con los sonidos y la identificación de convenciones espaciales de la escritura. Estos aprendizajes se encuentran contemplados en los contenidos de primer grado del Programa Sintético de la Fase 3 de la SEP \cite{sep2024fase3}.
 
-En el contexto nacional, los reportes recientes sobre el estado de la educación han señalado la importancia de implementar estrategias que apoyen el desarrollo de competencias comunicativas desde los primeros grados escolares \cite{mejoredu2023retos}. La detección temprana de errores ortográficos y dificultades en la escritura permite intervenir oportunamente, evitando que dichas problemáticas se consoliden en niveles educativos posteriores.
+En correspondencia con este contexto, se propone una herramienta complementaria para realizar actividades breves de escritura manuscrita y facilitar su revisión por parte del docente. Los ejercicios deberán utilizar nombres, palabras familiares y producciones acordes con el avance del alumno. La retroalimentación tendrá un carácter formativo y considerará que las producciones no convencionales pueden formar parte del proceso de aprendizaje, por lo que requieren interpretación docente.
 
-Desde el ámbito tecnológico, el uso de herramientas basadas en inteligencia artificial en entornos educativos ha demostrado potencial para mejorar procesos de retroalimentación y seguimiento académico cuando se emplean como apoyo complementario al docente \cite{unesco2021ai}. La posibilidad de automatizar ciertos procesos de análisis no busca sustituir la labor pedagógica, sino fortalecerla mediante información adicional que facilite la toma de decisiones educativas.
+El aporte tecnológico consiste en integrar la captura de escritura, su transcripción mediante Google Cloud Vision y el registro de resultados para apoyar el seguimiento individual. Como desarrollo pendiente, se incorporarán métricas de alineación, tamaño, separación y uniformidad del trazo. Estas mediciones deberán calibrarse con criterios docentes y utilizarse como indicadores complementarios de la revisión.
 
-Asimismo, el proyecto resulta viable desde el punto de vista técnico, al apoyarse en tecnologías consolidadas como el reconocimiento de patrones y el análisis lingüístico automatizado, las cuales han mostrado niveles adecuados de precisión en distintos contextos \cite{goodfellow2016deep}. Su implementación en un entorno controlado mediante una prueba piloto permite evaluar su funcionamiento real y analizar su impacto preliminar.
-
-Por lo anterior, el desarrollo de la aplicación propuesta se justifica por su pertinencia educativa, su aporte tecnológico y su potencial contribución al fortalecimiento de habilidades fundamentales en educación básica.
+Finalmente, la pertinencia de la aplicación se evaluará mediante una prueba piloto que examine su usabilidad, la calidad del reconocimiento y la utilidad de la información para el docente. Los posibles cambios en el desempeño del alumnado se analizarán como resultados exploratorios, sin asumir de antemano una mejora atribuible al sistema.
 
 %---- OBJETIVOS
 
@@ -63,10 +61,10 @@ Desarrollar una aplicación web interactiva para la práctica de la escritura ma
 Los objetivos específicos del proyecto se centran en:
 
 \begin{itemize}
-    \item OE-01. Seleccionar y adaptar datasets existentes de escritura manuscrita con letra de molde, incorporando muestras con caracteres acentuados para garantizar la variabilidad necesaria en el entrenamiento y validación de los modelos.
+    \item OE-01. Conformar un conjunto de evaluación de escritura manuscrita en letra de molde, con transcripciones manuales y caracteres propios del español, para validar Google Cloud Vision y calibrar las métricas caligráficas.
     \item OE-02. Desarrollar el módulo de captura digital de escritura manuscrita con letra de molde, con validaciones de calidad de imagen en el cliente.
-    \item OE-03. Desarrollar un sistema de OCR especializado en escritura infantil, que alcance una precisión mínima del 85\% en un conjunto de validación representativo.
-    \item OE-04. Desarrollar un módulo de extracción de métricas caligráficas (alineación, tamaño, espaciado e inclinación) que permita evaluar la legibilidad de la escritura con criterios cuantificables.
+    \item OE-03. Integrar y validar Google Cloud Vision para reconocer escritura infantil en español, con una meta de tasa de error por carácter (CER) no mayor al 15\% en un conjunto representativo reservado para evaluación.
+    \item OE-04. Desarrollar un módulo de extracción de métricas caligráficas (alineación, tamaño, separación y uniformidad del trazo) que permita evaluar la legibilidad de la escritura con criterios cuantificables.
     \item OE-05. Implementar un módulo de análisis ortográfico basado en NLP que identifique errores y genere sugerencias de corrección con una tasa de detección mayor o igual al 85\% en pruebas controladas.
     \item OE-06. Diseñar e implementar un módulo de ejercicios que asigne actividades de refuerzo a partir de las métricas caligráficas y el análisis ortográfico.
     \item OE-07. Desarrollar el Front-End interactivo y responsivo, adecuado al nivel cognitivo de estudiantes de primaria y compatible con distintos dispositivos.

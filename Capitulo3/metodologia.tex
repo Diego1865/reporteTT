@@ -29,7 +29,7 @@ Cada iteración del modelo sigue cuatro cuadrantes fundamentales:
 
 La metodología en Espiral es la más adecuada para este proyecto debido a la naturaleza
 de sus componentes de Inteligencia Artificial y Visión por Computadora, los cuales
-requieren iteraciones de entrenamiento, validación y ajuste que una metodología lineal
+requieren iteraciones de integración, validación y calibración que una metodología lineal
 no permite gestionar eficazmente. En cada vuelta de la espiral se construye un
 incremento del sistema, se prueba y se reduce el riesgo acumulado.
 
@@ -38,7 +38,7 @@ Entre las razones específicas que justifican esta elección destacan:
 \begin{itemize}
     \item \textbf{Alta incertidumbre técnica.} La integración de OCR especializado en
     escritura infantil en español y de módulos de NLP implica decisiones tecnológicas —
-    selección de modelos, datasets, estrategias de \textit{fine-tuning} — cuyo resultado
+    configuración de Cloud Vision, selección de muestras y calibración de métricas — cuyo resultado
     no puede garantizarse desde el inicio del proyecto.
 
     \item \textbf{Gestión explícita de riesgos.} Dado que el proyecto presenta riesgos en múltiples dimensiones: técnicos (precisión del OCR
@@ -65,8 +65,8 @@ del Trabajo Terminal. Las iteraciones 1 y 2 (correspondientes a TT1) se enfocaro
 la construcción de la infraestructura web, la recolección del dataset y el
 preprocesamiento de imágenes, mitigando tempranamente los riesgos asociados a la
 calidad de la entrada. Las iteraciones 3 y 4 (correspondientes a TT2) abordarán la
-implementación de los modelos de Inteligencia Artificial (OCR y NLP) y la validación
-final con usuarios, asegurando que los componentes críticos se desarrollen sobre una
+validación de Cloud Vision, el desarrollo del análisis caligráfico y lingüístico y las pruebas
+finales con usuarios, asegurando que los componentes críticos se desarrollen sobre una
 base de datos validada y estable.
 
 \paragraph{Etapa 1 — Trabajo Terminal I: Fundamentos y Procesamiento Visual}
@@ -98,7 +98,7 @@ Backend) y el módulo de digitalización de escritura.
 
 \textit{Objetivo:} Seleccionar y adaptar datasets existentes de escritura manuscrita
 con letra de molde e incorporar muestras adicionales, incluyendo caracteres con tilde,
-para completar la variabilidad necesaria en el entrenamiento y validación de los modelos
+para completar la variabilidad necesaria en el validación del servicio
 de reconocimiento.
 
 \textit{Actividades principales:}
@@ -113,7 +113,7 @@ de reconocimiento.
 \textit{Gestión de riesgos:}
 \begin{itemize}
     \item \textbf{Riesgo:} Insuficiencia de datos públicos en español para el
-    entrenamiento de modelos.
+    validación del servicio de reconocimiento.
     \item \textbf{Mitigación:} Creación de un dataset propio validado para integrarlo
     con un conjunto existente, asegurando la diversidad caligráfica necesaria para el
     siguiente ciclo.
@@ -121,10 +121,9 @@ de reconocimiento.
 
 \paragraph{Etapa 2 — Trabajo Terminal II: Inteligencia Artificial e Integración}
 
-En esta etapa se integran los modelos de aprendizaje profundo y procesamiento de
-lenguaje natural, utilizando los datos procesados en la etapa anterior.
+En esta etapa se valida la integración de Cloud Vision y se completa el análisis del trazo y del contenido textual, utilizando las muestras de evaluación.
 
-\textbf{Iteración 3: Implementación de Modelos OCR y Métricas Caligráficas}
+\textbf{Iteración 3: Integración de Cloud Vision y Métricas Caligráficas}
 
 \textit{Objetivo:} Integrar el motor de Reconocimiento Óptico de Caracteres (OCR) y
 los algoritmos de evaluación de calidad del trazo, así como la generación del módulo
@@ -132,10 +131,10 @@ de retroalimentación mediante ejercicios correctivos.
 
 \textit{Actividades principales:}
 \begin{itemize}
-    \item Entrenamiento y \textit{fine-tuning} del modelo OCR (TrOCR/Tesseract)
-    utilizando el corpus generado en la Iteración 2.
-    \item Programación de métricas geométricas para evaluar inclinación, espaciado y
-    tamaño de letra.
+    \item Integración y validación de Google Cloud Vision
+    utilizando el corpus de evaluación de la Iteración 2.
+    \item Programación de métricas geométricas para evaluar alineación, tamaño,
+    separación y uniformidad del trazo.
     \item Validación técnica de la precisión de la transcripción.
     \item Desarrollo del módulo de retroalimentación con ejercicios correctivos.
 \end{itemize}
@@ -144,8 +143,8 @@ de retroalimentación mediante ejercicios correctivos.
 \begin{itemize}
     \item \textbf{Riesgo:} Baja precisión del modelo ante trazos irregulares o
     inmaduros.
-    \item \textbf{Mitigación:} Reentrenamiento iterativo y ajuste de hiperparámetros
-    específicos para la morfología de la letra infantil.
+    \item \textbf{Mitigación:} Evaluación de la captura, las pistas de idioma y las transcripciones
+    mediante referencias manuales de escritura infantil.
 \end{itemize}
 
 \textbf{Iteración 4: Análisis Lingüístico (NLP), Integración y Despliegue}
@@ -184,7 +183,7 @@ del Trabajo Terminal y los entregables principales asociados.
 \hline
 2 & TT1 & Dataset y preprocesamiento & Corpus etiquetado, algoritmos de binarización y segmentación \\
 \hline
-3 & TT2 & OCR y métricas caligráficas & Modelo OCR ajustado, métricas geométricas, módulo de retroalimentación \\
+3 & TT2 & OCR y métricas caligráficas & Servicio Cloud Vision validado, métricas geométricas, módulo de retroalimentación \\
 \hline
 4 & TT2 & NLP, integración y despliegue & Módulo NLP, reportes de progreso, sistema integrado desplegado \\
 \hline

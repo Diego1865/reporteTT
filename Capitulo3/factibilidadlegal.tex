@@ -36,7 +36,7 @@ El desarrollo del sistema se enmarca en el régimen de Trabajo Terminal de la Es
 Respecto al uso de herramientas de terceros, todas las tecnologías seleccionadas para el desarrollo cuentan con licencias compatibles con fines académicos y no comerciales:
 
 \begin{itemize}
-    \item \textbf{Tesseract OCR:} Licencia Apache 2.0, que permite uso, modificación y distribución sin restricciones para fines académicos.
+    \item \textbf{Google Cloud Vision:} Servicio externo sujeto a las condiciones de Google Cloud. El uso de su biblioteca cliente no convierte al servicio en un motor local de libre distribución.
     \item \textbf{FastAPI:} Licencia MIT, de uso libre sin condiciones.
     \item \textbf{React:} Licencia MIT.
     \item \textbf{Dataset Letras Alfabeto Español (Kaggle – Herrera, 2023):} Publicado bajo licencia Creative Commons, compatible con uso académico.
@@ -73,3 +73,4 @@ Programas SEP 1.$^{\circ}$ grado & Plan de Estudios 2017 / Nuestros Saberes 2024
 En razón de lo anterior, el proyecto se considera legalmente factible. El diseño del sistema contempla de forma explícita los requerimientos normativos vigentes en materia de protección de datos de menores, derechos digitales de la infancia y propiedad intelectual académica, sin que ninguna disposición identificada represente un impedimento para su desarrollo o despliegue en un entorno educativo supervisado.
 
 \clearpage % Para asegurar que la tabla no se desborde a la siguiente sección
+La integración transmite imágenes de escritura desde el servidor hacia Google Cloud Vision. El protocolo del proyecto deberá informar este tratamiento y evitar incluir identificadores del alumno en las imágenes cuando no sean necesarios. Las credenciales permanecerán en el servidor y fuera del repositorio. Esta descripción corresponde al flujo técnico y no acredita por sí misma el cumplimiento del protocolo de protección de datos.

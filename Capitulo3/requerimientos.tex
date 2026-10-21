@@ -94,6 +94,8 @@ RF-31 & Realización de actividades sugeridas & \\
 %----- Especificación de requerimientos
 \subsubsection{Especificación de requerimientos funcionales}
 
+De la Tabla~\ref{tab:rf2} a la Tabla~\ref{tab:rf31} se especifican los requerimientos funcionales del sistema, incluidos los requerimientos derivados de RF-23, detallando las condiciones y el comportamiento esperado de cada funcionalidad.
+
 \begin{table}[H]
 \caption{Especificación de requerimiento RF-01}
 \centering
@@ -1060,21 +1062,21 @@ El alumno utiliza únicamente una de las dos modalidades por intento.
 \setlength{\tabcolsep}{6pt}
 \begin{tabular}{|p{7cm}|p{8cm}|}
 \hline
-\multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web analizará automáticamente la imagen del intento de escritura enviado mediante el módulo de reconocimiento óptico de caracteres (OCR), evaluando los aspectos caligráficos del trazo.} \\ \hline
+\multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web analizará automáticamente la imagen del intento de escritura enviado mediante Google Cloud Vision para transcribir el texto, y un módulo complementario para las métricas del trazo.} \\ \hline
 \textbf{Identificador:} RF-26 &
 \textbf{Nombre:} Análisis OCR. \\ \cline{1-1}
 \textbf{Prioridad de desarrollo:} Alta &
 \multicolumn{1}{p{8cm}|}{} \\ \hline
 \textbf{Entrada:} Imagen del intento de escritura enviado por el alumno (trazo digital convertido a imagen o fotografía cargada). &
-\textbf{Salida:} Resultado del análisis caligráfico generado por el módulo OCR, incluyendo el texto reconocido y las observaciones sobre la calidad del trazo. \\ \hline
+\textbf{Salida:} Texto y anotaciones de Cloud Vision; métricas caligráficas al implementar el módulo complementario. \\ \hline
 \multicolumn{2}{|p{15cm}|}{
-\textbf{Descripción:} Una vez que el alumno envía su intento de escritura, el módulo OCR integrado en la aplicación web procesa la imagen para reconocer los caracteres escritos y evaluar los aspectos caligráficos del trazo, como la forma, legibilidad y trazado de las letras.
+\textbf{Descripción:} Una vez que el alumno envía su intento de escritura, Cloud Vision reconoce el texto y sus regiones. El cálculo de alineación, tamaño, separación y uniformidad del trazo se realizará en un módulo local pendiente de implementación.
 
 \vspace{0.2cm}
 \textbf{Precondición:} El alumno debe haber enviado un intento de ejercicio con una imagen válida generada desde el lienzo digital o cargada desde su dispositivo.
 
 \vspace{0.2cm}
-\textbf{Postcondición:} El resultado del análisis caligráfico queda almacenado y disponible para ser procesado por el módulo NLP (RF-27), visualizado por el alumno (RF-16) y consultado por el tutor (RF-09).
+\textbf{Postcondición:} La transcripción y la anotación quedan almacenadas; el texto está disponible para el módulo NLP (RF-27), visualizado por el alumno (RF-16) y consultado por el tutor (RF-09).
 } \\ \hline
 \end{tabular}
 \label{tab:rf26}
@@ -1090,7 +1092,7 @@ El alumno utiliza únicamente una de las dos modalidades por intento.
 \setlength{\tabcolsep}{6pt}
 \begin{tabular}{|p{7cm}|p{8cm}|}
 \hline
-\multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web analizará el texto reconocido por el módulo OCR mediante procesamiento de lenguaje natural (NLP), evaluando los aspectos ortográficos de la escritura del alumno.} \\ \hline
+\multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web analizará el texto reconocido por el módulo OCR mediante NLP, evaluando los aspectos ortográficos de la escritura del alumno.} \\ \hline
 \textbf{Identificador:} RF-27 &
 \textbf{Nombre:} Análisis NLP. \\ \cline{1-1}
 \textbf{Prioridad de desarrollo:} Alta &

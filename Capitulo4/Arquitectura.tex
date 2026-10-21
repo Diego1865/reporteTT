@@ -17,7 +17,7 @@ La arquitectura se organiza en los siguientes componentes principales:
 
 Esta separación en capas facilita el mantenimiento, las pruebas unitarias y futuras mejoras del sistema, especialmente la integración de los módulos OCR y NLP en TT2.
 
-\subsubsection{Patrón de Diseño DAO (Data Access Object)}
+\subsubsection{Patrón de Diseño DAO}
 
 El patrón DAO implementado en este proyecto abstrae completamente la lógica de acceso a datos, permitiendo una separación clara entre la lógica de negocio y la persistencia de datos en SQL Server. Esta arquitectura facilita el mantenimiento, las pruebas y futuras migraciones de bases de datos.
 
@@ -32,6 +32,8 @@ El proyecto organiza las funciones DAO en módulos específicos para cada domini
 \end{itemize}
 
 Cada módulo DAO encapsula las consultas SQL y la conexión a la base de datos, exponiendo funciones con nombres descriptivos que reflejan la operación que realizan.
+
+En el Código~\ref{lst:dao_estructura} se muestran las funciones de acceso a datos organizadas por módulo.
 
 \begin{lstlisting}[language=Python, label=lst:dao_estructura, caption={Estructura de funciones DAO por módulo}]
 # dao_alumno.py
@@ -72,7 +74,7 @@ def obtener_hash_contrasena_dao(id_usuario)
 
 \subsubsection{Ejemplo de Implementación DAO}
 
-A continuación se muestra un ejemplo de cómo los DAOs abstraen la lógica de base de datos:
+En el Código~\ref{lst:dao_ejemplo} se muestra una función DAO para consultar ejercicios próximos, que ilustra la abstracción de la lógica de acceso a la base de datos:
 
 \begin{lstlisting}[language=Python, label=lst:dao_ejemplo, caption={Ejemplo de función DAO para obtener ejercicios próximos}]
 def obtener_ejercicios_proximos_dao(id_usuario):
@@ -98,9 +100,12 @@ El backend organiza los endpoints en tres grupos principales basados en el tipo 
 
 El módulo de autenticación (implementado en \texttt{Control/auth.py}) gestiona la creación de sesiones, login y validación de credenciales. Los endpoints en esta sección no requieren autenticación previa.
 
+En la Tabla~\ref{tab:arquitectura_auth} se describen los endpoints de autenticación, sus métodos HTTP y su propósito.
+
 \begin{table}[H]
 \centering
 \caption{Endpoints de Autenticación}
+\label{tab:arquitectura_auth}
 \begin{tabular}{|l|c|p{8cm}|} % Se modificó la última columna a p{8cm}
 \hline
 \textbf{Método} & \textbf{Endpoint} & \textbf{Descripción} \\
@@ -120,9 +125,12 @@ El login verifica las credenciales contra la tabla \texttt{Usuario} y retorna un
 
 Estos endpoints (implementados en \texttt{Control/alumno.py}) permiten a los alumnos interactuar con la plataforma de práctica. Todos requieren autenticación y verifican que el usuario sea de tipo \texttt{alumno} mediante el decorador \texttt{@require\_alumno}.
 
+En la Tabla~\ref{tab:arquitectura_alumnos} se describen los endpoints disponibles para los alumnos y las operaciones que permiten realizar.
+
 \begin{table}[H]
 \centering
 \caption{Endpoints para Alumnos}
+\label{tab:arquitectura_alumnos}
 \begin{tabular}{|l|c|l|}
 \hline
 \textbf{Método} & \textbf{Endpoint} & \textbf{Descripción} \\
@@ -148,10 +156,13 @@ GET & \texttt{/api/alumno/ejercicios/vencidos} & Listar ejercicios vencidos \\
 
 Estos endpoints (implementados en \texttt{Control/tutor.py}) permiten a los tutores gestionar sus grupos de alumnos, revisar su progreso y activar ejercicios. Todos requieren autenticación y verifican que el usuario sea de tipo \texttt{tutor} mediante el decorador \texttt{@require\_tutor}.
 
+En la Tabla~\ref{tab:arquitectura_tutor_alumnos} se describen los endpoints del tutor para registrar alumnos, consultar su desempeño y gestionar su estado.
+
 \begin{table}[H]
 \centering
 \small
 \caption{Endpoints para Tutores - Gestión de Alumnos}
+\label{tab:arquitectura_tutor_alumnos}
 \begin{tabular}{|l|c|l|}
 \hline
 \textbf{Método} & \textbf{Endpoint} & \textbf{Descripción} \\
@@ -173,9 +184,12 @@ GET & \texttt{/api/tutor/progreso/\{id\_tutor\}} & Gráfico de progreso general 
 \end{tabular}
 \end{table}
 
+En la Tabla~\ref{tab:arquitectura_tutor_perfil} se describen los endpoints para actualizar los datos del tutor y desactivar su cuenta.
+
 \begin{table}[H]
 \centering
 \caption{Endpoints para Tutores - Gestión de Perfil}
+\label{tab:arquitectura_tutor_perfil}
 \begin{tabular}{|l|c|l|}
 \hline
 \textbf{Método} & \textbf{Endpoint} & \textbf{Descripción} \\
@@ -191,9 +205,12 @@ DELETE & \texttt{/api/tutor/eliminar} & Desactivar cuenta \\
 \end{tabular}
 \end{table}
 
+En la Tabla~\ref{tab:arquitectura_tutor_ejercicios} se describen los endpoints del tutor para consultar intentos, asignar calificaciones y gestionar ejercicios.
+
 \begin{table}[H]
 \centering
 \caption{Endpoints para Tutores - Gestión de Intentos y Ejercicios}
+\label{tab:arquitectura_tutor_ejercicios}
 \begin{tabular}{|l|c|l|}
 \hline
 \textbf{Método} & \textbf{Endpoint} & \textbf{Descripción} \\
@@ -218,6 +235,8 @@ DELETE & \texttt{/api/tutor/ejercicio/desactivar/\{id\}/\{id\_ej\}} & Desactivar
 Los tokens JWT se utilizan para autenticar y autorizar las solicitudes posteriores al login. Cada token contiene información sobre el usuario y su rol, permitiendo al servidor validar permisos sin consultar la base de datos en cada solicitud.
 
 \subsubsection{Estructura del Token JWT}
+
+En el Código~\ref{lst:jwt_payload} se muestra la estructura del payload de un token JWT con los campos que identifican al usuario.
 
 \begin{lstlisting}[language=JSON, label=lst:jwt_payload, caption={Estructura del payload de un token JWT generado por el sistema}]
 {
@@ -254,7 +273,7 @@ El sistema implementa un control de acceso basado en roles que asegura que cada 
     \end{itemize}
 \end{itemize}
 
-La validación del rol se realiza mediante decoradores en FastAPI que verifican el token JWT:
+En el Código~\ref{lst:rbac_decorator} se muestra la validación del rol de alumno mediante una dependencia de FastAPI que verifica el token JWT:
 
 \begin{lstlisting}[language=Python, label=lst:rbac_decorator, caption={Validación de rol mediante decoradores - Alumno}]
 from fastapi import Depends
@@ -273,6 +292,8 @@ def actualizar_info_alumno(
                                id_usuario)
     return {"message": "Informacion actualizada correctamente"}
 \end{lstlisting}
+
+En el Código~\ref{lst:rbac_decorator_tutor} se muestran la validación del rol de tutor y la comprobación de acceso a los alumnos que le corresponden.
 
 \begin{lstlisting}[language=Python, label=lst:rbac_decorator_tutor, caption={Validación de rol mediante decoradores - Tutor}]
 from fastapi import Depends
@@ -320,6 +341,8 @@ Los contratos de datos definen la estructura de los objetos que se intercambian 
 
 \subsubsection{Esquemas de Autenticación}
 
+En el Código~\ref{lst:schemas_auth} se muestran los esquemas de datos utilizados en las operaciones de autenticación y administración de la cuenta.
+
 \begin{lstlisting}[language=Python, label=lst:schemas_auth, caption={Schemas de autenticación}]
 class LoginRequest(BaseModel):
     username: str
@@ -345,6 +368,8 @@ class DeleteAccount(BaseModel):
 \end{lstlisting}
 
 \subsubsection{Esquemas de Alumno}
+
+En el Código~\ref{lst:schemas_alumno} se muestran los esquemas de datos para el registro, la consulta del progreso y el envío de intentos del alumno.
 
 \begin{lstlisting}[language=Python, label=lst:schemas_alumno, caption={Schemas de datos de Alumno}]
 class AlumnoCreate(BaseModel):
@@ -386,6 +411,8 @@ class IntentoCreate(BaseModel):
 \end{lstlisting}
 
 \subsubsection{Esquemas de Tutor}
+
+En el Código~\ref{lst:schemas_tutor} se muestran los esquemas de datos para actualizar la información del tutor.
 
 \begin{lstlisting}[language=Python, label=lst:schemas_tutor, caption={Schemas de datos de Tutor}]
 class TutorUpdate(BaseModel):
@@ -437,9 +464,12 @@ El token JWT se decodifica en el cliente mediante una función local (\texttt{de
  
 Estos componentes son el punto de entrada a la aplicación y no requieren token JWT.
  
+En la Tabla~\ref{tab:componentes_auth} se describen los componentes que intervienen en el flujo de autenticación de la interfaz.
+
 \begin{table}[H]
 \centering
 \caption{Componentes del flujo de autenticación}
+\label{tab:componentes_auth}
 \begin{tabular}{|l|p{10cm}|} % Se modificó la última columna a p{10cm}
 \hline
 \textbf{Componente} & \textbf{Responsabilidad} \\
@@ -457,9 +487,12 @@ El componente raíz \texttt{MainAlumno.jsx} actúa como controlador del flujo de
  
 El componente organiza la interfaz en cuatro pestañas y gestiona además la vista de resolución de ejercicios:
  
+En la Tabla~\ref{tab:componentes_alumno} se describen los componentes hijos de \texttt{MainAlumno} y sus responsabilidades dentro de la interfaz.
+
 \begin{table}[H]
 \centering
 \caption{Componentes hijos de \texttt{MainAlumno}}
+\label{tab:componentes_alumno}
 \small
 \begin{tabular}{|l|l|p{8cm}|}
 \hline
@@ -509,7 +542,7 @@ Implementa la captura de imágenes del trabajo manuscrito en papel. Sus funciona
     \item Conversión final a Base64 en formato JPEG con calidad del 80\%
 \end{itemize}
  
-Ambos componentes construyen y envían el mismo payload al mismo endpoint:
+En el Código~\ref{lst:fetch-intento} se muestra cómo ambos componentes construyen y envían el mismo payload al endpoint de registro de intentos:
  
 \begin{lstlisting}[language=JSX, caption={Envío de intento desde el Front-End}, label={lst:fetch-intento}]
 const response = await fetch(
@@ -532,9 +565,12 @@ const response = await fetch(
  
 El componente raíz \texttt{MainTutor.jsx} actúa como controlador del flujo del tutor. Al montarse, decodifica el JWT para obtener el \texttt{id\_usuario} del tutor y su nombre, y organiza la interfaz en cuatro pestañas principales:
  
+En la Tabla~\ref{tab:componentes_tutor} se describen los componentes hijos de \texttt{MainTutor} y sus responsabilidades dentro de la interfaz.
+
 \begin{table}[H]
 \centering
 \caption{Componentes hijos de \texttt{MainTutor}}
+\label{tab:componentes_tutor}
 \begin{tabular}{|l|l|p{8cm}|}
 \hline
 \textbf{Componente} & \textbf{Pestaña} & \textbf{Responsabilidad} \\
@@ -554,70 +590,19 @@ El componente raíz \texttt{MainTutor.jsx} actúa como controlador del flujo del
  
 El \texttt{ModalDetalleAlumno} se instancia dentro de \texttt{MainTutor} y consume el endpoint \texttt{GET /api/tutor/intentos/\{id\_tutor\}}, filtrando los resultados en el cliente por \texttt{id\_alumno} para mostrar únicamente los intentos del alumno seleccionado.
 
-\subsubsection{Estado Actual de Implementación}
+\subsubsection{Estado actual e integración del reconocimiento}
+La aplicación dispone de autenticación JWT, rutas por actor, validación con Pydantic, acceso a datos mediante DAO y captura y registro de intentos. El reconocimiento ya está integrado mediante \texttt{Servicios/ocr.py}, que consume Google Cloud Vision cuando la configuración lo habilita. El DAO solicita el reconocimiento y la evaluación textual preliminar durante el registro, y conserva la respuesta en \texttt{resultado\_ocr\_json}.
 
-Se han completado satisfactoriamente las siguientes áreas:
+El análisis automático de alineación, tamaño, separación y uniformidad del trazo está pendiente. También quedan por completar la calibración pedagógica y la incorporación de estas mediciones a los reportes de progreso. El diseño de este módulo se presenta en la Sección~\ref{sec:vision-metricas}; su estado se distingue del reconocimiento y la comparación textual ya implementados.
 
-\begin{itemize}
-    \item[\checkmark] Patrón DAO con abstracción completa de acceso a datos
-    \item[\checkmark] Sistema de autenticación con tokens JWT
-    \item[\checkmark] Rutas organizadas por actor (Alumnos, Tutores, Autenticación)
-    \item[\checkmark] Control de acceso basado en roles (RBAC)
-    \item[\checkmark] Modelos de datos y validación automática con Pydantic
-    \item[\checkmark] Registro y captura de intentos de práctica
-    \item[\checkmark] Gestión de ejercicios (activación, desactivación)
-    \item[\checkmark] Clasificación de alumnos por desempeño
-    \item[\checkmark] Sistema de reportes básicos para tutores
-\end{itemize}
+\subsubsection{Responsabilidades y extensiones previstas}
+El navegador envía la imagen al Back-End; solo el servidor se autentica ante Cloud Vision. El proveedor devuelve texto y anotaciones. El procesamiento local compara el contenido con referencias configuradas y, en una futura extensión, medirá el trazo sobre la imagen. Las respuestas automáticas requieren revisión del tutor y no asignan actualmente una calificación.
 
-Las siguientes áreas están pendientes para ser implementadas en TT2:
-
-\begin{itemize}
-    \item[$\circ$] Integración del módulo OCR para análisis automático de imágenes
-    \item[$\circ$] Integración del módulo NLP para detección de errores ortográficos
-    \item[$\circ$] Cálculo automático de métricas de legibilidad
-    \item[$\circ$] Generación de retroalimentación automática basada en IA
-    \item[$\circ$] Módulo de reportes avanzados con visualizaciones
-\end{itemize}
-
-\subsection{Decisiones Arquitectónicas Abiertas para próximas iteraciones}
-
-Por la naturaleza modular de la arquitectura implementada, la integración de los módulos OCR y NLP en TT2 se realizará sin afectar las funcionalidades ya implementadas. Se han dejado puntos de extensión claros en el flujo de procesamiento de intentos para incorporar estas nuevas funcionalidades.
-
-\subsubsection{Integración del Módulo OCR}
-
-El módulo de OCR (Reconocimiento Óptico de Caracteres) se integrará en TT2. La arquitectura actual prepara los puntos de conexión necesarios:
-
-\begin{itemize}
-    \item El endpoint POST \texttt{/api/alumno/intento} ya recibe la imagen codificada (\texttt{imagen\_codificada})
-    \item La tabla \texttt{Intentos} tiene campos reservados para los resultados del OCR: \texttt{texto\_detectado\_ocr}
-    \item El flujo de procesamiento será:
-    \begin{enumerate}
-        \item Alumno envía imagen al endpoint \texttt{/api/alumno/intento}
-        \item Se almacena la imagen en base de datos
-        \item En TT2, se procesará con OCR para extraer texto y métricas de legibilidad
-        \item Los resultados se almacenarán en los campos correspondientes de \texttt{Intentos}
-    \end{enumerate}
-\end{itemize}
-
-\subsubsection{Integración del Módulo NLP}
-
-El módulo de Procesamiento de Lenguaje Natural (NLP) se integrará después del OCR en TT2. Se ha preparado la estructura:
-
-\begin{itemize}
-    \item El texto extraído del OCR será enviado al módulo NLP
-    \item El NLP analizará errores ortográficos y proporcionará sugerencias
-    \item Los campos \texttt{puntuacion} y \texttt{retroalimentacion} de \texttt{Intentos} almacenarán estos resultados
-    \item El endpoint \texttt{PUT /api/tutor/calificar/\{id\_intento\}} permitirá que el tutor revise y modifique la retroalimentación automática
-\end{itemize}
-
-\subsubsection{Métricas de Desempeño}
-
-Los campos \texttt{promedio\_ortografia} y \texttt{promedio\_legibilidad} en la respuesta \texttt{AlumnoProgresoResponse} están preparados para recibir estos datos calculados por los módulos OCR y NLP en próximas iteraciones.
+La ejecución en segundo plano es una posible mejora futura. El flujo implementado espera la respuesta del servicio antes de insertar el intento. Incorporar una cola requerirá definir estados persistentes, reintentos y consulta de resultados, sin describirlos como mecanismos ya disponibles.
 
 \subsection{Diagrama de arquitectura del sistema}
 
-La Figura \ref{fig:arquitectura_completa} muestra el diagrama de arquitectura del sistema, tomando en cuenta que los módulos OCR y NLP están pendientes de integración.
+La Figura \ref{fig:arquitectura_completa} muestra el diagrama de arquitectura del sistema, como vista conceptual de sus capas. El componente OCR corresponde al servicio Google Cloud Vision, invocado desde el servidor; el análisis caligráfico completo permanece pendiente.
 
 \begin{landscape}
     \begin{figure}[H]
