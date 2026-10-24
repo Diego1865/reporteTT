@@ -100,57 +100,74 @@ Brecha digital & Puede generar desigualdades de acceso \\
 
 El análisis de estos factores permite comprender que la tecnología, cuando se implementa como herramienta complementaria y supervisada, puede contribuir significativamente al fortalecimiento de competencias académicas fundamentales, favoreciendo tanto el aprendizaje individual como el desarrollo de habilidades digitales necesarias en el contexto actual.
 
-\subsection{Reconocimiento manuscrito mediante Google Cloud Vision}
-El OCR convierte el contenido textual de una imagen en texto procesable. En este proyecto se implementa mediante Google Cloud Vision, cuya operación de detección de texto en documentos admite escritura manuscrita \cite{googlevisionHandwriting}. El servicio se consume desde el Back-End; el equipo desarrolla la integración, la validación de entradas y el tratamiento de resultados.
+\subsection{Secuencia correcta de letras (CLS)}
 
-La Figura~\ref{fig:OCR} resume el flujo utilizado. El reconocimiento y el análisis caligráfico tienen responsabilidades distintas: la transcripción sirve para comparar el contenido escrito, mientras que las métricas pendientes requieren medir geometría y píxeles de la imagen.
-\begin{figure}[H]
-\centering
-\begin{tikzpicture}[every node/.style={draw, rounded corners, align=center, text width=10cm, minimum height=0.75cm}]
-\node (a) at (0,0) {Captura: lienzo o fotografía};
-\node (b) at (0,-1.15) {Back-End: validación y composición sobre blanco};
-\node (c) at (0,-2.3) {Google Cloud Vision: detección de texto en documentos};
-\node (d) at (0,-3.45) {Transcripción y anotaciones de la escritura};
-\node (e) at (0,-4.6) {Comparación textual, almacenamiento y revisión del tutor};
-\draw[->] (a)--(b); \draw[->] (b)--(c); \draw[->] (c)--(d); \draw[->] (d)--(e);
-\end{tikzpicture}
-\caption{Flujo de reconocimiento integrado en el proyecto. Elaboración propia.}
-\label{fig:OCR}
-\end{figure}
+La secuencia correcta de letras (CLS, por sus siglas en inglés Correct Letter Sequence) es un método de puntuación de la ortografía que se basa únicamente en la corrección ortográfica de la palabra, es decir, en
+las letras convencionales y no en la plausibilidad fonológica de lo escrito \cite{treiman2016measures}. En la literatura se describe como una medida letter sequence: otorga un punto por la primera letra correcta, uno por
+la última letra correcta y uno por cada par de letras consecutivas escrito en el orden correcto \cite{treiman2016measures}.
 
-La anotación completa representa el texto mediante páginas, bloques, párrafos, palabras y símbolos, e incluye regiones delimitadoras y valores de confianza \cite{googlevisionAnnotation}. Estos datos permiten asociar la transcripción con zonas de la imagen. Una región reconocida no equivale a un contorno exacto de tinta, y la confianza del proveedor no es una medida pedagógica de legibilidad.
-
-La escritura infantil presenta variaciones de forma, tamaño y separación que pueden afectar la transcripción. También influyen el desenfoque, la iluminación y la perspectiva de las fotografías. Por ello, el proyecto conserva la imagen para revisión y deberá validar el servicio con muestras representativas. La meta de desempeño se evaluará con referencias manuales que mantengan lo realmente escrito, sin corregir sus faltas de ortografía.
-
-El análisis local del trazo utilizará una copia de la imagen para aislar tinta y medir características espaciales. La binarización de Otsu y los umbrales adaptativos son opciones de procesamiento que deberán evaluarse según la captura \cite{otsu1979threshold,opencvMetricas}. Estas operaciones pertenecen al diseño de las métricas; no se presentan como etapas internas conocidas del servicio de Google ni como procesamiento ya implementado en el proyecto.
-
-\subsection{NLP}
-El NLP es una rama de la inteligencia artificial que permite a los sistemas computacionales analizar, interpretar y generar lenguaje humano de manera automatizada \cite{jurafsky2023speech}. Esta disciplina combina conocimientos de lingüística, informática y aprendizaje automático para procesar texto y extraer información significativa, permitiendo transformar datos textuales en información útil para distintos tipos de aplicaciones.
-
-En el ámbito educativo, el NLP se ha utilizado en aplicaciones como análisis de redacción, detección de errores ortográficos, evaluación automática de textos y generación de retroalimentación personalizada \cite{unesco2021ai}. Estas aplicaciones permiten apoyar el proceso de aprendizaje al proporcionar herramientas que facilitan la identificación de errores y la mejora continua del desempeño del estudiante.
-
-A diferencia del OCR, que convierte imágenes en texto digital, el NLP trabaja directamente sobre el contenido textual, permitiendo su análisis lingüístico. Esta diferencia es fundamental dentro del sistema propuesto, ya que el OCR se encarga de la captura y digitalización del texto manuscrito, mientras que el NLP permite interpretar y analizar dicho contenido, estableciendo una relación directa entre ambas tecnologías.
-El proceso general de detección de errores ortográficos mediante NLP puede representarse de forma conceptual en la Figura \ref{fig:NLP}.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{Imagenes/procesoNLP.png}
-    \caption{Flujo básico del proceso de corrección ortográfica mediante NLP. Elaboración con base en \cite{jurafsky2023speech}.}
-    \label{fig:NLP}
-\end{figure}
+En \textit{aimswebPlus}, una CLS es un par de letras correctamente ordenadas dentro de una sílaba o palabra; por tanto, no equivale a contar letras
+correctas de forma aislada. Además, se consideran los espacios antes y después de la sílaba o palabra, de modo que cada letra extra al inicio o al final se
+penaliza. Cada CLS vale un punto, y una palabra de $n$ letras escrita correctamente obtiene $n+1$ puntos \cite{aimswebplus2025manual}. Como podemos observar en la siguiente tabla \ref{tab:cls_ejemplos} adaptada de \cite{aimswebplus2025manual}, los ejemplos de como se realiza la puntuación de CLS para distintas palabras.
 
 
-Como se muestra en la Figura \ref{fig:NLP}, el procedimiento inicia con el texto digital previamente obtenido. Posteriormente, en la etapa de tokenización, el sistema divide el texto en unidades mínimas, generalmente palabras o tokens individuales, lo cual facilita su análisis individual y contextual dentro de la oración.
+% --- Tabla ---
+\begin{longtable}{@{}l l l c@{}}
+\caption{Ejemplos de puntuación de secuencias correctas de letras (CLS).}
+\label{tab:cls_ejemplos} \\
+\toprule
+\textbf{Sílaba/palabra} & \textbf{Escritura del estudiante} & \textbf{Puntuación*} & \textbf{Puntaje CLS} \\
+\midrule
+\endfirsthead
 
-En la siguiente fase, cada token es comparado con un diccionario léxico o modelo lingüístico entrenado. Si una palabra no coincide con las entradas válidas, el sistema la identifica como posible error ortográfico. Para generar una sugerencia, pueden emplearse algoritmos de similitud como la distancia de Levenshtein o modelos estadísticos que calculan la probabilidad de ocurrencia de una palabra dentro de un contexto determinado \cite{jurafsky2023speech}. Este tipo de técnicas permite no solo detectar errores, sino también proponer alternativas adecuadas.
+\multicolumn{4}{c}{\tablename~\thetable~(continuación)} \\
+\toprule
+\textbf{Sílaba/palabra} & \textbf{Escritura del estudiante} & \textbf{Puntuación*} & \textbf{Puntaje CLS} \\
+\midrule
+\endhead
 
-Este enfoque permite ofrecer retroalimentación automatizada en forma de sugerencias, lo cual resulta útil en entornos educativos cuando se busca apoyar el aprendizaje sin reemplazar la intervención del docente. No obstante, la precisión del sistema depende de la calidad del modelo lingüístico, del contexto del texto y de la claridad del contenido procesado.
+\midrule
+\multicolumn{4}{r}{\textit{Continúa en la siguiente página}} \\
+\endfoot
 
-La integración de NLP dentro del sistema propuesto permite complementar el análisis realizado por el OCR, cerrando el ciclo de procesamiento desde la captura del texto manuscrito hasta la generación de sugerencias ortográficas. Esta integración representa un enfoque más completo para el tratamiento de la información, combinando procesamiento visual y análisis lingüístico.
+\bottomrule
+\multicolumn{4}{@{}p{\linewidth}@{}}{\footnotesize *\textit{Nota.} El símbolo \textcolor{orange!70!black}{\textasciicircum}{} indica una secuencia correcta de letras (CLS). Para esta evaluación, las letras \textit{ch} se cuentan como dos letras.} \\
+\endlastfoot
 
-En los últimos años, el NLP ha experimentado avances significativos gracias al uso de modelos de representación distribuida del lenguaje, conocidos como embeddings, los cuales permiten capturar relaciones semánticas entre palabras en espacios vectoriales de alta dimensión. Estos modelos han demostrado ser efectivos para mejorar tareas de análisis lingüístico, incluyendo la corrección ortográfica contextual y la detección de errores en textos escritos \cite{jurafsky2023speech}.
+\multirow{2}{*}{\textit{do}}
+  & do       & \_\cls d\cls o\cls\_                              & 3 de 3 \\
+  & ba       & \_ba\_                                            & 0 de 3 \\
+\midrule
+\multirow{5}{*}{\textit{gato}}
+  & gato     & \_\cls g\cls a\cls t\cls o\cls\_                  & 5 de 5 \\
+  & goto     & \_\cls got\cls o\cls\_                            & 3 de 5 \\
+  & gata     & \_\cls g\cls a\cls ta\_                           & 3 de 5 \\
+  & gatos    & \_\cls g\cls a\cls t\cls os\_                     & 4 de 5 \\
+  & godos    & \_\cls godos\_                                    & 1 de 5 \\
+\midrule
+\multirow{2}{*}{\textit{soledad}}
+  & soledad  & \_\cls s\cls o\cls l\cls e\cls d\cls a\cls d\cls\_ & 8 de 8 \\
+  & soldad   & \_\cls s\cls o\cls ld\cls a\cls d\cls\_           & 6 de 8 \\
+\midrule
+\multirow{3}{*}{\textit{muchacho}}
+  & muchacho & \_\cls m\cls u\cls c\cls h\cls a\cls c\cls h\cls o\cls\_ & 9 de 9 \\
+  & machacho & \_\cls mac\cls h\cls a\cls c\cls h\cls o\cls\_     & 7 de 9 \\
+  & muchacha & \_\cls m\cls u\cls c\cls h\cls a\cls c\cls ha\_    & 7 de 9 \\
+\midrule
+\multirow{3}{*}{\textit{casa}}
+  & casa     & \_\cls c\cls a\cls s\cls a\cls\_                  & 5 de 5 \\
+  & caas     & \_\cls c\cls aa\cls s\_                           & 3 de 5 \\
+  & casas    & \_\cls c\cls a\cls s\cls as                       & 4 de 5 \\
+\end{longtable}
 
-Asimismo, el uso de modelos más avanzados basados en arquitecturas modernas ha permitido mejorar la comprensión del contexto dentro de una oración, lo que resulta especialmente útil en aplicaciones educativas donde los errores pueden depender no solo de la forma de la palabra, sino de su uso dentro de una estructura gramatical. Esto permite generar sugerencias más precisas y adaptadas al contexto real del usuario.
+Este método es no binario, por lo que distingue entre errores de distinta
+gravedad. Si un estudiante escribe gata en lugar de gato, obtiene
+3 de 5 puntos, y si escribe gatos, obtiene 4 de 5
+\cite{aimswebplus2025manual}. Treiman et al. encontraron que la
+medida letter sequence fue uno de los mejores predictores de la
+ortografía en primer grado ($r = .63$), por encima de los métodos basados en
+fonemas, y que su cálculo no requiere adaptarse a cada lengua o dialecto
+\cite{treiman2016measures}.
 
 \subsection{Evaluación del trazo manuscrito}
 
@@ -174,13 +191,37 @@ Legibilidad & Claridad visual de los caracteres & Valoración docente apoyada en
 Alineación & Ubicación uniforme sobre línea base & Desviación vertical promedio \\ \hline
 Tamaño & Proporción consistente de las letras & Altura mediana y dispersión de letras comparables \\ \hline
 Espaciado & Separación adecuada entre letras & Separaciones normalizadas entre letras y palabras \\ \hline
-Uniformidad & Consistencia en forma y grosor del trazo & Dispersión del grosor estimado sobre el esqueleto \\ \hline
 \end{tabular}
 \end{table}
 
 Como se observa en la Tabla \ref{tab:parametros_evaluacion}, los parámetros seleccionados combinan criterios pedagógicos tradicionales con posibles métricas de análisis digital. Esta integración permite establecer un modelo básico de evaluación que apoye el seguimiento del desempeño del estudiante sin reemplazar la interpretación docente, sino más bien complementándola.
 
 La incorporación de estos indicadores dentro del sistema propuesto busca complementar el análisis ortográfico realizado mediante NLP, ofreciendo una visión más integral del proceso de escritura. De esta manera, el sistema no solo evalúa la corrección del texto, sino también la calidad del trazo manuscrito, integrando así componentes visuales y lingüísticos dentro de una misma solución tecnológica.
+
+
+\subsection{Reconocimiento manuscrito mediante Google Cloud Vision}
+El OCR convierte el contenido textual de una imagen en texto procesable. En este proyecto se implementa mediante Google Cloud Vision, cuya operación de detección de texto en documentos admite escritura manuscrita \cite{googlevisionHandwriting}. El servicio se consume desde el Back-End; el equipo desarrolla la integración, la validación de entradas y el tratamiento de resultados.
+
+La Figura~\ref{fig:OCR} resume el flujo utilizado. El reconocimiento y el análisis caligráfico tienen responsabilidades distintas: la transcripción sirve para comparar el contenido escrito, mientras que las métricas pendientes requieren medir geometría y píxeles de la imagen.
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[every node/.style={draw, rounded corners, align=center, text width=10cm, minimum height=0.75cm}]
+\node (a) at (0,0) {Captura: lienzo o fotografía};
+\node (b) at (0,-1.15) {Back-End: validación y composición sobre blanco};
+\node (c) at (0,-2.3) {Google Cloud Vision: detección de texto en documentos};
+\node (d) at (0,-3.45) {Transcripción y anotaciones de la escritura};
+\node (e) at (0,-4.6) {Comparación textual, almacenamiento y revisión del tutor};
+\draw[->] (a)--(b); \draw[->] (b)--(c); \draw[->] (c)--(d); \draw[->] (d)--(e);
+\end{tikzpicture}
+\caption{Flujo de reconocimiento integrado en el proyecto. Elaboración propia.}
+\label{fig:OCR}
+\end{figure}
+
+La anotación completa representa el texto mediante páginas, bloques, párrafos, palabras y símbolos, e incluye regiones delimitadoras y valores de confianza \cite{googlevisionAnnotation}. Estos datos permiten asociar la transcripción con zonas de la imagen. Una región reconocida no equivale a un contorno exacto de tinta, y la confianza del proveedor no es una medida pedagógica de legibilidad.
+
+La escritura infantil presenta variaciones de forma, tamaño y separación que pueden afectar la transcripción. También influyen el desenfoque, la iluminación y la perspectiva de las fotografías. Por ello, el proyecto conserva la imagen para revisión y deberá validar el servicio con muestras representativas. La meta de desempeño se evaluará con referencias manuales que mantengan lo realmente escrito, sin corregir sus faltas de ortografía.
+
+El análisis local del trazo utilizará una copia de la imagen para aislar tinta y medir características espaciales. La binarización de Otsu y los umbrales adaptativos son opciones de procesamiento que deberán evaluarse según la captura \cite{otsu1979threshold,opencvMetricas}. Estas operaciones pertenecen al diseño de las métricas; no se presentan como etapas internas conocidas del servicio de Google ni como procesamiento ya implementado en el proyecto.
 
 \subsection{Arquitectura de la aplicación web}
 El desarrollo de aplicaciones web modernas suele estructurarse bajo patrones de diseño que permiten organizar de manera eficiente los componentes del sistema. Uno de los modelos más utilizados es la arquitectura Modelo Vista Controlador (Model-View-Controller, MVC por sus siglas en inglés), la cual divide la aplicación en tres capas principales: modelo, vista y controlador \cite{sommerville2015software}.
