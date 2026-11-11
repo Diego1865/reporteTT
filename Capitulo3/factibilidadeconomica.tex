@@ -10,7 +10,7 @@ La factibilidad técnica estudia la posibilidad tecnológica para que el proyect
  
 \paragraph{Software}
  
-El software es una parte esencial en la elaboración del proyecto, ya que con este se desarrollará la aplicación web y el servidor. Todas las herramientas seleccionadas tienen costo cero para el equipo, incluyendo GitHub en su plan gratuito, el cual cubre repositorios privados ilimitados, colaboradores ilimitados y 2{,}000 minutos mensuales de CI/CD, suficientes para un equipo de tres personas.
+El software es una parte esencial en la elaboración del proyecto, ya que con este se desarrollará la aplicación web y el servidor. Todas las herramientas seleccionadas tienen costo cero para el equipo, incluyendo GitHub en su plan gratuito, el cual permite repositorios privados y colaboradores ilimitados con funciones limitadas. El uso de automatizaciones de integración y despliegue continuo (CI/CD) se sujetará a la cuota vigente del plan \cite{githubPlans}.
  
 En la Tabla~\ref{tab:software} se presentan las herramientas de software seleccionadas para desarrollar la aplicación y el servidor.
 
@@ -23,24 +23,24 @@ En la Tabla~\ref{tab:software} se presentan las herramientas de software selecci
     \hline
     \textbf{Herramienta} & \textbf{Uso en el proyecto} & \textbf{Tipo} & \textbf{Costo/mes} & \textbf{10 meses} \\
     \hline
-    React / Next.js & Front-End: panel tutor, panel alumno, lienzo digital & Libre & \$0 & N/A \\
+    React \cite{reactDocs} / Next.js \cite{nextDocs} & Front-End: panel tutor, panel alumno, lienzo digital & Libre & \$0 & N/A \\
     \hline
-    FastAPI (Python) & Back-End: endpoints REST, lógica de negocio, JWT & Libre & \$0 & N/A \\
+    FastAPI (Python) \cite{fastapiDocs} & Back-End: endpoints REST, lógica de negocio, JWT & Libre & \$0 & N/A \\
     \hline
     SQL Server Express & Base de datos: tablas, triggers, vistas, restricciones & Libre & \$0 & N/A \\
     \hline
-    Docker & Contenedorización y despliegue & Libre & \$0 & N/A \\
+    Docker \cite{dockerDocs} & Contenedorización y despliegue & Libre & \$0 & N/A \\
     \hline
-    VS Code & Editor de código fuente & Libre & \$0 & N/A \\
+    VS Code \cite{vscodeDocs} & Editor de código fuente & Libre & \$0 & N/A \\
     \hline
-    GitHub (Free) & Control de versiones, repos privados, CI/CD & Libre & \$0 & N/A \\
+    GitHub (Free) \cite{githubPlans} & Control de versiones, repos privados, CI/CD & Libre & \$0 & N/A \\
     \hline
-    GCP (Compute Engine e2-medium ×3) & Hosting con escalamiento horizontal: VM-1 Front-End, VM-2 Back-End OCR/NLP, VM-3 Base de datos & Pago por uso & \$1,316.80 MXN & \$2,633.60 MXN (2 meses) \\
+    GCP (Compute Engine e2-medium ×3) \cite{gcpE2} & Hosting con escalamiento horizontal: VM-1 Front-End, VM-2 Back-End OCR/NLP, VM-3 Base de datos & Pago por uso & \$1,316.80 MXN & \$2,633.60 MXN (2 meses) \\
     \hline
     \multicolumn{3}{|r|}{\textbf{Total}} & \multicolumn{2}{r|}{\textbf{\$2,633.60 MXN}} \\
     \hline
     \end{tabularx}
-    \footnotesize\textit{Nota: El costo de GCP aplica únicamente durante los 2 meses de prueba piloto. Las demás herramientas operan en entorno local sin costo durante los 10 meses del proyecto.}
+    \footnotesize\textit{Nota: Las referencias de las herramientas documentan sus características; los importes son estimaciones del proyecto y deben verificarse antes de contratar. El costo de GCP aplica únicamente durante los 2 meses de prueba piloto. Las demás herramientas operan en entorno local sin costo durante los 10 meses del proyecto.}
 \end{table}
  
 \paragraph{Hardware}
@@ -69,7 +69,7 @@ iPad / Tablets  & N/A & N/A & N/A & iPadOS/Android & \$10,000 \\
 \end{tabularx}
 \end{table}
  
-Dadas las características de las herramientas tanto en software como en hardware, se puede observar que el proyecto puede llevarse a cabo correctamente. El stack tecnológico es coherente y moderno: React/Next.js cubre el front-end educativo, FastAPI con Python concentra la lógica de inteligencia artificial (OCR y NLP), y SQL Server garantiza integridad referencial con soporte a triggers y vistas. El reconocimiento se ejecuta en Google Cloud Vision; los equipos locales ejecutan la aplicación y las pruebas de procesamiento de imágenes.
+Dadas las características de las herramientas tanto en software como en hardware, se puede observar que el proyecto puede llevarse a cabo correctamente. El stack tecnológico es coherente y moderno: React/Next.js cubre el front-end educativo, FastAPI con Python concentra la lógica de inteligencia artificial (Artificial Intelligence, AI por sus siglas en inglés) para OCR y NLP, y SQL Server, cuyo nombre incluye las siglas de lenguaje de consulta estructurado (Structured Query Language, SQL), garantiza integridad referencial con soporte a triggers y vistas. El reconocimiento se ejecuta en Google Cloud Vision; los equipos locales ejecutan la aplicación y las pruebas de procesamiento de imágenes.
  
 % ─────────────────────────────────────────────
 \subsubsection{Factibilidad Operativa}

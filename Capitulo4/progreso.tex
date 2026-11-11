@@ -34,13 +34,13 @@ La arquitectura del módulo se divide en tres componentes principales:
     del tutor como del alumno.
 
     \item \textbf{Capa de Persistencia (Base de Datos):} El módulo opera
-    principalmente sobre las tablas \texttt{Progreso\_Alumno} e
-    \texttt{Historial\_Alumno}. La primera almacena el promedio acumulado
+    principalmente sobre las tablas \texttt{Progreso\_\allowbreak Alumno} e
+    \texttt{Historial\_\allowbreak Alumno}. La primera almacena el promedio acumulado
     vigente del alumno en cada dimensión de evaluación; la segunda
     registra una fotografía histórica del progreso cada vez que dicho
     promedio es actualizado, permitiendo trazar la evolución del alumno
     a lo largo del tiempo. Las tablas \texttt{Recomendacion} y
-    \texttt{Actividad\_Sugerida} soportan la generación de actividades
+    \texttt{Actividad\_\allowbreak Sugerida} soportan la generación de actividades
     personalizadas a partir de los errores detectados.
 \end{enumerate}
 
@@ -51,24 +51,24 @@ El progreso del alumno se representa mediante dos dimensiones
 independientes pero complementarias:
 
 \begin{itemize}
-    \item \textbf{Promedio ortográfico} (\texttt{promedio\_ortografia}):
-    promedio acumulado del campo \texttt{ortografia\_score} de todos los
-    análisis ortográficos registrados para el alumno.
+    \item \textbf{Promedio ortográfico}: media de los valores de
+    \texttt{ortografia\_\allowbreak score} registrados para el alumno.
+    Se almacena en \texttt{promedio\_\allowbreak ortografia}.
 
     \item \textbf{Promedio de legibilidad} (calculado): promedio aritmético
-    de los cuatro scores caligráficos —\texttt{alineacion\_score},
-    \texttt{tamano\_letra\_score}, \texttt{espaciado\_score} e
-    \texttt{inclinacion\_score}— derivados de los análisis caligráficos
+    de los cuatro scores caligráficos —\texttt{alineacion\_\allowbreak score},
+    \texttt{tamano\_\allowbreak letra\_\allowbreak score}, \texttt{espaciado\_\allowbreak score} e
+    \texttt{inclinacion\_\allowbreak score}— derivados de los análisis caligráficos
     del alumno.
 \end{itemize}
 
 El \textbf{promedio general} se obtiene como la media de ambas
 dimensiones y actúa como indicador sintético para la clasificación del
-alumno dentro de su grupo:
+alumno dentro de su grupo. Se utiliza la definición de media aritmética \cite{nistLocation}; asignar el mismo peso a las dos dimensiones es una decisión de diseño del proyecto, pendiente de validación pedagógica:
 
 \begin{equation}
-    Promedio\_general = \frac{Promedio\_ortográfico +
-    Promedio\_legibilidad}{2}
+    \text{Promedio general} = \frac{\text{Promedio ortográfico} +
+    \text{Promedio de legibilidad}}{2}
     \label{eq:promedio-general}
 \end{equation}
 
@@ -94,39 +94,36 @@ Excelencia  & $> 8.0$         & El alumno muestra un desempeño consistentemente
 \end{tabular}
 \end{table}
 \newpage
-\noindent\textbf{Nota de diseño:} los umbrales de clasificación (6.0 y
-8.0) están alineados con la escala de evaluación del sistema educativo
-mexicano de educación primaria \cite{sep2011guia}, donde 6.0 representa
-el mínimo aprobatorio y 8.0 delimita el desempeño sobresaliente.
+\noindent\textbf{Nota de diseño:} los umbrales de clasificación (6.0 y 8.0) son parámetros propuestos para el seguimiento interno de la aplicación. Su pertinencia para primer grado y su interpretación deberán validarse con el docente; no constituyen criterios oficiales de acreditación ni una escala pedagógica validada.
 
 % ─────────────────────────────────────────────────────────
 \subsubsection{Diseño del Flujo de Actualización de Progreso}
 
-La tabla \texttt{Progreso\_Alumno} se actualiza cada vez que el módulo
+La tabla \texttt{Progreso\_\allowbreak Alumno} se actualiza cada vez que el módulo
 OCR/NLP completa el análisis de un intento. El mecanismo de actualización
 opera en dos pasos:
 
 \begin{enumerate}
     \item \textbf{Actualización del promedio vigente:} al persistir los
-    resultados de \texttt{Analisis\_Ortografico} y
-    \texttt{Analisis\_Caligrafico}, el proceso recalcula los promedios
+    resultados de \texttt{Analisis\_\allowbreak Ortografico} y
+    \texttt{Analisis\_\allowbreak Caligrafico}, el proceso recalcula los promedios
     acumulados del alumno mediante una consulta \texttt{UPDATE} con
     subconsulta \texttt{AVG} sobre todos sus intentos analizados hasta
-    la fecha, y los escribe en \texttt{Progreso\_Alumno}.
+    la fecha, y los escribe en \texttt{Progreso\_\allowbreak Alumno}.
 
     \item \textbf{Registro histórico:} simultáneamente, se inserta un
-    nuevo registro en \texttt{Historial\_Alumno} con una instantánea
+    nuevo registro en \texttt{Historial\_\allowbreak Alumno} con una instantánea
     (\textit{snapshot}) del progreso en ese momento, incluyendo la fecha
     con precisión \texttt{DATETIME2}. Este registro es inmutable y
     permite reconstruir la curva de progreso del alumno a lo largo del
     tiempo, independientemente de los cambios posteriores en
-    \texttt{Progreso\_Alumno}.
+    \texttt{Progreso\_\allowbreak Alumno}.
 \end{enumerate}
 
 La separación entre la tabla de progreso vigente y la tabla de historial
-responde a una decisión de diseño deliberada: \texttt{Progreso\_Alumno}
+responde a una decisión de diseño deliberada: \texttt{Progreso\_\allowbreak Alumno}
 es la fuente de verdad para las consultas actuales del tutor y los
-cálculos de clasificación, mientras que \texttt{Historial\_Alumno}
+cálculos de clasificación, mientras que \texttt{Historial\_\allowbreak Alumno}
 es la fuente de verdad para la visualización de la evolución temporal.
 Ambas responsabilidades son distintas y justifican la existencia de dos
 tablas separadas.
@@ -141,15 +138,15 @@ es el siguiente:
 \begin{enumerate}
     \item El proceso evalúa los resultados del análisis recién
     completado e identifica el tipo de error predominante: ortográfico
-    si \texttt{ortografia\_score} está por debajo del umbral, caligráfico
+    si \texttt{ortografia\_\allowbreak score} está por debajo del umbral, caligráfico
     si alguno de los cuatro scores de legibilidad lo está.
 
-    \item Se consulta la tabla \texttt{Actividad\_Sugerida} filtrando por
-    \texttt{tipo\_error} y \texttt{tipo\_ejercicio} correspondientes al
+    \item Se consulta la tabla \texttt{Actividad\_\allowbreak Sugerida} filtrando por
+    \texttt{tipo\_\allowbreak error} y \texttt{tipo\_\allowbreak ejercicio} correspondientes al
     error identificado.
 
     \item Se insertan registros en la tabla \texttt{Recomendacion}
-    vinculando el \texttt{id\_intento} con las actividades seleccionadas.
+    vinculando el \texttt{id\_\allowbreak intento} con las actividades seleccionadas.
     Cada recomendación recibe un valor de \texttt{prioridad}
     (\texttt{alta}, \texttt{media} o \texttt{baja}) calculado con base
     en la magnitud del error: a mayor desviación respecto al umbral,
@@ -181,8 +178,8 @@ En la Tabla~\ref{tab:endpoints-alumnos} se describen los endpoints que permiten 
 \textbf{Endpoint} & \textbf{Método} & \textbf{Acceso} \\
 \hline
 \texttt{/api/alumnos/registrar}              & POST & Tutor (JWT) \\
-\texttt{/api/alumnos/tutor/\{id\_tutor\}}    & GET  & Tutor (JWT) \\
-\texttt{/api/alumnos/baja/\{id\_alumno\}}    & PUT  & Tutor (JWT) \\
+\texttt{/api/alumnos/tutor/\{id\_\allowbreak tutor\}}    & GET  & Tutor (JWT) \\
+\texttt{/api/alumnos/baja/\{id\_\allowbreak alumno\}}    & PUT  & Tutor (JWT) \\
 \hline
 \end{tabular}
 \end{table}
@@ -192,8 +189,8 @@ En la Tabla~\ref{tab:endpoints-alumnos} se describen los endpoints que permiten 
 Los siguientes tres endpoints implementan la clasificación del grupo
 según las categorías definidas en la Tabla~\ref{tab:categorias-progreso}.
 Cada uno ejecuta la misma consulta CTE (\textit{Common Table Expression})
-sobre \texttt{Progreso\_Alumno}, variando únicamente el filtro de
-\texttt{promedio\_general} aplicado:
+sobre \texttt{Progreso\_\allowbreak Alumno}, variando únicamente el filtro de
+\texttt{promedio\_\allowbreak general} aplicado:
 
 En la Tabla~\ref{tab:endpoints-clasificacion} se describen los endpoints para consultar a los alumnos según su categoría de desempeño.
 
@@ -205,14 +202,14 @@ En la Tabla~\ref{tab:endpoints-clasificacion} se describen los endpoints para co
 \hline
 \textbf{Endpoint} & \textbf{Método} & \textbf{Acceso} \\
 \hline
-\texttt{/api/alumnos/riesgo/\{id\_tutor\}}      & GET & Tutor (JWT) \\
-\texttt{/api/alumnos/regular/\{id\_tutor\}}     & GET & Tutor (JWT) \\
-\texttt{/api/alumnos/excelencia/\{id\_tutor\}}  & GET & Tutor (JWT) \\
+\texttt{/api/alumnos/riesgo/\{id\_\allowbreak tutor\}}      & GET & Tutor (JWT) \\
+\texttt{/api/alumnos/regular/\{id\_\allowbreak tutor\}}     & GET & Tutor (JWT) \\
+\texttt{/api/alumnos/excelencia/\{id\_\allowbreak tutor\}}  & GET & Tutor (JWT) \\
 \hline
 \end{tabular}
 \end{table}
 
-El endpoint \texttt{/api/alumnos/progreso/\{id\_tutor\}} opera mediante
+El endpoint \texttt{/api/alumnos/progreso/\{id\_\allowbreak tutor\}} opera mediante
 el método \texttt{GET} y retorna los datos agrupados para las gráficas
 del panel del tutor. Ejecuta dos consultas independientes: una sobre
 el promedio ortográfico y otra sobre el promedio de legibilidad,
@@ -261,10 +258,10 @@ En la Tabla~\ref{tab:endpoints-perfil} se describen los endpoints para consultar
 
 El endpoint \texttt{/api/perfil/alumno/estado-tutor} merece una mención
 especial: su propósito es verificar si el tutor asociado al alumno
-sigue activo en el sistema (\texttt{id\_estatus = 1}). Esta verificación
+sigue activo en el sistema (\texttt{id\_\allowbreak estatus = 1}). Esta verificación
 protege al alumno de intentar acceder a funcionalidades dependientes
 del tutor cuando este ha sido dado de baja, retornando un indicador
-booleano (\texttt{tutor\_activo: true | false}) que el Front-End
+booleano (\texttt{tutor\_\allowbreak activo: true | false}) que el Front-End
 utiliza para condicionar la renderización del panel del alumno.
 
 \noindent\textbf{Nota de diseño:} todas las operaciones de actualización

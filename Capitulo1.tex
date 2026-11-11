@@ -35,12 +35,12 @@ Ante este panorama, surge la necesidad de explorar alternativas que permitan ana
 \subsection{Propuesta de solución}
 Para atender la problemática identificada, se propone el desarrollo e implementación de una aplicación web orientada al fortalecimiento de la escritura en letra de molde en alumnos de primer grado de educación primaria. La solución integra herramientas tecnológicas que permiten analizar textos manuscritos y generar retroalimentación automatizada dentro de un entorno educativo supervisado.
 
-La aplicación permitirá la captura de ejercicios mediante escritura directa en pantalla o carga de imágenes digitalizadas. Posteriormente, se utiliza la API de Google Cloud Vision para convertir el texto manuscrito en formato digital, y herramientas de NLP para detectar posibles errores ortográficos y sugerir correcciones.
+La aplicación permitirá la captura de ejercicios mediante escritura directa en pantalla o carga de imágenes digitalizadas. Posteriormente, se utiliza la interfaz de programación de aplicaciones (Application Programming Interface, API por sus siglas en inglés) de Google Cloud Vision para convertir el texto manuscrito en formato digital, y herramientas de NLP para detectar posibles errores ortográficos y sugerir correcciones.
 
 Asimismo, se evaluarán parámetros básicos relacionados con la legibilidad del trazo, alineación, tamaño, separación y uniformidad del trazo. La aplicación será desplegada en un servidor funcional y validado mediante una prueba piloto, con el fin de analizar su impacto preliminar en el fortalecimiento de la escritura.
 
 \subsection{Justificación}
-El desarrollo de esta aplicación se justifica por la necesidad de apoyar la adquisición inicial de la escritura en estudiantes de primer grado de educación primaria. En esta etapa, el aprendizaje comprende el reconocimiento y trazado de letras, su relación con los sonidos y la identificación de convenciones espaciales de la escritura. Estos aprendizajes se encuentran contemplados en los contenidos de primer grado del Programa Sintético de la Fase 3 de la SEP \cite{sep2024fase3}.
+El desarrollo de esta aplicación se justifica por la necesidad de apoyar la adquisición inicial de la escritura en estudiantes de primer grado de educación primaria. En esta etapa, el aprendizaje comprende el reconocimiento y trazado de letras, su relación con los sonidos y la identificación de convenciones espaciales de la escritura. Estos aprendizajes se encuentran contemplados en los contenidos de primer grado del Programa Sintético de la Fase 3 de la Secretaría de Educación Pública (SEP) \cite{sep2024fase3}.
 
 En correspondencia con este contexto, se propone una herramienta complementaria para realizar actividades breves de escritura manuscrita y facilitar su revisión por parte del docente. Los ejercicios deberán utilizar nombres, palabras familiares y producciones acordes con el avance del alumno. La retroalimentación tendrá un carácter formativo y considerará que las producciones no convencionales pueden formar parte del proceso de aprendizaje, por lo que requieren interpretación docente.
 
@@ -78,23 +78,23 @@ Los objetivos específicos del proyecto se centran en:
 Para comprender el panorama actual de las herramientas de asistencia a la escritura y el reconocimiento de texto, se realizó un estado del arte que permitió identificar soluciones existentes con funcionalidades similares a las propuestas en este proyecto.
 
 \subsubsection{Google Handwriting Input}
-Google Handwriting Input \cite{google2024handwriting} es una aplicación desarrollada para dispositivos Android que permite a los usuarios escribir a mano y convertir la escritura automáticamente a texto. Esta herramienta destaca por su compatibilidad con múltiples idiomas, su capacidad de escribir en cualquier campo de texto de forma seamless, y su reconocimiento en tiempo real que facilita la entrada de texto de manera intuitiva en dispositivos móviles.
+Google Handwriting Input fue una aplicación para Android que convertía la escritura a mano en texto y permitía utilizarla como método de entrada en otras aplicaciones. Reconocía letra de molde y cursiva en múltiples idiomas, con o sin lápiz digital. Se incluye como antecedente: Google informó de su retirada de Google Play y de la continuidad de este desarrollo en Gboard \cite{google2024handwriting}.
 
 \subsubsection{Tesseract OCR}
-Tesseract OCR \cite{smith2007overview} es un motor de reconocimiento óptico de caracteres de código abierto que convierte imágenes de texto manuscrito o tipografiado en texto editable. Su fortaleza radica en el soporte de más de 100 idiomas, su compatibilidad con imágenes escaneadas o fotografías, y su capacidad de ser utilizado para entrenar modelos personalizados de OCR. Sin embargo, requiere configuraciones específicas para mejorar su precisión en documentos con manuscritos complejos.
+Tesseract OCR es un motor de reconocimiento óptico de caracteres de código abierto, orientado principalmente a texto impreso. Permite convertir imágenes en texto editable y adaptar modelos de reconocimiento. Su documentación advierte que el reconocimiento de escritura manuscrita ofrece resultados limitados, por lo que requiere validación específica antes de considerarlo para escritura infantil \cite{smith2007overview,tesseractFAQ}.
 
 \subsubsection{Grammarly}
-Grammarly \cite{grammarly2024} es una plataforma de corrección gramatical y ortográfica basada en inteligencia artificial, disponible como extensión de navegador, aplicación web y complemento para Microsoft Word y Google Docs. Ofrece corrección gramatical y ortográfica avanzada, recomendaciones de estilo personalizadas, y una versión gratuita con funciones limitados. Su amplia compatibilidad multiplataforma la convierte en una solución integral para la mejora de escritura en diversos contextos.
+Grammarly es una plataforma de corrección gramatical y ortográfica basada en inteligencia artificial, disponible como extensión de navegador, aplicación web y complemento para Microsoft Word y Google Docs. Ofrece corrección gramatical y ortográfica avanzada, recomendaciones de estilo personalizadas, y una versión gratuita con funciones limitadas. Su amplia compatibilidad multiplataforma la convierte en una solución integral para la mejora de escritura en diversos contextos \cite{grammarly2024}.
 
-\subsubsection{Calligrapher}
-Calligrapher \cite{calligraphr2024} es una aplicación especializada en la mejora de la caligrafía que proporciona retroalimentación en tiempo real sobre la legibilidad de la letra. Su enfoque está centrado en la evaluación de la legibilidad y la calidad caligráfica, con compatibilidad en dispositivos móviles y tabletas. La aplicación ofrece ejercicios estructurados y personalizados diseñados para mejorar progresivamente las habilidades de escritura manual del usuario.
+\subsubsection{Calligraphr}
+Calligraphr es una herramienta web para convertir muestras de escritura y caligrafía en fuentes tipográficas personalizadas. Su propósito es la creación de fuentes; la página citada no documenta evaluación pedagógica de la legibilidad, corrección ortográfica ni ejercicios de refuerzo. Se incluye como herramienta relacionada con la digitalización de la escritura \cite{calligraphr2024}.
 
 \subsubsection{WriteApp}
-WriteApp \cite{writeapp2024} es una plataforma educativa gamificada que combina elementos lúdicos con la mejora de la escritura manual. Proporciona un juego interactivo que permite el seguimiento de la calidad de letra y puntuación, genera reportes detallados para padres y maestros, y permite la personalización de ejercicios según el perfil de cada usuario, fomentando un aprendizaje adaptativo y motivador.
+WriteApp se presenta como una plataforma de análisis de escritura manuscrita. La información pública consultada no permite verificar las funciones de gamificación, corrección ortográfica, personalización de ejercicios y reportes para docentes atribuidas en la versión anterior. Estas características se indican como no documentadas en la comparación, a reserva de contar con documentación técnica o una evaluación directa de la plataforma \cite{writeapp2024}.
 
 \subsection{Tabla comparativa}
 
-La comparación entre las herramientas analizadas en el estado del arte y la aplicación web propuesta se presenta en la Tabla~\ref{tab:comparativa}, donde se sintetizan las características de reconocimiento de escritura, corrección ortográfica, evaluación caligráfica y compatibilidad que ofrece cada solución. Se utiliza $\checkmark$ para indicar que la herramienta posee la característica, $\times$ para indicar que no la posee, y $\Delta$ para indicar compatibilidad parcial.
+La comparación entre las herramientas analizadas en el estado del arte y la aplicación web propuesta se presenta en la Tabla~\ref{tab:comparativa}, donde se sintetizan las características de reconocimiento de escritura, corrección ortográfica, evaluación caligráfica y compatibilidad que ofrece cada solución. Se utiliza $\checkmark$ para indicar que la herramienta posee la característica, $\times$ para indicar que no la posee, y $\Delta$ para indicar compatibilidad parcial. ND significa que la fuente no documenta la función, sin afirmar que sea inexistente. En la propuesta, Prev. identifica funciones previstas y Pend. funciones pendientes de implementación. La columna de Google HW describe el antecedente histórico, no su disponibilidad actual.
 
 \begin{table}[h]
 \centering
@@ -102,29 +102,29 @@ La comparación entre las herramientas analizadas en el estado del arte y la apl
 \setlength{\tabcolsep}{4pt}
 \caption{Comparativa de herramientas de asistencia a la escritura y reconocimiento de texto.}
 \label{tab:comparativa}
-\begin{tabular}{|l|c|c|c|c|c|c|}
+\begin{tabularx}{\textwidth}{|p{3.6cm}|*{6}{>{\centering\arraybackslash}X|}}
 \hline
-\textbf{Característica} & \textbf{Google HW} & \textbf{Tesseract} & \textbf{Grammarly} & \textbf{Calligrapher} & \textbf{WriteApp} & \textbf{Propuesta} \\
+\textbf{Característica} & {\footnotesize\textbf{Google HW}\newline\cite{google2024handwriting}} & {\footnotesize\textbf{Tesseract}\newline\cite{smith2007overview}} & {\footnotesize\textbf{Grammarly}\newline\cite{grammarly2024}} & {\footnotesize\textbf{Calligraphr}\newline\cite{calligraphr2024}} & {\footnotesize\textbf{WriteApp}\newline\cite{writeapp2024}} & \textbf{Propuesta} \\
 \hline
-Reconocimiento manual & $\checkmark$ & $\checkmark$ & $\times$ & $\checkmark$ & $\checkmark$ & $\checkmark$ \\
+Reconocimiento manuscrito & $\checkmark$ & $\Delta$ & $\times$ & ND & ND & $\checkmark$ \\
 \hline
-Corrección ortográfica & $\times$ & $\times$ & $\checkmark$ & $\times$ & $\checkmark$ & $\checkmark$ \\
+Corrección ortográfica & $\times$ & $\times$ & $\checkmark$ & ND & ND & $\Delta$ \\
 \hline
-Evaluación de caligrafía & $\times$ & $\times$ & $\times$ & $\checkmark$ & $\checkmark$ & $\checkmark$ \\
+Evaluación de caligrafía & $\times$ & $\times$ & $\times$ & ND & ND & Prev. \\
 \hline
-Retroalimentación real & $\checkmark$ & $\times$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ \\
+Retroalimentación inmediata & $\checkmark$ & $\times$ & $\checkmark$ & ND & ND & Pend. \\
 \hline
-Compatible móvil & $\checkmark$ & $\Delta$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ \\
+Compatible móvil & $\checkmark$ & $\Delta$ & $\checkmark$ & ND & ND & $\checkmark$ \\
 \hline
-Compatible web & $\times$ & $\times$ & $\checkmark$ & $\Delta$ & $\Delta$ & $\checkmark$ \\
+Compatible web & $\times$ & $\times$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ \\
 \hline
-Múltiples idiomas & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\Delta$ & $\Delta$ & - \\
+Múltiples idiomas & $\checkmark$ & $\checkmark$ & $\checkmark$ & ND & ND & - \\
 \hline
-Gamificación & $\times$ & $\times$ & $\times$ & $\times$ & $\checkmark$ & - \\
+Gamificación & $\times$ & $\times$ & $\times$ & ND & ND & - \\
 \hline
-Reportes educadores & $\times$ & $\times$ & $\times$ & $\checkmark$ & $\checkmark$ & $\checkmark$ \\
+Reportes educadores & $\times$ & $\times$ & $\times$ & ND & ND & Prev. \\
 \hline
-\end{tabular}
+\end{tabularx}
 \end{table}
 
 \input{Capitulo3/metodologia}

@@ -9,7 +9,7 @@ Cada caso conservará la imagen original, la imagen efectivamente enviada al ser
 La preparación ya implementada verifica PNG o JPEG, decodifica Base64, limita la entrada a 10 MB y 20 millones de píxeles, y compone las transparencias sobre fondo blanco antes de generar un PNG RGB. Estos son límites de la aplicación, no una declaración de los límites generales de Cloud Vision. La binarización y la segmentación para calcular el trazo corresponden al módulo caligráfico pendiente.
 
 \subsubsection{Protocolo de evaluación del reconocimiento}
-Se ejecutará el mismo flujo usado por la aplicación sobre un conjunto reservado. Las referencias conservarán acentos, mayúsculas y puntuación. Se fijará y documentará una política de espacios, saltos de línea y normalización Unicode antes de comparar resultados. La distancia de edición permitirá contar sustituciones ($S$), eliminaciones ($D$) e inserciones ($I$):
+Se ejecutará el mismo flujo usado por la aplicación sobre un conjunto reservado. Las referencias conservarán acentos, mayúsculas y puntuación. Se fijará y documentará una política de espacios, saltos de línea y normalización Unicode antes de comparar resultados. La distancia de edición permitirá contar sustituciones ($S$), eliminaciones ($D$) e inserciones ($I$). Con estos conteos se calcularán la tasa de error por carácter (Character Error Rate, CER) y la tasa de error por palabra (Word Error Rate, WER), conforme a sus definiciones \cite{hfCER,hfWER}:
 \begin{equation}
  CER=\frac{S_c+D_c+I_c}{N_c}, \qquad
  WER=\frac{S_p+D_p+I_p}{N_p}.

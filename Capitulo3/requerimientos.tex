@@ -1,5 +1,7 @@
 \subsubsection{Requerimientos funcionales}
 
+La Tabla~\ref{tab:requerimientos_funcionales} muestra los RF de la propuesta.
+
 % =========================
 % Tabla de Requerimientos Funcionales
 % =========================
@@ -18,74 +20,76 @@
 \endfoot
 
 % MÓDULO 1: Autenticación y Registro
-RF-01 & Registro de tutor & \multirow{6}{*}{\shortstack{Autenticación \\ y Registro}} \\
-\cline{1-2}
-RF-02 & Validación de correo único & \\
-\cline{1-2}
-RF-03 & Registro de alumnos & \\
-\cline{1-2}
-RF-04 & Inicio de sesión & \\
-\cline{1-2}
-RF-05 & Control de acceso por rol & \\
-\cline{1-2}
+RF-01 & Registro de tutor & \multirow{6}{*}{\shortstack{Autenticación \\ y Registro}} \\*
+\cline{1-2}\noalign{\nobreak}
+RF-02 & Validación de correo único & \\*
+\cline{1-2}\noalign{\nobreak}
+RF-03 & Registro de alumnos & \\*
+\cline{1-2}\noalign{\nobreak}
+RF-04 & Inicio de sesión & \\*
+\cline{1-2}\noalign{\nobreak}
+RF-05 & Control de acceso por rol & \\*
+\cline{1-2}\noalign{\nobreak}
 RF-06 & Notificación de credenciales incorrectas & \\
 \hline
 
 % MÓDULO 2: Gestión de Alumnos
-RF-07 & Clasificación de desempeño de alumnos & \multirow{3}{*}{\shortstack{Gestión de \\ Alumnos}} \\
-\cline{1-2}
-RF-08 & Gráfico de distribución de desempeño & \\
-\cline{1-2}
-RF-09 & Historial de actividades por alumno & \\
+RF-07 & Clasificación de desempeño de alumnos & \multirow{3}{*}{\shortstack{Gestión de \\ Alumnos}} \\*
+\cline{1-2}\noalign{\nobreak}
+RF-08 & Visualización del gráfico de distribución de desempeño & \\*
+\cline{1-2}\noalign{\nobreak}
+RF-09 & Visualización del historial de actividades por alumno & \\
 \hline
 
 % MÓDULO 3: Gestión de Ejercicios
-RF-10 & Catálogo de ejercicios & \multirow{8}{*}{\shortstack{Gestión de \\ Ejercicios}} \\
-\cline{1-2}
-RF-11 & Asignación de ejercicios & \\
-\cline{1-2}
-RF-12 & Ejercicios asignados por tutor & \\
-\cline{1-2}
-RF-13 & Ejercicios pendientes del alumno & \\
-\cline{1-2}
-RF-14 & Ejercicios vencidos& \\
-\cline{1-2}
-RF-15 & Extensión de fecha límite & \\
-\cline{1-2}
-RF-16 & Historial de ejercicios completados & \\
+RF-10 & Visualización del catálogo de ejercicios & \multirow{7}{*}{\shortstack{Gestión de \\ Ejercicios}} \\*
+\cline{1-2}\noalign{\nobreak}
+RF-11 & Asignación de ejercicios & \\*
+\cline{1-2}\noalign{\nobreak}
+RF-12 & Visualización de ejercicios asignados por tutor & \\*
+\cline{1-2}\noalign{\nobreak}
+RF-13 & Visualización de ejercicios pendientes del alumno & \\*
+\cline{1-2}\noalign{\nobreak}
+RF-14 & Visualización de ejercicios vencidos& \\*
+\cline{1-2}\noalign{\nobreak}
+RF-15 & Extensión de fecha límite & \\*
+\cline{1-2}\noalign{\nobreak}
+RF-16 & Visualización del historial de ejercicios completados & \\
 \hline
 
+% Iniciar el módulo completo en una página nueva evita partir su celda combinada.
+\pagebreak
 % MÓDULO 4: Captura de Escritura
-RF-17 & Acceso a vista de captura & \multirow{9}{*}{\shortstack{Captura de \\ Escritura}} \\
-\cline{1-2}
-RF-18 & Captura Multimodal & \\
-\cline{1-2}
-RF-19 & Captura mediante cámara & \\
-\cline{1-2}
-RF-20 & Formatos soportados & \\
-\cline{1-2}
-RF-21 & Herramientas de pre-edición de imagen & \\
-\cline{1-2}
-RF-22 & Gestión de estado de captura & \\
-\cline{1-2}
-RF-23 & Herramientas del lienzo digital & \\
-\cline{1-2}
-RF-24 & Previsualización y confirmación & \\
-\cline{1-2}
+RF-17 & Acceso a vista de captura & \multirow{9}{*}{\shortstack{Captura de \\ Escritura}} \\*
+\cline{1-2}\noalign{\nobreak}
+RF-18 & Captura Multimodal & \\*
+\cline{1-2}\noalign{\nobreak}
+RF-19 & Captura mediante cámara & \\*
+\cline{1-2}\noalign{\nobreak}
+RF-20 & Visualización de formatos soportados & \\*
+\cline{1-2}\noalign{\nobreak}
+RF-21 & Visualización de herramientas de pre-edición de imagen & \\*
+\cline{1-2}\noalign{\nobreak}
+RF-22 & Gestión de estado de captura & \\*
+\cline{1-2}\noalign{\nobreak}
+RF-23 & Visualización de herramientas del lienzo digital & \\*
+\cline{1-2}\noalign{\nobreak}
+RF-24 & Previsualización y confirmación & \\*
+\cline{1-2}\noalign{\nobreak}
 RF-25 & Validación de envío vacío & \\
 \hline
 
 % MÓDULO 5: Seguimiento y Retroalimentación
-RF-26 & Análisis OCR & \multirow{5}{*}{\shortstack{Seguimiento y \\ Retroalimentación}} \\
-\cline{1-2}
-RF-27 & Anaálisis NLP & \\
-\cline{1-2}
-RF-28 & Notificación de fallo en análisis & \\
-\cline{1-2}
-RF-29 & Modificación de resultados & \\
-\cline{1-2}
-RF-30 & Actividades sugeridas & \\
-\cline{1-2}
+RF-26 & Análisis OCR & \multirow{6}{*}{\shortstack{Seguimiento y \\ Retroalimentación}} \\*
+\cline{1-2}\noalign{\nobreak}
+RF-27 & Análisis NLP & \\*
+\cline{1-2}\noalign{\nobreak}
+RF-28 & Notificación de fallo en análisis & \\*
+\cline{1-2}\noalign{\nobreak}
+RF-29 & Modificación de resultados & \\*
+\cline{1-2}\noalign{\nobreak}
+RF-30 & Visualización de actividades sugeridas & \\*
+\cline{1-2}\noalign{\nobreak}
 RF-31 & Realización de actividades sugeridas & \\
 \hline
 
@@ -346,7 +350,7 @@ De la Tabla~\ref{tab:rf2} a la Tabla~\ref{tab:rf31} se especifican los requerimi
 } \\ \hline
 
 \textbf{Identificador:} RF-08 &
-\textbf{Nombre:} Gráfico de distribución de desempeño. \\ \cline{1-1}
+\textbf{Nombre:} Visualización del gráfico de distribución de desempeño. \\ \cline{1-1}
 
 \textbf{Prioridad de desarrollo:} Media &
 \multicolumn{1}{p{8cm}|}{} \\ \hline
@@ -380,7 +384,7 @@ De la Tabla~\ref{tab:rf2} a la Tabla~\ref{tab:rf31} se especifican los requerimi
 \hline
 \multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web permitirá al tutor visualizar las actividades realizadas por cada alumno, incluyendo los resultados del análisis ortográfico y caligráfico obtenidos.} \\ \hline
 \textbf{Identificador:} RF-09 &
-\textbf{Nombre:} Historial de actividades por alumno. \\ \cline{1-1}
+\textbf{Nombre:} Visualización del historial de actividades por alumno. \\ \cline{1-1}
 \textbf{Prioridad de desarrollo:} Alta &
 \multicolumn{1}{p{8cm}|}{} \\ \hline
 \textbf{Entrada:} Selección del alumno a consultar por parte del tutor autenticado. &
@@ -410,7 +414,7 @@ De la Tabla~\ref{tab:rf2} a la Tabla~\ref{tab:rf31} se especifican los requerimi
 \hline
 \multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web mostrará al tutor el catálogo completo de ejercicios disponibles proporcionados por la plataforma.} \\ \hline
 \textbf{Identificador:} RF-10 &
-\textbf{Nombre:} Catálogo de ejercicios. \\ \cline{1-1}
+\textbf{Nombre:} Visualización del catálogo de ejercicios. \\ \cline{1-1}
 \textbf{Prioridad de desarrollo:} Alta &
 \multicolumn{1}{p{8cm}|}{} \\ \hline
 \textbf{Entrada:} Solicitud del tutor para acceder al catálogo de ejercicios desde su panel de gestión. &
@@ -470,7 +474,7 @@ De la Tabla~\ref{tab:rf2} a la Tabla~\ref{tab:rf31} se especifican los requerimi
 \hline
 \multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web mostrará al tutor la lista de ejercicios que ha asignado previamente, indicando para cada uno su fecha límite de entrega si fue establecida.} \\ \hline
 \textbf{Identificador:} RF-12 &
-\textbf{Nombre:} Ejercicios asignados por tutor. \\ \cline{1-1}
+\textbf{Nombre:} Visualización de ejercicios asignados por tutor. \\ \cline{1-1}
 \textbf{Prioridad de desarrollo:} Alta &
 \multicolumn{1}{p{8cm}|}{} \\ \hline
 \textbf{Entrada:} Solicitud del tutor para consultar los ejercicios que ha asignado a sus alumnos. &
@@ -499,7 +503,7 @@ De la Tabla~\ref{tab:rf2} a la Tabla~\ref{tab:rf31} se especifican los requerimi
 } \\ \hline
 
 \textbf{Identificador:} RF-13 &
-\textbf{Nombre:} Ejercicios pendientes del alumno. \\ \cline{1-1}
+\textbf{Nombre:} Visualización de ejercicios pendientes del alumno. \\ \cline{1-1}
 
 \textbf{Prioridad de desarrollo:} Alta &
 \multicolumn{1}{p{8cm}|}{} \\ \hline
@@ -531,7 +535,7 @@ De la Tabla~\ref{tab:rf2} a la Tabla~\ref{tab:rf31} se especifican los requerimi
 \multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web permitirá a tutores y alumnos consultar los ejercicios cuya fecha límite de entrega ha expirado.} \\ \hline
 
 \textbf{Identificador:} RF-14 &
-\textbf{Nombre:} Ejercicios vencidos. \\ \cline{1-1}
+\textbf{Nombre:} Visualización de ejercicios vencidos. \\ \cline{1-1}
 
 \textbf{Prioridad de desarrollo:} Media &
 \multicolumn{1}{p{8cm}|}{} \\ \hline
@@ -592,7 +596,7 @@ De la Tabla~\ref{tab:rf2} a la Tabla~\ref{tab:rf31} se especifican los requerimi
 } \\ \hline
 
 \textbf{Identificador:} RF-16 &
-\textbf{Nombre:} Historial de ejercicios completados. \\ \cline{1-1}
+\textbf{Nombre:} Visualización del historial de ejercicios completados. \\ \cline{1-1}
 
 \textbf{Prioridad de desarrollo:} Alta &
 \multicolumn{1}{p{8cm}|}{} \\ \hline
@@ -726,7 +730,7 @@ El alumno utiliza únicamente una de las dos modalidades por intento.
 \hline
 \multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web aceptará únicamente imágenes en formato JPEG (.jpeg, .jpg) y PNG (.png) para la carga de escritura manuscrita.} \\ \hline
 \textbf{Identificador:} RF-20 &
-\textbf{Nombre:} Formatos soportados. \\ \cline{1-1}
+\textbf{Nombre:} Visualización de formatos soportados. \\ \cline{1-1}
 \textbf{Prioridad de desarrollo:} Alta &
 \multicolumn{1}{p{8cm}|}{} \\ \hline
 \textbf{Entrada:} Archivo de imagen seleccionado por el alumno para cargar como intento de ejercicio. &
@@ -756,7 +760,7 @@ El alumno utiliza únicamente una de las dos modalidades por intento.
 } \\ \hline
 
 \textbf{Identificador:} RF-21 &
-\textbf{Nombre:} Herramientas de pre-edición de imagen. \\ \cline{1-1}
+\textbf{Nombre:} Visualización de herramientas de pre-edición de imagen. \\ \cline{1-1}
 
 \textbf{Prioridad de desarrollo:} Media &
 \multicolumn{1}{p{8cm}|}{} \\ \hline
@@ -819,7 +823,7 @@ El alumno utiliza únicamente una de las dos modalidades por intento.
 \hline
 \multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web proporcionará al alumno un conjunto de herramientas dentro del lienzo digital para facilitar la escritura manuscrita y su corrección.} \\ \hline
 \textbf{Identificador:} RF-23 &
-\textbf{Nombre:} Herramientas del lienzo digital. \\ \cline{1-1}
+\textbf{Nombre:} Visualización de herramientas del lienzo digital. \\ \cline{1-1}
 \textbf{Prioridad de desarrollo:} Alta &
 \multicolumn{1}{p{8cm}|}{} \\ \hline
 \textbf{Entrada:} Interacción del alumno con las herramientas disponibles en el lienzo digital durante la realización del ejercicio. &
@@ -1184,7 +1188,7 @@ El alumno utiliza únicamente una de las dos modalidades por intento.
 \hline
 \multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web presentará al alumno actividades de mejora sugeridas, ordenadas por prioridad según las debilidades ortográficas y caligráficas.} \\ \hline
 \textbf{Identificador:} RF-30 &
-\textbf{Nombre:} Actividades sugeridas. \\ \cline{1-1}
+\textbf{Nombre:} Visualización de actividades sugeridas. \\ \cline{1-1}
 \textbf{Prioridad de desarrollo:} Alta &
 \multicolumn{1}{p{8cm}|}{} \\ \hline
 \textbf{Entrada:} Resultados del análisis ortográfico (RF-27) y caligráfico (RF-26) generados a partir del intento de escritura del alumno. &
@@ -1238,6 +1242,8 @@ El alumno utiliza únicamente una de las dos modalidades por intento.
 
 \subsubsection{Requerimientos no funcionales}
 
+La Tabla~\ref{tab:rnf} muestra los requerimientos no funcionales (RNF) de la propuesta.
+
 \begin{longtable}{|p{3.2cm}|p{3.8cm}|p{8.5cm}|}
 \caption{Requerimientos no funcionales del sistema} \label{tab:rnf} \\ \hline
 
@@ -1252,14 +1258,14 @@ RNF-01 &
 Usabilidad &
 La aplicación web debe garantizar la accesibilidad, comprensión y correcta interacción del usuario en múltiples dispositivos.
 
-Especificación: Los textos deben mantener un índice de legibilidad Fernández-Huerta mayor o igual a 80. [38] La interfaz debe ser responsiva y se deben bloquear los gestos de desplazamiento del navegador.
+Especificación: Los textos deben mantener un índice de legibilidad Fernández-Huerta mayor o igual a 80 \cite{fernandez1959lecturabilidad}. La interfaz debe ser responsiva y se deben bloquear los gestos de desplazamiento del navegador.
 \\ \hline
 
 RNF-02 &
 Eficiencia &
 La aplicación web debe responder a las acciones del usuario en tiempos que no interrumpan el flujo de trabajo.
 
-Especificación: La interfaz debe proporcionar retroalimentación visual al cambiar de herramienta en un tiempo menor o igual a 100 ms. [39] Los procesos de procesamiento y exportación del dibujo deben ejecutarse de manera asíncrona, sin generar bloqueos perceptibles.
+Especificación: La interfaz debe proporcionar retroalimentación visual al cambiar de herramienta en un tiempo menor o igual a 100 ms \cite{nielsenResponse}. Los procesos de procesamiento y exportación del dibujo deben ejecutarse de manera asíncrona, sin generar bloqueos perceptibles.
 \\ \hline
 
 RNF-03 &
