@@ -4,12 +4,12 @@ La arquitectura implementada en el Trabajo Terminal 1 se enfoca en establecer un
 
 \subsubsection{Visión General de la Arquitectura}
 
-La aplicación backend implementa una arquitectura en capas que separa claramente las responsabilidades de acceso a datos, lógica de negocio y gestión de rutas. El sistema está desarrollado con FastAPI como framework principal, proporcionando una base robusta para la gestión de solicitudes HTTP y la validación automática de datos.
+La aplicación backend implementa una arquitectura en capas que separa claramente las responsabilidades de acceso a datos, lógica de negocio y gestión de rutas. El sistema está desarrollado con FastAPI como framework principal, proporcionando una base robusta para la gestión de solicitudes del Protocolo de Transferencia de Hipertexto (\textit{Hypertext Transfer Protocol}, HTTP por sus siglas en inglés) y la validación automática de datos.
 
 La arquitectura se organiza en los siguientes componentes principales:
 
 \begin{itemize}
-    \item \textbf{Capa de Acceso a Datos (DAO):} Encargada de todas las operaciones con la base de datos SQL Server
+    \item \textbf{Capa de Acceso a Datos:} Encargada de todas las operaciones con la base de datos SQL Server
     \item \textbf{Capa de Autenticación y Autorización:} Gestión de tokens JWT y control de acceso basado en roles
     \item \textbf{Capa de Rutas (Routers):} Endpoints organizados por tipo de actor (Alumno, Tutor, Autenticación)
     \item \textbf{Capa de Validación (Schemas):} Modelos Pydantic que aseguran la integridad de datos entrantes
@@ -19,7 +19,7 @@ Esta separación en capas facilita el mantenimiento, las pruebas unitarias y fut
 
 \subsubsection{Patrón de Diseño DAO}
 
-El patrón DAO implementado en este proyecto abstrae completamente la lógica de acceso a datos, permitiendo una separación clara entre la lógica de negocio y la persistencia de datos en SQL Server. Esta arquitectura facilita el mantenimiento, las pruebas y futuras migraciones de bases de datos.
+El patrón Objeto de Acceso a Datos (\textit{Data Access Object}, DAO por sus siglas en inglés) implementado en este proyecto abstrae completamente la lógica de acceso a datos, permitiendo una separación clara entre la lógica de negocio y la persistencia de datos en SQL Server. Esta arquitectura facilita el mantenimiento, las pruebas y futuras migraciones de bases de datos.
 
 \subsubsection{Estructura del DAO}
 
@@ -536,10 +536,10 @@ Implementa la captura de imágenes del trabajo manuscrito en papel. Sus funciona
  
 \begin{itemize}
     \item Captura mediante la cámara del dispositivo (modo nativo en móvil o cámara web en escritorio)
-    \item Carga de archivo con validación de tipo MIME (\texttt{image/*}) y tamaño máximo de 10\,MB
+    \item Carga de archivo con validación de tipo de Extensiones Multipropósito de Correo de Internet (\textit{Multipurpose Internet Mail Extensions}, MIME por sus siglas en inglés) (\texttt{image/*}) y tamaño máximo de 10\,MB
     \item Redimensionado automático a un máximo de 1\,200\,px para optimizar el payload
     \item Herramientas de edición: rotación en 90° y recorte interactivo con control por arrastre
-    \item Conversión final a Base64 en formato JPEG con calidad del 80\%
+    \item Conversión final a Base64 en formato del Grupo Conjunto de Expertos en Fotografía (\textit{Joint Photographic Experts Group}, JPEG por sus siglas en inglés) con calidad del 80\%
 \end{itemize}
  
 En el Código~\ref{lst:fetch-intento} se muestra cómo ambos componentes construyen y envían el mismo payload al endpoint de registro de intentos:
