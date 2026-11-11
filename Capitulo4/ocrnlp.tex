@@ -51,7 +51,7 @@ La metodología siguiente constituye un diseño pendiente de implementación y v
 Se considerarán no evaluables las imágenes sin trazo suficiente, la segmentación ambigua o las referencias geométricas insuficientes. Los umbrales y mínimos de muestras se fijarán durante la calibración. La ausencia de medición se representará con \texttt{null} y una observación; no se interpretará como puntuación cero.
 
 \subsubsection{Métrica de alineación}
-Para cada renglón se estimará una línea base $y=ax+b$ mediante un ajuste robusto a puntos inferiores de letras sin descendentes. Si la plantilla tiene un renglón conocido, se usará como referencia después de rectificar la captura. Para $n$ puntos válidos $(x_i,y_i)$ se propone:
+Para cada renglón se estimará una línea base $y=ax+b$ mediante un ajuste robusto a puntos inferiores de letras sin descendentes. Si la plantilla tiene un renglón conocido, se usará como referencia después de rectificar la captura. Para $n$ puntos válidos $(x_i,y_i)$ se propone \cite{vinciarelli2001normalization}:
 \begin{equation}
  A=\frac{1}{n h_{\mathrm{ref}}}\sum_{i=1}^{n}
  \frac{|y_i-(ax_i+b)|}{\sqrt{1+a^2}}.
@@ -59,7 +59,7 @@ Para cada renglón se estimará una línea base $y=ax+b$ mediante un ajuste robu
 Un menor valor representa menor dispersión respecto de la línea base. Cuando exista guía, se registrarán también el desplazamiento y el ángulo respecto a ella. Sin guía, un renglón recto pero inclinado puede tener dispersión baja; por ello no se confundirá regularidad de alineación con horizontalidad. No se corregirá artificialmente la posición de cada letra antes de medir.
 
 \subsubsection{Métrica de tamaño}
-Se medirán las alturas $h_i$ de cajas refinadas sobre la máscara, agrupando caracteres comparables. Se reportarán la altura mediana y una dispersión robusta:
+Se medirán las alturas $h_i$ de cajas refinadas sobre la máscara, agrupando caracteres comparables. Se reportarán la altura mediana y una dispersión robusta \cite{leys2013outliers}:
 \begin{equation}
  T=\frac{\operatorname{mediana}_i\left(|h_i-\operatorname{mediana}(h)|\right)}
  {\operatorname{mediana}(h)}.
@@ -67,14 +67,14 @@ Se medirán las alturas $h_i$ de cajas refinadas sobre la máscara, agrupando ca
 Un valor bajo indica mayor regularidad del tamaño dentro del grupo. Si se conoce la altura útil del renglón, se calculará además su proporción de ocupación para valorar si las letras se ajustan a la plantilla. Sin una escala física o plantilla conocida solo se informará tamaño relativo; los píxeles de una fotografía no se convertirán directamente a milímetros.
 
 \subsubsection{Métrica de separación}
-En el sistema de coordenadas de cada renglón, se calculará la distancia horizontal entre el extremo derecho de una caja y el extremo izquierdo de la siguiente:
+En el sistema de coordenadas de cada renglón, se calculará la distancia horizontal entre el extremo derecho de una caja y el extremo izquierdo de la siguiente \cite{louloudis2009segmentation}:
 \begin{equation}
  g_i=x^{\min}_{i+1}-x^{\max}_i, \qquad s_i=\frac{g_i}{h_{\mathrm{ref}}}.
 \end{equation}
 Se analizarán por separado espacios entre letras de una palabra y entre palabras, usando la agrupación del OCR y la máscara como apoyo. Se reportarán la mediana, la dispersión robusta y la proporción de separaciones negativas o nulas, que pueden señalar contacto o solapamiento y requieren revisión. Los valores esperados dependerán del ejercicio y de la rúbrica: una separación pequeña no es siempre mejor. Cuando no puedan distinguirse letras contiguas se evitará producir una medida individual ficticia.
 
 \subsubsection{Métrica de uniformidad del trazo}
-La uniformidad se operacionalizará inicialmente como consistencia del grosor visible. Sobre la máscara binaria se obtendrá un esqueleto de un píxel de ancho y una transformada de distancia euclidiana $D$, que mide la distancia de cada píxel de tinta al fondo \cite{opencvMetricas}. En puntos interiores del esqueleto, el grosor local se aproximará por $w_j=2D(j)$. Se excluirán extremos, intersecciones y fragmentos demasiado cortos, donde esta aproximación puede sesgarse. Se propone:
+La uniformidad se operacionalizará inicialmente como consistencia del grosor visible. Sobre la máscara binaria se obtendrá un esqueleto de un píxel de ancho \cite{zhang1984thinning} y una transformada de distancia euclidiana $D$, que mide la distancia de cada píxel de tinta al fondo \cite{opencvMetricas}. En puntos interiores del esqueleto, el grosor local se aproximará por $w_j=2D(j)$. Se excluirán extremos, intersecciones y fragmentos demasiado cortos, donde esta aproximación puede sesgarse. Al igual que en la métrica de tamaño, se propone una dispersión robusta basada en la mediana \cite{leys2013outliers}:
 \begin{equation}
  U=\frac{\operatorname{mediana}_j\left(|w_j-\operatorname{mediana}(w)|\right)}
  {\operatorname{mediana}(w)}.
@@ -82,7 +82,7 @@ La uniformidad se operacionalizará inicialmente como consistencia del grosor vi
 Un valor bajo representa grosor más uniforme. Se registrarán además fragmentaciones visibles como observaciones, sin atribuirles automáticamente una causa motriz. Esta medición no estima presión del lápiz, velocidad ni orden de los movimientos. En un lienzo con pincel de ancho fijo puede aportar poca información sobre el alumno; se identificará esta limitación al interpretar resultados. La regularidad de la forma requeriría comparar repeticiones del mismo carácter y queda fuera de esta primera definición.
 
 \subsubsection{Puntuaciones, almacenamiento e integración pendientes}
-Las medidas anteriores se conservarán junto con el número de observaciones válidas, la versión del algoritmo y los motivos de exclusión. Para convertir una desviación no negativa $d$ a la escala de 0 a 10 del reporte se propone, una vez calibradas dos tolerancias $t_{\mathrm{bueno}}<t_{\mathrm{malo}}$:
+Las medidas anteriores se conservarán junto con el número de observaciones válidas, la versión del algoritmo y los motivos de exclusión. Para convertir una desviación no negativa $d$ a la escala de 0 a 10 del reporte se propone la siguiente transformación lineal, definida por los autores para este trabajo, una vez calibradas dos tolerancias $t_{\mathrm{bueno}}<t_{\mathrm{malo}}$:
 \begin{equation}
  Q(d)=10\max\left(0,\min\left(1,
  \frac{t_{\mathrm{malo}}-d}{t_{\mathrm{malo}}-t_{\mathrm{bueno}}}\right)\right).
