@@ -1,10 +1,11 @@
 \section{Capítulo 4: Diseño}
 
-En este capítulo se presenta la fase de diseño técnico y arquitectónico de la plataforma web, tomando como base los requerimientos funcionales, no funcionales y las reglas de negocio definidos en el capítulo anterior. A lo largo de esta sección se detallará la estructuración general del sistema, el diseño del flujo de interacción de los usuarios, la especificación de la interfaz de programación de aplicaciones (\textit{Application Programming Interface}, API por sus siglas en inglés) bajo el estilo de Transferencia de Estado Representacional (\textit{Representational State Transfer}, REST por sus siglas en inglés) y el modelado de la base de datos. El propósito principal de esta fase es establecer un modelo sólido que garantice la integración eficiente, la escalabilidad y el correcto funcionamiento de los módulos de captura, OCR y NLP.
+En este capítulo se presenta la fase de diseño técnico y arquitectónico de la plataforma web, tomando como base los requerimientos funcionales, no funcionales y las reglas de negocio definidos en el capítulo anterior. A lo largo de esta sección se detallará la estructuración general del sistema, el diseño del flujo de interacción de los usuarios, la especificación de la interfaz de programación de aplicaciones (\textit{Application Programming Interface}, API por sus siglas en inglés) bajo el estilo de Transferencia de Estado Representacional (\textit{Representational State Transfer}, REST por sus siglas en inglés) y el modelado de la base de datos. El propósito principal de esta fase es establecer un modelo sólido que garantice la integración eficiente, la escalabilidad y el correcto funcionamiento de los módulos de captura, OCR y evaluación ortográfica mediante CLS.
 
 \input{Capitulo4/Arquitectura.tex}
 
 \subsection{Diseño de la base de datos}
+\label{sec:diseno-bd}
 
 El diseño de la base de datos define la capa de persistencia necesaria para soportar las operaciones de la plataforma, garantizando la integridad, seguridad y disponibilidad de la información. Siguiendo las formas normales para el modelado de bases de datos relacionalesw, el esquema ha sido normalizado hasta la Tercera Forma Normal (3NF), lo que permite mitigar anomalías de inserción, actualización y borrado, asegurando que la información de los usuarios y los resultados del análisis se almacenen de manera eficiente y sin redundancias innecesarias. 
 
@@ -15,7 +16,7 @@ El diagrama entidad–relación constituye un elemento fundamental dentro del di
 
 La aplicación web propuesta gestiona el proceso de aprendizaje y evaluación de la escritura en alumnos de educación primaria. En este contexto, un tutor es responsable de supervisar a múltiples alumnos, asignándoles ejercicios orientados al desarrollo de habilidades de escritura.
 
-El núcleo del sistema se encuentra en la entidad Intento, la cual representa cada ejecución de un ejercicio por parte del alumno. A partir de este intento, se procesa una imagen mediante Google Cloud Vision para obtener el texto digital, el cual es posteriormente analizado mediante NLP para evaluar la ortografía. De forma complementaria, se prevé un análisis caligráfico todavía pendiente de implementación.
+El núcleo del sistema se encuentra en la entidad Intento, la cual representa cada ejecución de un ejercicio por parte del alumno. A partir de este intento, se procesa una imagen mediante Google Cloud Vision para obtener el texto digital, el cual es posteriormente comparado con la respuesta esperada mediante la secuencia correcta de letras (CLS) para evaluar la ortografía. De forma complementaria, se prevé un análisis caligráfico todavía pendiente de implementación.
 
 Los resultados de estos análisis permiten generar recomendaciones personalizadas y actualizar el progreso del alumno, facilitando el seguimiento continuo de su desempeño.
 
@@ -91,12 +92,8 @@ Ejercicio\_Tutor & Ejercicios asignados por el tutor. & id\_ejercicio\_tutor, FK
 Intento & Ejecución de un ejercicio por parte del alumno. &
 id\_intento, FK id\_alumno, FK id\_ejercicio\_tutor, imagen, texto\_detectado\_ocr, fecha\_envio \\ \hline
 
-Analisis\_ortografico & Resultado del procesamiento NLP. &
-id\_analisis\_ortografico, cantidad\_errores, ortografia\_score \\ \hline
-
-sugerencia\_ortogra-
-fica & Errores detetctados del procesamiento NLP, en conjunto con su sugerencia. &
-id\_sugerencia\_ortografica, palabra\_incorrecta, posicion, sugerencia, contexto \\ \hline
+Analisis\_ortografico & Resultado de la evaluación ortográfica mediante CLS. &
+id\_analisis\_ortografico, cls\_obtenidas, cls\_posibles, ortografia\_score, confirmado\_tutor \\ \hline
 
 Analisis\_caligrafico & Resultado del análisis del trazo manuscrito. &
 id\_analisis\_caligrafico, inclinacion\_score, espaciado\_score, tamano\_letra\_score \\ \hline
@@ -169,7 +166,7 @@ Un alumno puede realizar múltiples intentos a lo largo del tiempo, ya que cada 
     \item \textbf{Intento -- Análisis ortográfico (1:1)}
 \end{itemize}
 
-Cada intento genera exactamente un análisis ortográfico, el cual contiene la evaluación del texto detectado mediante NLP, incluyendo errores y sugerencias.
+Cada intento genera exactamente un análisis ortográfico, el cual contiene el puntaje CLS del texto detectado (secuencias correctas obtenidas y posibles), su equivalente en escala de 0 a 10 y la indicación de si el tutor ya lo confirmó.
 
 \begin{itemize}
     \item \textbf{Intento -- Análisis caligráfico (1:1)}
@@ -214,7 +211,7 @@ En la Figura \ref{fig:rel} se presenta el diagrama relacional de la aplicación 
 
 \paragraph{Gestión del texto detectado (OCR)}
 
-El atributo texto\_detectado\_ocr en la entidad Intento representa un elemento crítico dentro de la aplicación web, ya que corresponde a la salida generada por el módulo de OCR. Este dato constituye la entrada principal para el procesamiento mediante técnicas de NLP, por lo que su correcta generación y almacenamiento es fundamental para garantizar la calidad del análisis ortográfico.
+El atributo texto\_detectado\_ocr en la entidad Intento representa un elemento crítico dentro de la aplicación web, ya que corresponde a la salida generada por el módulo de OCR. Este dato constituye la entrada principal para el cálculo del puntaje CLS, por lo que su correcta generación y almacenamiento es fundamental para garantizar la calidad del análisis ortográfico.
 
 El uso de este formato proporciona flexibilidad y evita la rigidez de un esquema relacional estrictamente normalizado, facilitando futuras ampliaciones del sistema.
 

@@ -35,7 +35,7 @@ Ante este panorama, surge la necesidad de explorar alternativas que permitan ana
 \subsection{Propuesta de solución}
 Para atender la problemática identificada, se propone el desarrollo e implementación de una aplicación web orientada al fortalecimiento de la escritura en letra de molde en alumnos de primer grado de educación primaria. La solución integra herramientas tecnológicas que permiten analizar textos manuscritos y generar retroalimentación automatizada dentro de un entorno educativo supervisado.
 
-La aplicación permitirá la captura de ejercicios mediante escritura directa en pantalla o carga de imágenes digitalizadas. Posteriormente, se utiliza la interfaz de programación de aplicaciones (\textit{Application Programming Interface}, API por sus siglas en inglés) de Google Cloud Vision para convertir el texto manuscrito en formato digital, y herramientas de NLP para detectar posibles errores ortográficos y sugerir correcciones.
+La aplicación permitirá la captura de ejercicios mediante escritura directa en pantalla o carga de imágenes digitalizadas. Posteriormente, se utiliza la interfaz de programación de aplicaciones (\textit{Application Programming Interface}, API por sus siglas en inglés) de Google Cloud Vision para convertir el texto manuscrito en formato digital. A partir de ese texto, la ortografía se evalúa mediante la secuencia correcta de letras (\textit{Correct Letter Sequence}, CLS por sus siglas en inglés), una métrica que compara la escritura del alumno con la respuesta esperada del ejercicio y cuyo puntaje confirma el tutor.
 
 Asimismo, se evaluarán parámetros básicos relacionados con la legibilidad del trazo, alineación, tamaño, separación y uniformidad del trazo. La aplicación será desplegada en un servidor funcional y validado mediante una prueba piloto, con el fin de analizar su impacto preliminar en el fortalecimiento de la escritura.
 
@@ -65,7 +65,7 @@ Los objetivos específicos del proyecto se centran en:
     \item OE-02. Desarrollar el módulo de captura digital de escritura manuscrita con letra de molde, con validaciones de calidad de imagen en el cliente.
     \item OE-03. Integrar y validar Google Cloud Vision para reconocer escritura infantil en español, con una meta de tasa de error por carácter (CER) no mayor al 15\% en un conjunto representativo reservado para evaluación.
     \item OE-04. Desarrollar un módulo de extracción de métricas caligráficas (alineación, tamaño, separación y uniformidad del trazo) que permita evaluar la legibilidad de la escritura con criterios cuantificables.
-    \item OE-05. Implementar un módulo de análisis ortográfico basado en NLP que identifique errores y genere sugerencias de corrección con una tasa de detección mayor o igual al 85\% en pruebas controladas.
+    \item OE-05. Implementar un módulo de evaluación ortográfica basado en la secuencia correcta de letras (CLS) que calcule el puntaje de cada intento a partir del texto reconocido, con una concordancia mayor o igual al 85\% respecto a la puntuación CLS manual del tutor.
     \item OE-06. Diseñar e implementar un módulo de ejercicios que asigne actividades de refuerzo a partir de las métricas caligráficas y el análisis ortográfico.
     \item OE-07. Desarrollar el Front-End interactivo y responsivo, adecuado al nivel cognitivo de estudiantes de primaria y compatible con distintos dispositivos.
     \item OE-08. Desarrollar el Back-End y la Base de Datos del sistema, incluyendo autenticación y gestión de usuarios.

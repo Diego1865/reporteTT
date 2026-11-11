@@ -1,100 +1,117 @@
 % ─────────────────────────────────────────────────────────────────────────────
-%  Sección 3.9  Módulo de Ejercicios y Retroalimentación
-%  Insertar al final del Capítulo 3: Análisis, después de la sección 3.8
-%  (Criterios de selección de dataset).
-%  CITES: Reemplazar sep_tercer_grado, sep_cuarto_grado y sep_planes_primaria
-%  con las claves exactas de su archivo .bib cuando las tengan.
+%  Sección: Módulo de Ejercicios y Retroalimentación (enfoque primer grado, CLS)
 % ─────────────────────────────────────────────────────────────────────────────
 
 \subsection{Módulo de Ejercicios y Retroalimentación}
 
 El módulo de ejercicios y retroalimentación es el componente pedagógico
-central del sistema, encargado de transformar los resultados de los
-análisis ortográfico y caligráfico en acciones correctivas concretas.
-Su propósito es proporcionar al alumno material de práctica focalizado
-en sus áreas de oportunidad específicas y al tutor las herramientas para
-supervisar y complementar dicho proceso. A diferencia de los módulos de
-captura y análisis, cuya naturaleza es predominantemente técnica, este
-módulo establece el puente entre el procesamiento computacional y el
-contexto pedagógico en el que opera la aplicación.
+central del sistema. Su propósito es ofrecer al alumno práctica focalizada en
+los errores más frecuentes de la escritura inicial y dar al tutor la
+información necesaria para supervisar y complementar dicho proceso. A
+diferencia de los módulos de captura y análisis, de naturaleza
+predominantemente técnica, este módulo establece el puente entre el
+procesamiento computacional y el contexto pedagógico en el que opera la
+aplicación.
 
 % ─────────────────────────────────────────────────────────
 \subsubsection{Justificación pedagógica de los ejercicios}
 
-La selección y diseño de los ejercicios dentro de la plataforma se
-fundamentan en los requerimientos del plan de estudios de la SEP para el primer grado de primaria
-\cite{sep2011guia, sep2024saberes4, mejoredu2022indicadores}, etapa
-en la cual el alumno transita de la decodificación básica hacia la
-consolidación de la ortografía convencional y la fluidez del trazo
-manuscrito. En este periodo, los errores no corregidos tienden a fijarse
-como hábitos, lo que justifica la intervención temprana y personalizada
-que el sistema propone.
+La selección y el diseño de los ejercicios se fundamentan en los contenidos de
+primer grado del Programa Sintético de la Fase 3 \cite{sep2024fase3}: el
+reconocimiento y trazado de letras, su relación con los sonidos y la
+identificación de las convenciones espaciales de la escritura. En esta etapa
+los errores no corregidos tienden a fijarse como hábitos, lo que justifica una
+intervención temprana y focalizada \cite{berninger2010teaching, graham2010handwriting}.
 
-Los ejercicios se categorizan en dos grandes rubros, en correspondencia
-directa con las métricas evaluadas por el sistema:
+\paragraph{Métodos de enseñanza de la lectoescritura}
 
-\paragraph{Ejercicios de refuerzo caligráfico}
+El catálogo adopta el \textbf{método ecléctico}, que combina los dos caminos
+clásicos de la enseñanza de la lectoescritura y los ordena en una ruta
+progresiva \cite{ortega2009eclectico}:
 
-Orientados a mejorar las métricas de trazo previstas para el módulo de análisis de imagen:
-alineación, tamaño de letra, separación y uniformidad del trazo. Se contemplan dos
-tipos:
+\begin{itemize}
+    \item \textbf{Sintético:} parte de las unidades mínimas (letra, sílaba) y
+    las combina para formar palabras. En la plataforma corresponde a la copia
+    de letras y sílabas, a la unión de sílabas y a los ejercicios de completar
+    la grafía que falta.
+    \item \textbf{Analítico:} parte de unidades con significado (la palabra
+    asociada a una imagen, la oración) y después atiende a sus partes. En la
+    plataforma corresponde a escribir el nombre de lo que se ve, separar
+    palabras en sílabas y copiar oraciones completas.
+    \item \textbf{Ecléctico:} integra ambos en un mismo ejercicio, por ejemplo
+    completar una oración con significado decidiendo una grafía específica.
+\end{itemize}
 
-\begin{enumerate}
-    \item \textbf{Copia de modelos (pangramas y frases cortas):} Se
-    utilizan frases que contienen todas las letras del alfabeto
-    —pangramas— y oraciones adaptadas al vocabulario infantil. La
-    práctica de este tipo de textos obliga al alumno a trabajar la
-    proporción de tamaño y el espaciado correcto entre caracteres de
-    distinta frecuencia de uso, dado que los pangramas incluyen letras
-    poco comunes que requieren mayor atención en el trazo.
+Cada ejercicio declara el método al que pertenece y un nivel (1 a 3) que
+indica su lugar en la ruta: primero las unidades (nivel 1), después la
+palabra (nivel 2) y al final la oración (nivel 3).
 
-    \item \textbf{Trazos de direccionalidad:} Ejercicios enfocados en
-    grupos de letras que comparten patrones motores similares, como
-    \textit{a, c, d, g, q} o \textit{b, p, d, q}. Su objetivo es
-    corregir la inclinación del trazo y reducir la confusión espacial
-    derivada de la similitud morfológica entre estos caracteres, un
-    fenómeno frecuente en alumnos de este nivel educativo.
-\end{enumerate}
+\paragraph{Errores ortográficos atendidos}
 
-\paragraph{Ejercicios de corrección ortográfica}
+Los ejercicios de ortografía se agrupan según los errores más frecuentes en
+este nivel. Para cada error se identifica la habilidad que debe fortalecerse y
+la estrategia didáctica que se implementa en la plataforma
+(Tabla~\ref{tab:errores-estrategias}).
 
-Generados dinámicamente a partir de los errores detectados por el módulo
-NLP y asignados según el tipo de falla identificada. Se contemplan tres
-modalidades:
+\begin{table}[H]
+\centering
+\caption{Errores ortográficos comunes, habilidad a fortalecer y estrategia didáctica.}
+\label{tab:errores-estrategias}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{|p{4.2cm}|p{4.6cm}|p{5.2cm}|}
+\hline
+\textbf{Error específico} & \textbf{Habilidad a fortalecer} & \textbf{Estrategia didáctica} \\ \hline
+Grafías dudosas (\textit{b/v}, \textit{c/s/z}, \textit{c/k/q}) & Conciencia ortográfica & Dictado lúdico (escribir el nombre de imágenes) \\ \hline
+Inversión (\textit{d} por \textit{b}, \textit{p} por \textit{q}) & Orientación espacial de la letra & Discriminación visual \\ \hline
+Omisión o adición de letras (\textit{pato} por \textit{plato}) & Procesamiento fonológico & Conciencia silábica \\ \hline
+Omisión de tildes & Identificación de la sílaba tónica y uso de la tilde & Desafíos visuales \\ \hline
+\end{tabular}
+\end{table}
 
-\begin{enumerate}
-    \item \textbf{Uso de grafías conflictivas:} Ejercicios de completar
-    palabras enfocados en las reglas ortográficas de mayor dificultad en
-    este nivel educativo: uso de \textit{b/v}, \textit{c/s/z},
-    \textit{g/j} y el uso de la \textit{h}. Cada ejercicio presenta al
-    alumno el contexto de la palabra con la grafía omitida, de modo que
-    la decisión ortográfica requiera razonamiento y no memorización
-    mecánica.
+Además, se incluyen ejercicios de \textbf{refuerzo caligráfico} orientados a
+las métricas de trazo del módulo de análisis de imagen (alineación, tamaño,
+separación y uniformidad del trazo; Tabla~\ref{tab:parametros_evaluacion}): copia de
+vocales sobre el renglón, letras de giro similar (\textit{a, c, d, g, q}) y
+oraciones cortas con vocabulario infantil.
 
-    \item \textbf{Acentuación:} Ejercicios de identificación y
-    colocación de tildes, con énfasis en la clasificación de palabras en
-    agudas, graves y esdrújulas. El sistema selecciona palabras del mismo
-    campo semántico que el texto original del alumno para mantener la
-    coherencia con el ejercicio que motivó el análisis.
+\paragraph{Evaluación mediante CLS}
 
-    \item \textbf{Reescritura focalizada:} Cuando el módulo NLP detecta
-    una palabra mal escrita en el texto libre del alumno, el sistema
-    genera automáticamente un ejercicio de repetición espaciada en el
-    que el alumno debe reescribir correctamente esa palabra específica
-    dentro de un nuevo contexto oracional. Esta modalidad es la de mayor
-    personalización, pues el contenido del ejercicio se construye
-    directamente a partir del error individual del alumno.
-\end{enumerate}
+Todos los ejercicios producen una respuesta manuscrita con un texto esperado
+conocido, lo que permite medirla con la secuencia correcta de letras
+(CLS) descrita en la Sección~\ref{sec:cls} \cite{treiman2016measures, aimswebplus2025manual}.
+Por esa razón el catálogo no incluye escritura libre: cada ejercicio define una
+o más respuestas aceptadas (por ejemplo, \textit{uva} y \textit{uvas}).
+
+El CLS es especialmente adecuado para los errores atendidos porque los
+penaliza de forma proporcional a su gravedad:
+
+\begin{itemize}
+    \item \textbf{Omisión:} escribir \textit{pato} en lugar de \textit{plato}
+    obtiene 4 de 6 secuencias.
+    \item \textbf{Inversión y grafías dudosas:} escribir \textit{baca} en
+    lugar de \textit{vaca} obtiene 3 de 5, porque se pierden las dos
+    secuencias que contienen la letra sustituida.
+    \item \textbf{Tilde:} el CLS distingue \textit{ó} de \textit{o}, por lo que
+    \textit{raton} obtiene 4 de 6 frente a \textit{ratón}.
+\end{itemize}
+
+El puntaje calculado es una sugerencia: solo se incorpora al progreso del
+alumno cuando el tutor lo confirma al revisar el intento.
+
+\paragraph{Retroalimentación al alumno}
+
+Cada ejercicio incluye una \textbf{pista} redactada en lenguaje infantil (por
+ejemplo, «La \textit{b} tiene la panza a la derecha y la \textit{d}, a la
+izquierda»), que se muestra junto a la instrucción y se lee en voz alta. Los
+ejercicios con imagen presentan dibujos numerados del 1 al 4 para que el orden
+de las palabras esperadas sea inequívoco.
 
 % ─────────────────────────────────────────────────────────
 \subsubsection{Estructura del catálogo de ejercicios}
 
-El catálogo de ejercicios disponibles en la plataforma se almacena en
-la tabla \texttt{Ejercicios} de la base de datos. Cada registro del
-catálogo contiene los atributos necesarios para que el sistema pueda
-tanto presentarlo al alumno como procesarlo automáticamente para la
-generación de variantes. La Tabla~\ref{tab:catalogo-ejercicios} describe
-los atributos del catálogo y su propósito dentro del módulo.
+El catálogo se almacena en la tabla \texttt{Ejercicios}. Cada registro contiene
+los atributos necesarios para presentarlo al alumno y para evaluarlo
+automáticamente (Tabla~\ref{tab:catalogo-ejercicios}).
 
 \begin{table}[H]
 \centering
@@ -105,24 +122,36 @@ los atributos del catálogo y su propósito dentro del módulo.
 \textbf{Atributo} & \textbf{Tipo} & \textbf{Descripción} \\
 \hline
 \texttt{id\_ejercicio}  & Entero        & Identificador único del ejercicio en el catálogo. \\
-\texttt{titulo}         & VARCHAR(150)  & Nombre descriptivo del ejercicio visible para el tutor. \\
-\texttt{descripcion}    & VARCHAR(MAX)  & Instrucciones del ejercicio para el alumno. \\
-\texttt{tipo}           & VARCHAR(30)   & Categoría del ejercicio: \texttt{caligrafico} u \texttt{ortografico}. \\
-\texttt{contenido\_base}& VARCHAR(MAX)  & Texto base, pangrama, frase o patrón de letra sobre el que se construye el ejercicio. \\
+\texttt{titulo}         & VARCHAR(150)  & Nombre descriptivo del ejercicio. \\
+\texttt{descripcion}    & VARCHAR(MAX)  & Instrucción para el alumno, que también se lee en voz alta. \\
+\texttt{tipo}           & VARCHAR(30)   & Área principal: \texttt{Ortografía}, \texttt{Legibilidad} o \texttt{dictado}. \\
+\texttt{contenido\_base}& VARCHAR(MAX)  & Documento JSON con el modelo (texto o imagen), la evaluación y la información pedagógica (ver abajo). \\
+\texttt{id\_tutor\_creador} & Entero    & Nulo para el catálogo común; el tutor dueño en los dictados que él crea. \\
 \texttt{id\_estatus}    & Entero        & Estado del ejercicio en el catálogo (activo/inactivo). \\
 \hline
 \end{tabular}
 \end{table}
 
-El campo \texttt{tipo} actúa como discriminador para que el sistema
-pueda filtrar y asignar ejercicios de forma coherente con el tipo de
-error detectado: errores caligráficos activan ejercicios de tipo
-\texttt{caligrafico}, mientras que errores ortográficos activan
-ejercicios de tipo \texttt{ortografico}. Esta separación garantiza que
-la retroalimentación entregada al alumno sea siempre pertinente al área
-de oportunidad identificada en su intento.
+El campo \texttt{contenido\_base} reúne tres partes:
 
-La relación entre el catálogo y el tutor se gestiona a través de la
-tabla \texttt{Ejercicios\_Tutor}, que representa la activación de un
-ejercicio del catálogo por parte de un tutor específico y contiene su
-propio ciclo de vida independiente, conforme al diseño descrito en la Sección~4.5.
+\begin{itemize}
+    \item \textbf{Modelo:} \texttt{texto\_guia} (texto a copiar o completar) e
+    \texttt{imagen\_guia} (imagen de referencia, por ejemplo los dibujos
+    numerados de los ejercicios de modalidad \textit{imagen}).
+    \item \textbf{Evaluación:} \texttt{evaluacion.modo} y
+    \texttt{evaluacion.respuestas\_aceptadas}, contra las que se calcula el
+    CLS.
+    \item \textbf{Pedagogía:} \texttt{pedagogia.metodo} (sintético, analítico o
+    ecléctico), \texttt{pedagogia.error\_objetivo}, \texttt{habilidad},
+    \texttt{estrategia}, \texttt{nivel}, \texttt{orden} y \texttt{pista}.
+\end{itemize}
+
+Con la información pedagógica, el tutor puede filtrar el catálogo por método y
+por error, y conocer la habilidad que fortalece cada ejercicio antes de
+activarlo. De esta forma la práctica asignada se elige según el área de
+oportunidad observada en los intentos del alumno.
+
+La relación entre el catálogo y el tutor se gestiona a través de la tabla
+\texttt{Ejercicios\_Tutor}, que representa la activación de un ejercicio del
+catálogo por parte de un tutor específico y tiene su propio ciclo de vida
+independiente, conforme al diseño descrito en la Sección~\ref{sec:diseno-bd}.

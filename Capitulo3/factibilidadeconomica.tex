@@ -35,7 +35,7 @@ En la Tabla~\ref{tab:software} se presentan las herramientas de software selecci
     \hline
     GitHub (Free) \cite{githubDocs} & Control de versiones, repos privados, CI/CD & Libre & \$0 & N/A \\
     \hline
-    GCP (Compute Engine e2-medium ×3) \cite{gcpComputeEngine} & Hosting con escalamiento horizontal: VM-1 Front-End, VM-2 Back-End OCR/NLP, VM-3 Base de datos & Pago por uso & \$1,316.80 MXN & \$2,633.60 MXN (2 meses) \\
+    GCP (Compute Engine e2-medium ×3) \cite{gcpComputeEngine} & Hosting con escalamiento horizontal: VM-1 Front-End, VM-2 Back-End (OCR y evaluación CLS), VM-3 Base de datos & Pago por uso & \$1,316.80 MXN & \$2,633.60 MXN (2 meses) \\
     \hline
     \multicolumn{3}{|r|}{\textbf{Total}} & \multicolumn{2}{r|}{\textbf{\$2,633.60 MXN}} \\
     \hline
@@ -69,7 +69,7 @@ iPad / Tablets  & N/A & N/A & N/A & iPadOS/Android & \$10,000 \\
 \end{tabularx}
 \end{table}
  
-Dadas las características de las herramientas tanto en software como en hardware, se puede observar que el proyecto puede llevarse a cabo correctamente. El stack tecnológico es coherente y moderno: React/Next.js cubre el front-end educativo, FastAPI con Python concentra la lógica de la inteligencia artificial (\textit{Artificial Intelligence}, AI por sus siglas en inglés) para OCR y NLP, y SQL Server garantiza integridad referencial con soporte a triggers y vistas. El reconocimiento se ejecuta en Google Cloud Vision; los equipos locales ejecutan la aplicación y las pruebas de procesamiento de imágenes.
+Dadas las características de las herramientas tanto en software como en hardware, se puede observar que el proyecto puede llevarse a cabo correctamente. El stack tecnológico es coherente y moderno: React/Next.js cubre el front-end educativo, FastAPI con Python concentra la lógica de la inteligencia artificial (\textit{Artificial Intelligence}, AI por sus siglas en inglés) para OCR, junto con la evaluación ortográfica mediante CLS, y SQL Server garantiza integridad referencial con soporte a triggers y vistas. El reconocimiento se ejecuta en Google Cloud Vision; los equipos locales ejecutan la aplicación y las pruebas de procesamiento de imágenes.
  
 % ─────────────────────────────────────────────
 \subsubsection{Factibilidad Operativa}
@@ -134,7 +134,7 @@ Desarrollador Front-End & Desarrolla la interfaz de usuario con React/Next.js: p
 \hline
 Desarrollador Back-End  & Implementa los endpoints REST con FastAPI, lógica de negocio, autenticación JWT y BCrypt.        & 1 \\
 \hline
-Especialista AI         & Integra y ajusta los módulos de OCR y NLP para análisis caligráfico y corrección ortográfica.    & 1 \\
+Especialista AI         & Integra y ajusta el OCR, el análisis caligráfico y la evaluación ortográfica mediante CLS.    & 1 \\
 \hline
 Tester / QA             & Realiza las pruebas funcionales y de integración para validar el correcto funcionamiento.        & 1 \\
 \hline
@@ -160,7 +160,7 @@ Desarrollador Front-End & 20\% & 42.4 días \\
 \hline
 Desarrollador Back-End  & 20\% & 42.4 días \\
 \hline
-Especialista AI (OCR + NLP) & 20\% & 42.4 días \\
+Especialista AI (OCR + CLS) & 20\% & 42.4 días \\
 \hline
 Tester / QA             & 10\% & 21.2 días \\
 \hline

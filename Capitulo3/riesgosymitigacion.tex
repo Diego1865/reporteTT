@@ -2,7 +2,7 @@
 
 Durante el desarrollo e implementación de la aplicación pueden presentarse distintos riesgos técnicos, operativos y de seguridad que afecten el funcionamiento del sistema o el cumplimiento de los objetivos del proyecto.
 
-Debido a que la solución propuesta integra tecnologías de reconocimiento óptico de caracteres, procesamiento de lenguaje natural y almacenamiento de información en una plataforma web, resulta necesario identificar posibles problemáticas relacionadas con la precisión del procesamiento, la calidad de los datos, la disponibilidad de los servicios y la interacción de los usuarios con la aplicación.
+Debido a que la solución propuesta integra tecnologías de reconocimiento óptico de caracteres, evaluación ortográfica automatizada mediante CLS y almacenamiento de información en una plataforma web, resulta necesario identificar posibles problemáticas relacionadas con la precisión del procesamiento, la calidad de los datos, la disponibilidad de los servicios y la interacción de los usuarios con la aplicación.
 
 El análisis presentado a continuación permite identificar los principales riesgos asociados al proyecto y definir medidas orientadas a reducir su impacto sobre el sistema.
 
@@ -10,7 +10,7 @@ El análisis presentado a continuación permite identificar los principales ries
 
 \subsubsection{Identificación de riesgos}
 
-La identificación de riesgos se realizó mediante el análisis de los diferentes componentes que integran la arquitectura de la aplicación, considerando aspectos relacionados con el procesamiento OCR, el análisis ortográfico mediante NLP, la infraestructura tecnológica utilizada, la calidad de las imágenes procesadas y la interacción de los usuarios con el sistema.
+La identificación de riesgos se realizó mediante el análisis de los diferentes componentes que integran la arquitectura de la aplicación, considerando aspectos relacionados con el procesamiento OCR, la evaluación ortográfica mediante CLS, la infraestructura tecnológica utilizada, la calidad de las imágenes procesadas y la interacción de los usuarios con el sistema.
 
 Asimismo, se consideraron posibles riesgos relacionados con la seguridad de la información, el rendimiento del sistema y la experiencia de usuario, debido a que la aplicación está orientada a estudiantes de educación primaria y requiere mecanismos de procesamiento confiables y accesibles.
 
@@ -128,11 +128,11 @@ Validar capturas y configuración de Cloud Vision con transcripciones manuales. 
 \cellcolor{RiskOrange} Alto \\
 \hline
 
-Errores en análisis ortográfico &
-El módulo NLP podría generar sugerencias incorrectas o falsos positivos. &
+Errores en evaluación ortográfica &
+Una transcripción OCR incorrecta podría producir un puntaje CLS que no corresponde a lo que escribió el alumno. &
 Media &
 Medio &
-Implementar validaciones contextuales y pruebas controladas. &
+Confirmación obligatoria del puntaje por el tutor y comparación con la puntuación CLS manual. &
 \cellcolor{RiskYellow} Medio \\
 \hline
 
@@ -201,7 +201,7 @@ La implementación de estas medidas permite disminuir la exposición a riesgos c
 
 En el caso del módulo OCR, las estrategias de mitigación se enfocan principalmente en reducir errores ocasionados por imágenes de baja calidad o variaciones en la escritura manuscrita. Para ello, se contempla la implementación de técnicas de preprocesamiento de imágenes, validaciones de resolución y una alternativa de captura manual mediante un lienzo digital, permitiendo disminuir problemas asociados a iluminación, desenfoque o ruido presentes en fotografías tomadas por el usuario.
 
-Por otra parte, los riesgos asociados al análisis ortográfico mediante NLP serán mitigados mediante pruebas de validación contextual y revisión de resultados generados por el modelo, con el propósito de disminuir falsos positivos o sugerencias incorrectas durante el procesamiento del texto.
+Por otra parte, los riesgos asociados a la evaluación ortográfica serán mitigados mediante la confirmación del puntaje CLS por parte del tutor antes de incorporarlo al progreso del alumno, y mediante la comparación periódica con la puntuación CLS manual, con el propósito de evitar que un error de transcripción se registre como un error ortográfico.
 
 Respecto a la seguridad de la información, se consideran mecanismos de autenticación mediante JWT, cifrado de contraseñas y control de acceso por roles para reducir riesgos relacionados con accesos no autorizados o exposición de datos almacenados en la plataforma.
 
