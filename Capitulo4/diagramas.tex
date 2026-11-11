@@ -19,7 +19,26 @@ Con el propósito de representar el comportamiento dinámico del sistema, en la 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.75\textwidth]{Imagenes/DiagramaDeSecuencia.png}
+    \resizebox{\textwidth}{!}{%
+    \begin{sequencediagram}
+        \def\unitfactor{0.9}
+        \newinst{al}{:ALUMNO}
+        \newinst[2.6]{fe}{:FRONTEND (React)}
+        \newinst[0.9]{be}{:BACKEND (API)}
+        \newinst[0.9]{ocr}{:MODULO\_OCR}
+        \newinst[0.9]{nlp}{:MODULO\_NLP}
+        \newinst[0.9]{db}{:BASE\_DE\_DATOS}
+        \begin{call}{al}{Subir\_imagen}{fe}{Mostrar\_retroalimentación}
+            \begin{call}{fe}{Enviar\_imagen}{be}{Enviar\_resultados}
+                \begin{call}{be}{Procesar\_imagen}{ocr}{Texto\_extraído}
+                \end{call}
+                \begin{call}{be}{Analizar\_texto}{nlp}{Errores\_y\_sugerencias}
+                \end{call}
+                \begin{call}{be}{Guardar\_resultado}{db}{Confirmación}
+                \end{call}
+            \end{call}
+        \end{call}
+    \end{sequencediagram}}
     \caption{Diagrama de secuencia del procesamiento de ejercicios}
     \label{fig:diagrama_secuencia}
 \end{figure}
