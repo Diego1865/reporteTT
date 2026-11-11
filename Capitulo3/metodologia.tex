@@ -61,15 +61,15 @@ Entre las razones específicas que justifican esta elección destacan:
 \subsubsection{Estructura de las iteraciones}
 
 El desarrollo se estructuró en cuatro ciclos evolutivos distribuidos en las dos etapas
-del Trabajo Terminal. Las iteraciones 1 y 2 (correspondientes a TT1) se enfocaron en
+del Trabajo Terminal (TT). Las iteraciones 1 y 2 (correspondientes a TT I) se enfocaron en
 la construcción de la infraestructura web, la recolección del dataset y el
 preprocesamiento de imágenes, mitigando tempranamente los riesgos asociados a la
-calidad de la entrada. Las iteraciones 3 y 4 (correspondientes a TT2) abordarán la
+calidad de la entrada. Las iteraciones 3 y 4 (correspondientes a TT II) abordarán la
 validación de Cloud Vision, el desarrollo del análisis caligráfico y lingüístico y las pruebas
 finales con usuarios, asegurando que los componentes críticos se desarrollen sobre una
 base de datos validada y estable.
 
-\paragraph{Etapa 1 — Trabajo Terminal I: Fundamentos y Procesamiento Visual}
+\paragraph{Etapa 1 — TT I: Fundamentos y Procesamiento Visual}
 
 El objetivo de esta etapa fue establecer la infraestructura tecnológica, recolectar el
 corpus de datos necesario y validar los algoritmos de preprocesamiento de imágenes.
@@ -119,7 +119,7 @@ de reconocimiento.
     siguiente ciclo.
 \end{itemize}
 
-\paragraph{Etapa 2 — Trabajo Terminal II: Inteligencia Artificial e Integración}
+\paragraph{Etapa 2 — TT II: Inteligencia Artificial e Integración}
 
 En esta etapa se valida la integración de Cloud Vision y se completa el análisis del trazo y del contenido textual, utilizando las muestras de evaluación.
 
@@ -169,7 +169,7 @@ generación de reportes pedagógicos, culminando con el despliegue del sistema c
 \end{itemize}
 
 La Tabla~\ref{tab:espiral} resume la correspondencia entre cada iteración, su etapa
-del Trabajo Terminal y los entregables principales asociados.
+del TT y los entregables principales asociados.
 
 \begin{table}[H]
 \centering
@@ -179,13 +179,13 @@ del Trabajo Terminal y los entregables principales asociados.
 \hline
 \textbf{Iteración} & \textbf{Etapa} & \textbf{Enfoque} & \textbf{Entregables principales} \\
 \hline
-1 & TT1 & Infraestructura web y captura & Base de datos, autenticación, módulo de captura de imágenes \\
+1 & TT I & Infraestructura web y captura & Base de datos, autenticación, módulo de captura de imágenes \\
 \hline
-2 & TT1 & Dataset y preprocesamiento & Corpus etiquetado, algoritmos de binarización y segmentación \\
+2 & TT I & Dataset y preprocesamiento & Corpus etiquetado, algoritmos de binarización y segmentación \\
 \hline
-3 & TT2 & OCR y métricas caligráficas & Servicio Cloud Vision validado, métricas geométricas, módulo de retroalimentación \\
+3 & TT II & OCR y métricas caligráficas & Servicio Cloud Vision validado, métricas geométricas, módulo de retroalimentación \\
 \hline
-4 & TT2 & NLP, integración y despliegue & Módulo NLP, reportes de progreso, sistema integrado desplegado \\
+4 & TT II & NLP, integración y despliegue & Módulo NLP, reportes de progreso, sistema integrado desplegado \\
 \hline
 \end{tabular}
 \end{table}
