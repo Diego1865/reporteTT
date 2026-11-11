@@ -37,7 +37,7 @@ Entre las razones específicas que justifican esta elección destacan:
 
 \begin{itemize}
     \item \textbf{Alta incertidumbre técnica.} La integración de OCR especializado en
-    escritura infantil en español y de módulos de NLP implica decisiones tecnológicas —
+    escritura infantil en español y de la evaluación ortográfica mediante CLS implica decisiones tecnológicas —
     configuración de Cloud Vision, selección de muestras y calibración de métricas — cuyo resultado
     no puede garantizarse desde el inicio del proyecto.
 
@@ -54,7 +54,7 @@ Entre las razones específicas que justifican esta elección destacan:
 
     \item \textbf{Desarrollo incremental por módulos.} La arquitectura contempla
     componentes claramente diferenciados — autenticación, captura de escritura, OCR,
-    NLP y retroalimentación — que pueden desarrollarse y validarse de manera independiente
+    evaluación ortográfica (CLS) y retroalimentación — que pueden desarrollarse y validarse de manera independiente
     en iteraciones sucesivas.
 \end{itemize}
 
@@ -147,15 +147,16 @@ de retroalimentación mediante ejercicios correctivos.
     mediante referencias manuales de escritura infantil.
 \end{itemize}
 
-\textbf{Iteración 4: Análisis Lingüístico (NLP), Integración y Despliegue}
+\textbf{Iteración 4: Evaluación Ortográfica (CLS), Integración y Despliegue}
 
-\textit{Objetivo:} Implementar la detección semántica de errores ortográficos y la
-generación de reportes pedagógicos, culminando con el despliegue del sistema completo.
+\textit{Objetivo:} Implementar la evaluación ortográfica mediante la secuencia correcta de
+letras (CLS) y la generación de reportes pedagógicos, culminando con el despliegue del sistema completo.
 
 \textit{Actividades principales:}
 \begin{itemize}
-    \item Desarrollo del módulo de NLP para la corrección ortográfica contextual y
-    gramatical.
+    \item Desarrollo del módulo de evaluación ortográfica que calcula el puntaje CLS de
+    cada intento respecto a las respuestas aceptadas del ejercicio.
+    \item Incorporación de la confirmación del puntaje por parte del tutor.
     \item Generación automática de retroalimentación para el alumno y reportes de
     progreso para el docente.
     \item Pruebas de aceptación con usuarios finales y despliegue del sistema.
@@ -163,9 +164,10 @@ generación de reportes pedagógicos, culminando con el despliegue del sistema c
 
 \textit{Gestión de riesgos:}
 \begin{itemize}
-    \item \textbf{Riesgo:} Generación de falsos positivos en la corrección ortográfica.
-    \item \textbf{Mitigación:} Calibración de umbrales de confianza y validación
-    cruzada con evaluaciones docentes manuales.
+    \item \textbf{Riesgo:} Puntajes CLS incorrectos derivados de errores de transcripción
+    del OCR.
+    \item \textbf{Mitigación:} Confirmación obligatoria del puntaje por el tutor y
+    comparación con la puntuación CLS manual (meta de concordancia del OE-05).
 \end{itemize}
 
 La Tabla~\ref{tab:espiral} resume la correspondencia entre cada iteración, su etapa
@@ -185,7 +187,7 @@ del TT y los entregables principales asociados.
 \hline
 3 & TT II & OCR y métricas caligráficas & Servicio Cloud Vision validado, métricas geométricas, módulo de retroalimentación \\
 \hline
-4 & TT II & NLP, integración y despliegue & Módulo NLP, reportes de progreso, sistema integrado desplegado \\
+4 & TT II & CLS, integración y despliegue & Evaluación ortográfica CLS, reportes de progreso, sistema integrado desplegado \\
 \hline
 \end{tabular}
 \end{table}

@@ -80,7 +80,7 @@ RF-25 & Validación de envío vacío & \\
 % MÓDULO 5: Seguimiento y Retroalimentación
 RF-26 & Análisis OCR & \multirow{5}{*}{\shortstack{Seguimiento y \\ Retroalimentación}} \\
 \cline{1-2}
-RF-27 & Análisis NLP & \\
+RF-27 & Evaluación ortográfica CLS & \\
 \cline{1-2}
 RF-28 & Notificación de fallo en análisis & \\
 \cline{1-2}
@@ -1078,14 +1078,14 @@ El alumno utiliza únicamente una de las dos modalidades por intento.
 \textbf{Precondición:} El alumno debe haber enviado un intento de ejercicio con una imagen válida generada desde el lienzo digital o cargada desde su dispositivo.
 
 \vspace{0.2cm}
-\textbf{Postcondición:} La transcripción y la anotación quedan almacenadas; el texto está disponible para el módulo NLP (RF-27), visualizado por el alumno (RF-16) y consultado por el tutor (RF-09).
+\textbf{Postcondición:} La transcripción y la anotación quedan almacenadas; el texto está disponible para la evaluación ortográfica CLS (RF-27), visualizado por el alumno (RF-16) y consultado por el tutor (RF-09).
 } \\ \hline
 \end{tabular}
 \label{tab:rf26}
 \end{table}
 
 % =========================
-% RF-27: Análisis NLP
+% RF-27: Evaluación ortográfica CLS
 % =========================
 \begin{table}[H]
 \caption{Especificación de requerimiento RF-27}
@@ -1094,21 +1094,21 @@ El alumno utiliza únicamente una de las dos modalidades por intento.
 \setlength{\tabcolsep}{6pt}
 \begin{tabular}{|p{7cm}|p{8cm}|}
 \hline
-\multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web analizará el texto reconocido por el módulo OCR mediante NLP, evaluando los aspectos ortográficos de la escritura del alumno.} \\ \hline
+\multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web calculará la secuencia correcta de letras (CLS) del texto reconocido por el módulo OCR respecto a las respuestas aceptadas del ejercicio, y presentará el puntaje al tutor para su confirmación.} \\ \hline
 \textbf{Identificador:} RF-27 &
-\textbf{Nombre:} Análisis NLP. \\ \cline{1-1}
+\textbf{Nombre:} Evaluación ortográfica CLS. \\ \cline{1-1}
 \textbf{Prioridad de desarrollo:} Alta &
 \multicolumn{1}{p{8cm}|}{} \\ \hline
-\textbf{Entrada:} Texto reconocido por el módulo OCR (RF-26) a partir de la imagen del intento de escritura del alumno. &
-\textbf{Salida:} Resultado del análisis ortográfico con identificación de errores, palabras incorrectas. \\ \hline
+\textbf{Entrada:} Texto reconocido por el módulo OCR (RF-26) y respuestas aceptadas definidas en el ejercicio. &
+\textbf{Salida:} Secuencias correctas obtenidas, secuencias posibles y puntaje ortográfico de 0 a 10 pendiente de confirmación. \\ \hline
 \multicolumn{2}{|p{15cm}|}{
-\textbf{Descripción:} A partir del texto extraído por el módulo OCR, el módulo NLP evalúa la ortografía de la escritura del alumno, identificando errores como palabras mal escritas, acentuación incorrecta y uso inadecuado de caracteres. Los resultados del análisis ortográfico se combinan con los del análisis caligráfico (RF-26) para generar un resultado integral del intento.
+\textbf{Descripción:} A partir del texto extraído por el módulo OCR, el módulo de evaluación ortográfica compara la escritura del alumno con la respuesta aceptada más cercana y cuenta los pares de letras correctamente ordenados (Sección~\ref{sec:cls}). Omisiones, inversiones, grafías incorrectas y tildes faltantes reducen el puntaje en proporción a las secuencias afectadas. El puntaje es una sugerencia: se incorpora al progreso del alumno solo cuando el tutor lo confirma o lo corrige (RF-29).
 
 \vspace{0.2cm}
 \textbf{Precondición:} El módulo OCR debe haber procesado exitosamente la imagen del intento y generado el texto reconocido (RF-26).
 
 \vspace{0.2cm}
-\textbf{Postcondición:} El resultado del análisis ortográfico queda almacenado y disponible para su visualización por el alumno (RF-16), consulta por el tutor (RF-09) y generación de recomendaciones por intento.
+\textbf{Postcondición:} El puntaje CLS queda almacenado como pendiente de confirmación; una vez confirmado, está disponible para su visualización por el alumno (RF-16), consulta por el tutor (RF-09) y generación de recomendaciones por intento.
 } \\ \hline
 \end{tabular}
 \label{tab:rf27}
@@ -1129,11 +1129,11 @@ El alumno utiliza únicamente una de las dos modalidades por intento.
 \textbf{Prioridad de desarrollo:} Media &
 \multicolumn{1}{p{8cm}|}{} \\ \hline
 
-\textbf{Entrada:} Error generado por el módulo OCR (RF-26) o NLP (RF-27) al procesar el intento de escritura enviado por el alumno. &
+\textbf{Entrada:} Error generado por el módulo OCR (RF-26) o por la evaluación ortográfica (RF-27) al procesar el intento de escritura enviado por el alumno. &
 \textbf{Salida:} Mensaje de notificación al alumno indicando el fallo en el análisis. \\ \hline
 
 \multicolumn{2}{|p{15cm}|}{
-\textbf{Descripción:} Si el módulo OCR o NLP falla al procesar el intento de escritura enviado, la aplicación web notifica al alumno del error de forma clara.
+\textbf{Descripción:} Si el módulo OCR o la evaluación ortográfica fallan al procesar el intento de escritura enviado, la aplicación web notifica al alumno del error de forma clara.
 
 \vspace{0.2cm}
 \textbf{Precondición:} El alumno debe haber enviado un intento de ejercicio que el módulo de análisis no pudo procesar correctamente.
@@ -1162,7 +1162,7 @@ El alumno utiliza únicamente una de las dos modalidades por intento.
 \textbf{Entrada:} Ejercicio completado seleccionado y correcciones ingresadas por el tutor sobre los resultados del análisis automático. &
 \textbf{Salida:} Resultados actualizados reflejados en el historial del alumno. \\ \hline
 \multicolumn{2}{|p{15cm}|}{
-\textbf{Descripción:} Cuando el tutor considera que el análisis automático generado por los módulos OCR y NLP no refleja correctamente el desempeño del alumno, puede modificar los resultados del intento.
+\textbf{Descripción:} Cuando el tutor considera que el análisis automático generado por el OCR y la evaluación ortográfica CLS no refleja correctamente el desempeño del alumno, puede modificar los resultados del intento.
 
 \vspace{0.2cm}
 \textbf{Precondición:} El tutor debe estar autenticado, haber consultado el historial de actividades del alumno (RF-09) y el intento debe tener resultados de análisis disponibles.
@@ -1195,7 +1195,7 @@ El alumno utiliza únicamente una de las dos modalidades por intento.
 \textbf{Descripción:} La aplicación web genera recomendaciones de actividades de mejora personalizadas para el alumno. 
 
 \vspace{0.2cm}
-\textbf{Precondición:} El alumno debe haber completado y enviado al menos un intento con resultados de análisis OCR y NLP disponibles (RF-26, RF-27).
+\textbf{Precondición:} El alumno debe haber completado y enviado al menos un intento con resultados de análisis OCR y puntaje CLS confirmado (RF-26, RF-27).
 
 \vspace{0.2cm}
 \textbf{Postcondición:} Las actividades sugeridas quedan registradas y disponibles para que el alumno las consulte.
@@ -1225,7 +1225,7 @@ El alumno utiliza únicamente una de las dos modalidades por intento.
     \multicolumn{2}{|p{15cm}|}{
     \textbf{Descripción:} El alumno selecciona una actividad sugerida y la realiza mediante el módulo de captura de escritura (RF-17 al RF-25) con el propósito de reforzar las áreas de oportunidad identificadas previamente por el sistema.
     
-    Las actividades de refuerzo tendrán un carácter complementario y de práctica autónoma, por lo que no generarán un nuevo intento evaluado ni serán sometidas nuevamente a análisis por los módulos OCR (RF-26) y NLP (RF-27). La realización de la actividad podrá ser consultada y validada posteriormente por el profesor.
+    Las actividades de refuerzo tendrán un carácter complementario y de práctica autónoma, por lo que no generarán un nuevo intento evaluado ni serán sometidas nuevamente a análisis por el OCR (RF-26) ni por la evaluación ortográfica (RF-27). La realización de la actividad podrá ser consultada y validada posteriormente por el profesor.
     
     \vspace{0.2cm}
     \textbf{Precondición:} El alumno debe estar autenticado y tener actividades sugeridas disponibles.

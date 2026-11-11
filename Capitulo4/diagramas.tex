@@ -4,12 +4,68 @@ Con el objetivo de definir la estructura estática del sistema, en la Figura~\re
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.60\textwidth]{Imagenes/DiagramaDeClases.png}
+    \resizebox{0.85\textwidth}{!}{%
+    \renewcommand{\umldrawcolor}{black}\renewcommand{\umlfillcolor}{gray!8}\renewcommand{\umltextcolor}{black}
+    \begin{tikzpicture}[font=\small]
+    \begin{class}[text width=4.2cm]{Usuario}{3,0}
+      \attribute{-id: int}
+      \attribute{-nombre: string}
+      \attribute{-username: string}
+      \attribute{-password: string}
+      \operation{+login()}
+    \end{class}
+    \begin{class}[text width=4.2cm]{Tutor}{-1.5,-4.2}
+      \operation{+registrarAlumno()}
+      \operation{+verResultados()}
+      \operation{+modificarResultados()}
+      \operation{+confirmarPuntaje()}
+    \end{class}
+    \begin{class}[text width=4.2cm]{Alumno}{4,-4.2}
+      \attribute{-grado: int}
+      \attribute{-grupo: string}
+      \operation{+realizarEjercicio()}
+      \operation{+verResultados()}
+    \end{class}
+    \begin{class}[text width=5.4cm]{Ejercicio}{10,-4.2}
+      \attribute{-id: int}
+      \attribute{-descripcion: string}
+      \attribute{-respuestasAceptadas: list}
+      \attribute{-fechaLimite: date}
+    \end{class}
+    \begin{class}[text width=4.2cm]{Intento}{6.5,-9}
+      \attribute{-id: int}
+      \attribute{-fecha: date}
+      \attribute{-imagen: string}
+      \attribute{-textoProcesado: string}
+    \end{class}
+    \begin{class}[text width=4.2cm]{Resultado}{2,-13.5}
+      \attribute{-id: int}
+      \attribute{-clsObtenidas: int}
+      \attribute{-clsPosibles: int}
+      \attribute{-calificacion: float}
+      \attribute{-confirmadoTutor: bool}
+    \end{class}
+    \begin{class}[text width=4.2cm]{AnalisisOCR}{9.5,-13.5}
+      \operation{+procesarImagen()}
+    \end{class}
+    \begin{class}[text width=6cm]{EvaluacionCLS}{2,-18.2}
+      \operation{+calcularCLS(texto, respuestas)}
+      \operation{+calcularPuntaje()}
+    \end{class}
+    \inherit{Tutor}{Usuario}
+    \inherit{Alumno}{Usuario}
+    \association{Tutor}{registra}{1}{Alumno}{}{*}
+    \association{Alumno}{realiza}{1}{Intento}{}{*}
+    \association{Ejercicio}{}{1}{Intento}{}{*}
+    \association{Intento}{}{1}{Resultado}{}{1}
+    \unidirectionalAssociation{Intento}{}{}{AnalisisOCR}
+    \unidirectionalAssociation{Resultado}{}{}{EvaluacionCLS}
+    \end{tikzpicture}}
     \caption{Diagrama de clases del sistema}
     \label{fig:diagrama_clases}
 \end{figure}
 
-El diagrama de clases representa la estructura estática del sistema, mostrando las principales entidades, sus atributos y las relaciones entre ellas. Se observa una jerarquía de herencia donde la clase \textit{Usuario} es la base para los actores \textit{Tutor} y \textit{Alumno}. Asimismo, se modelan los elementos centrales del sistema como \textit{Ejercicio}, \textit{Intento} y \textit{Resultado}, los cuales permiten gestionar el proceso de captura, análisis y retroalimentación de la escritura. Finalmente, se integran los módulos de procesamiento \textit{AnalisisOCR} y \textit{AnalisisNLP}, responsables de la conversión de imágenes a texto y la detección de errores ortográficos respectivamente.
+El diagrama de clases representa la estructura estática del sistema, mostrando las principales entidades, sus atributos y las relaciones entre ellas. Se observa una jerarquía de herencia donde la clase \textit{Usuario} es la base para los actores \textit{Tutor} y \textit{Alumno}. Asimismo, se modelan los elementos centrales del sistema como \textit{Ejercicio}, \textit{Intento} y \textit{Resultado}, los cuales permiten gestionar el proceso de captura, análisis y retroalimentación de la escritura. Finalmente, se integran los módulos de procesamiento \textit{AnalisisOCR} y \textit{EvaluacionCLS}, responsables de la conversión de imágenes a texto y del cálculo del puntaje ortográfico mediante la secuencia correcta de letras, respectivamente. La clase \textit{Resultado} conserva las secuencias correctas obtenidas y posibles, la calificación y si el tutor ya confirmó el puntaje.
 
 %------------------------------------------------
 
@@ -26,13 +82,13 @@ Con el propósito de representar el comportamiento dinámico del sistema, en la 
         \newinst[2.6]{fe}{:FRONTEND (React)}
         \newinst[0.9]{be}{:BACKEND (API)}
         \newinst[0.9]{ocr}{:MODULO\_OCR}
-        \newinst[0.9]{nlp}{:MODULO\_NLP}
+        \newinst[0.9]{cls}{:EVALUACION\_CLS}
         \newinst[0.9]{db}{:BASE\_DE\_DATOS}
         \begin{call}{al}{Subir\_imagen}{fe}{Mostrar\_retroalimentación}
             \begin{call}{fe}{Enviar\_imagen}{be}{Enviar\_resultados}
                 \begin{call}{be}{Procesar\_imagen}{ocr}{Texto\_extraído}
                 \end{call}
-                \begin{call}{be}{Analizar\_texto}{nlp}{Errores\_y\_sugerencias}
+                \begin{call}{be}{Calcular\_CLS}{cls}{Puntaje\_CLS}
                 \end{call}
                 \begin{call}{be}{Guardar\_resultado}{db}{Confirmación}
                 \end{call}
@@ -43,7 +99,7 @@ Con el propósito de representar el comportamiento dinámico del sistema, en la 
     \label{fig:diagrama_secuencia}
 \end{figure}
 
-El diagrama muestra cómo el alumno interactúa con la interfaz para enviar una imagen, la cual es procesada por el backend mediante un módulo OCR para la extracción de texto. Posteriormente, el texto es analizado por el módulo NLP para identificar errores ortográficos y generar sugerencias. Finalmente, los resultados son almacenados en la base de datos y enviados al usuario para su visualización.
+El diagrama muestra cómo el alumno interactúa con la interfaz para enviar una imagen, la cual es procesada por el backend mediante un módulo OCR para la extracción de texto. Posteriormente, el módulo de evaluación ortográfica compara el texto con las respuestas aceptadas del ejercicio y calcula el puntaje CLS. Finalmente, los resultados son almacenados en la base de datos y enviados al usuario para su visualización.
 
 %------------------------------------------------
 
@@ -53,12 +109,32 @@ Con el propósito de representar el flujo de actividades del sistema, en la Figu
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.35\textwidth]{Imagenes/DiagramaDeActividad.png}
+    \begin{tikzpicture}[
+      node distance=0.45cm,
+      act/.style={rectangle, rounded corners=2.5mm, draw, fill=gray!8, minimum height=0.75cm, text width=7cm, align=center, font=\small},
+      flecha/.style={-{Stealth[length=2.2mm]}, thick}]
+    \node[circle, fill=black, minimum size=4mm, inner sep=0] (ini) {};
+    \node[act, below=of ini] (a1) {Alumno accede al sistema};
+    \node[act, below=of a1] (a2) {Selecciona ejercicio};
+    \node[act, below=of a2] (a3) {Escribe en el lienzo o sube imagen};
+    \node[act, below=of a3] (a4) {Enviar imagen al backend};
+    \node[act, below=of a4] (a5) {Procesar imagen (OCR)};
+    \node[act, below=of a5] (a6) {Extraer texto};
+    \node[act, below=of a6] (a7) {Calcular CLS respecto a las respuestas aceptadas};
+    \node[act, below=of a7] (a8) {Calcular puntaje ortográfico (0 a 10)};
+    \node[act, below=of a8] (a9) {Guardar en base de datos (pendiente de confirmación)};
+    \node[act, below=of a9] (a10) {Tutor confirma o corrige el puntaje};
+    \node[act, below=of a10] (a11) {Mostrar resultados al alumno};
+    \node[circle, draw, thick, minimum size=5mm, inner sep=0, below=of a11] (fin) {};
+    \node[circle, fill=black, minimum size=3mm, inner sep=0] at (fin) {};
+    \foreach \x/\y in {ini/a1,a1/a2,a2/a3,a3/a4,a4/a5,a5/a6,a6/a7,a7/a8,a8/a9,a9/a10,a10/a11,a11/fin}
+      \draw[flecha] (\x) -- (\y);
+    \end{tikzpicture}
     \caption{Diagrama de actividad del procesamiento de ejercicios}
     \label{fig:diagrama_actividad}
 \end{figure}
 
-El diagrama muestra la secuencia de actividades que se llevan a cabo cuando un alumno realiza un ejercicio, comenzando desde la selección y envío de la imagen, pasando por el procesamiento mediante OCR y el análisis con técnicas de procesamiento de lenguaje natural, hasta la generación y almacenamiento de los resultados, los cuales son finalmente presentados al usuario.
+El diagrama muestra la secuencia de actividades que se llevan a cabo cuando un alumno realiza un ejercicio, comenzando desde la selección y envío de la imagen, pasando por el procesamiento mediante OCR y el cálculo del puntaje CLS, hasta el almacenamiento de los resultados y su confirmación por parte del tutor, tras lo cual son presentados al alumno.
 
 %------------------------------------------------
 
@@ -88,9 +164,9 @@ Con el objetivo de representar la estructura modular del sistema, en la Figura~\
     \label{fig:diagrama_componentes}
 \end{figure}
 
-El diagrama muestra la separación del sistema en tres capas principales: cliente, servidor y persistencia. El frontend se encarga de la interacción con el usuario, mientras que el backend gestiona la lógica del sistema y coordina el procesamiento mediante los módulos OCR y NLP. Finalmente, la base de datos permite almacenar la información generada y consultada durante la operación del sistema.
+El diagrama muestra la separación del sistema en tres capas principales: cliente, servidor y persistencia. El frontend se encarga de la interacción con el usuario, mientras que el backend gestiona la lógica del sistema y coordina el reconocimiento OCR y la evaluación ortográfica mediante CLS. Finalmente, la base de datos permite almacenar la información generada y consultada durante la operación del sistema.
 
-La separación de los módulos de procesamiento OCR y NLP permite una arquitectura más flexible y escalable, ya que cada componente puede ser optimizado o actualizado de manera independiente. Además, esta división facilita el mantenimiento del sistema y mejora la eficiencia en el procesamiento de la información.
+La separación entre el reconocimiento OCR y la evaluación ortográfica permite una arquitectura más flexible y escalable, ya que cada componente puede ser optimizado o actualizado de manera independiente. Además, esta división facilita el mantenimiento del sistema y mejora la eficiencia en el procesamiento de la información.
 
 %------------------------------------------------
 
@@ -100,11 +176,38 @@ Con el objetivo de representar la distribución física del sistema, en la Figur
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.65\textwidth]{Imagenes/DiagramaDeDespliegue.png}
+    \resizebox{\textwidth}{!}{%
+    \begin{tikzpicture}[
+      font=\small,
+      comp/.style={rectangle, draw, fill=gray!8, rounded corners=1pt, minimum height=0.8cm, minimum width=4.4cm, align=center},
+      nodo/.style={rectangle, draw, thick, inner xsep=14pt, inner ysep=16pt, fill=white},
+      enlace/.style={thick}]
+    \node[comp] (nav) at (0,0) {\guillemotleft component\guillemotright\\Navegador Web};
+    \node[comp] (api) at (0,-3.6) {\guillemotleft component\guillemotright\\Backend API (FastAPI)};
+    \node[comp] (db) at (8.2,-3.6) {\guillemotleft component\guillemotright\\SQL Server};
+    \node[comp] (cls) at (-2.6,-7.4) {\guillemotleft component\guillemotright\\Evaluación CLS};
+    \node[comp] (ocr) at (2.6,-7.4) {\guillemotleft component\guillemotright\\Servicio OCR};
+    \node[comp] (gcv) at (9.4,-7.4) {\guillemotleft external\guillemotright\\Google Cloud Vision};
+    \newcommand{\nodo}[3]{%
+      \node[nodo, fit=#2, label={[anchor=north, font=\small\bfseries, yshift=-2pt]north:#3}] (#1) {};
+      \draw[thick] (#1.north west) -- ++(0.25,0.25) -- ([shift={(0.25,0.25)}]#1.north east) -- (#1.north east);
+      \draw[thick] ([shift={(0.25,0.25)}]#1.north east) -- ([shift={(0.25,0.25)}]#1.south east) -- (#1.south east);}
+    \begin{scope}[on background layer]
+    \nodo{n1}{(nav)}{Dispositivo del Usuario}
+    \nodo{n2}{(api)}{Servidor Web / API}
+    \nodo{n3}{(ocr)(cls)}{Servidor de Procesamiento}
+    \nodo{n4}{(db)}{Servidor de Base de Datos}
+    \nodo{n5}{(gcv)}{Google Cloud}
+    \end{scope}
+    \draw[enlace] (n1) -- node[right]{HTTP/HTTPS} (n2);
+    \draw[enlace] (n2) -- (n3);
+    \draw[enlace] (n2) -- (n4);
+    \draw[enlace, dashed] (n3) -- node[above]{HTTPS} (n5);
+    \end{tikzpicture}}
     \caption{Diagrama de despliegue del sistema}
     \label{fig:diagrama_despliegue}
 \end{figure}
 
-El diagrama muestra la organización del sistema en distintos nodos físicos, incluyendo el dispositivo del usuario, el servidor de aplicaciones, el servidor de procesamiento y el servidor de base de datos. En el dispositivo del usuario se ejecuta el navegador web, desde donde se realizan las solicitudes al backend mediante los protocolos HTTP y Protocolo Seguro de Transferencia de Hipertexto (\textit{Hypertext Transfer Protocol Secure}, HTTPS por sus siglas en inglés). El servidor de aplicaciones gestiona la lógica del sistema, mientras que los servicios de procesamiento OCR y NLP se encargan de analizar la información recibida. Finalmente, el servidor de base de datos permite almacenar y consultar la información generada durante la operación del sistema.
+El diagrama muestra la organización del sistema en distintos nodos físicos, incluyendo el dispositivo del usuario, el servidor de aplicaciones, el servidor de procesamiento y el servidor de base de datos. En el dispositivo del usuario se ejecuta el navegador web, desde donde se realizan las solicitudes al backend mediante los protocolos HTTP y Protocolo Seguro de Transferencia de Hipertexto (\textit{Hypertext Transfer Protocol Secure}, HTTPS por sus siglas en inglés). El servidor de aplicaciones gestiona la lógica del sistema, mientras que el servidor de procesamiento aloja el servicio OCR, que se comunica con Google Cloud Vision, y la evaluación ortográfica mediante CLS. Finalmente, el servidor de base de datos permite almacenar y consultar la información generada durante la operación del sistema.
 
-Esta figura representa una distribución conceptual de responsabilidades. En la implementación actual, el reconocimiento OCR se delega al servicio externo Google Cloud Vision; el Back-End realiza la validación, la comparación textual y la persistencia. El futuro cálculo de métricas del trazo corresponde al procesamiento local de imagen y todavía no está implementado.
+Esta figura representa una distribución conceptual de responsabilidades. En la implementación actual, el reconocimiento OCR se delega al servicio externo Google Cloud Vision; el Back-End realiza la validación, el cálculo del puntaje CLS y la persistencia. El futuro cálculo de métricas del trazo corresponde al procesamiento local de imagen y todavía no está implementado.

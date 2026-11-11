@@ -39,7 +39,7 @@ En el Código~\ref{lst:entidades_usuario} se presenta la definición simplificad
 
 \textbf{B. Proceso de evaluación}
 
-Este módulo agrupa las tablas centrales del flujo de evaluación: \texttt{Ejercicio\_Tutor}, \texttt{Intento} y \texttt{Analisis\_ortografico}. La tabla \texttt{Ejercicio\_Tutor} materializa la relación M:N entre tutores y ejercicios del catálogo, incorporando atributos propios de la asignación. La tabla \texttt{Intento} registra cada ejecución de un ejercicio por parte del alumno, almacenando la imagen capturada y el texto reconocido por el módulo OCR. La tabla \texttt{Analisis\_ortografico} almacena los resultados del procesamiento NLP, utilizando un campo JSON para representar las sugerencias de corrección de forma flexible.
+Este módulo agrupa las tablas centrales del flujo de evaluación: \texttt{Ejercicio\_Tutor}, \texttt{Intento} y \texttt{Analisis\_ortografico}. La tabla \texttt{Ejercicio\_Tutor} materializa la relación M:N entre tutores y ejercicios del catálogo, incorporando atributos propios de la asignación. La tabla \texttt{Intento} registra cada ejecución de un ejercicio por parte del alumno, almacenando la imagen capturada y el texto reconocido por el módulo OCR. La tabla \texttt{Analisis\_ortografico} almacena el resultado de la evaluación ortográfica mediante CLS: las secuencias correctas obtenidas, las secuencias posibles, el puntaje equivalente en escala de 0 a 10 y un indicador de confirmación por parte del tutor.
 
 En el Código~\ref{lst:estructura_evaluacion} se presenta la estructura simplificada de las entidades que intervienen en el proceso de evaluación.
 
@@ -58,6 +58,15 @@ En el Código~\ref{lst:estructura_evaluacion} se presenta la estructura simplifi
         id_ejercicio_tutor INT NOT NULL,
         texto_detectado_ocr VARCHAR(MAX),
         fecha_envio DATETIME2 DEFAULT GETDATE()
+    );
+
+    CREATE TABLE Analisis_Ortografico (
+        id_analisis_ortografico INT IDENTITY(1,1) PRIMARY KEY,
+        id_intento INT NOT NULL,
+        cls_obtenidas INT NULL,
+        cls_posibles INT NULL,
+        ortografia_score DECIMAL(4,2) NULL,
+        confirmado_tutor BIT NOT NULL DEFAULT 0
     );
 \end{lstlisting}
 
@@ -161,8 +170,6 @@ Intentos & Ejercicio\_Tutor & N:1 \\
 \hline
 Analisis\_Ortografico & Intentos & 1:1 \\
 \hline
-Sugerencia\_ortografica & Analisis\_Ortografico & N:1 \\
-\hline
 Analisis\_Caligrafico & Intentos & 1:1 \\
 \hline
 
@@ -203,7 +210,9 @@ SELECT
         ELSE 'Reintento'
     END                             AS tipo_intento,
     ao.ortografia_score,
-    ao.cantidad_errores,
+    ao.cls_obtenidas,
+    ao.cls_posibles,
+    ao.confirmado_tutor,
     ac.alineacion_score,
     ac.tamano_letra_score,
     ac.espaciado_score,
@@ -244,12 +253,12 @@ Ambos triggers manejan dos escenarios: la creación del primer registro de progr
 
 \textbf{Trigger sobre Analisis\_Ortografico}
 \vspace{0.5cm}
-En el Código~\ref{lst:trigger_ortografia} se presenta el trigger encargado de actualizar el promedio ortográfico del alumno.
+En el Código~\ref{lst:trigger_ortografia} se presenta el trigger encargado de actualizar el promedio ortográfico del alumno. El trigger se ejecuta también al actualizar el registro y solo promedia los puntajes CLS confirmados por el tutor, de modo que un puntaje pendiente de revisión no afecta el progreso.
 
 \begin{lstlisting}[language=SQL, caption={Trigger de actualización del promedio ortográfico}, label={lst:trigger_ortografia}]
 CREATE TRIGGER trg_actualizar_progreso_ortografia
 ON Analisis_Ortografico
-AFTER INSERT
+AFTER INSERT, UPDATE
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -265,7 +274,8 @@ BEGIN
     FROM Analisis_Ortografico ao
     INNER JOIN Intentos i ON i.id_intento = ao.id_intento
     WHERE i.id_alumno = @id_alumno
-    AND ao.ortografia_score IS NOT NULL;
+    AND ao.ortografia_score IS NOT NULL
+    AND ao.confirmado_tutor = 1;
 
     IF EXISTS (
         SELECT 1 FROM Progreso_Alumno

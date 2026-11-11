@@ -232,17 +232,17 @@ Cada métrica caligráfica debe tener un valor dentro del rango de 0 a 10. \\ \h
 RN-17 & Observaciones del análisis &
 El análisis caligráfico puede incluir observaciones adicionales generadas por el tutor. \\ \hline
 
-RN-18 & Detección de errores ortográficos &
-El análisis ortográfico debe detectar errores ortográficos en el texto del intento. \\ \hline
+RN-18 & Cálculo del puntaje CLS &
+El análisis ortográfico debe calcular la secuencia correcta de letras (CLS) del texto reconocido respecto a las respuestas aceptadas del ejercicio. \\ \hline
 
-RN-19 & Conteo de errores &
-El sistema debe almacenar el conteo total de errores ortográficos detectados por intento. \\ \hline
+RN-19 & Registro de secuencias &
+El sistema debe almacenar, por intento, el número de secuencias correctas obtenidas y el número de secuencias posibles. \\ \hline
 
-RN-20 & Sugerencias de corrección &
-El sistema debe generar sugerencias de corrección ortográfica. \\ \hline
+RN-20 & Confirmación del tutor &
+El puntaje CLS solo debe incorporarse al progreso del alumno cuando el tutor lo confirme. \\ \hline
 
 RN-21 & Puntuación ortográfica &
-El análisis ortográfico debe asignar una puntuación ortográfica basada en los errores detectados dentro del rango de 0 a 10. \\ \hline
+El análisis ortográfico debe asignar una puntuación de 0 a 10 proporcional al cociente entre las secuencias correctas obtenidas y las secuencias posibles. \\ \hline
 
 RN-22 & Historial y progreso del alumno &
 El historial y el progreso del alumno deben generarse a partir de los datos de análisis de sus intentos. \\ \hline
@@ -968,13 +968,13 @@ Comentarios & Una vez enviado, el ejercicio no puede modificarse. Este es el úl
 \endfoot
 Actor & Ninguno (proceso interno de la aplicación web) \\
 \hline
-Descripción & El sistema analiza automáticamente el intento de escritura enviado por el alumno, evaluando aspectos caligráficos y ortográficos mediante los módulos internos de OCR y NLP, con el fin de generar un resultado que refleje el desempeño del alumno. \\
+Descripción & El sistema analiza automáticamente el intento de escritura enviado por el alumno, evaluando aspectos caligráficos y ortográficos mediante el reconocimiento OCR y la evaluación ortográfica por CLS, con el fin de generar un resultado que refleje el desempeño del alumno. \\
 \hline
-Datos & Imagen del intento enviado (trazo digital o fotografía), identificador del ejercicio, identificador del alumno, resultado del análisis caligráfico y ortográfico generado por los módulos OCR y NLP. \\
+Datos & Imagen del intento enviado (trazo digital o fotografía), identificador del ejercicio, identificador del alumno, resultado del análisis caligráfico y puntaje CLS generados por el sistema. \\
 \hline
 Estímulo & El módulo de análisis se activa automáticamente una vez que el alumno confirma el envío del ejercicio en CU-15. \\
 \hline
-Respuesta & Google Cloud Vision transcribe la imagen y el módulo textual compara la respuesta cuando existe una referencia. Se almacenan los resultados para su revisión. El análisis caligráfico complementario permanece pendiente de implementación; su integración permitirá consultar esas métricas en CU-16 y CU-17. \\
+Respuesta & Google Cloud Vision transcribe la imagen y el módulo de evaluación ortográfica calcula el puntaje CLS respecto a las respuestas aceptadas del ejercicio. Se almacenan los resultados para que el tutor los confirme. El análisis caligráfico complementario permanece pendiente de implementación; su integración permitirá consultar esas métricas en CU-16 y CU-17. \\
 \hline
 Comentarios & Este caso de uso es un \textit{\textlangle\textlangle include\textrangle\textrangle} de CU-15, ya que el análisis siempre ocurre tras cada envío sin excepción. Al tratarse de un proceso interno, no requiere intervención del usuario.  \\
 \hline
