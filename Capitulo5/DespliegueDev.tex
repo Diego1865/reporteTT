@@ -1,0 +1,413 @@
+% ============================================================
+%  Despliegue del sistema
+%  Se incluye al final de Capitulo5.tex con \input{Capitulo5/DespliegueDev.tex}
+% ============================================================
+
+\subsection{Despliegue del sistema}
+\label{sec:despliegue}
+
+En esta sección se describe el despliegue de la aplicación web, actividad que cierra la Iteración~4 de la metodología. El sistema se empaquetó en contenedores Docker \cite{dockerDocs}, de modo que el mismo código se ejecuta sin cambios en el equipo de desarrollo y en el servidor. Se prepararon dos entornos: un entorno local de desarrollo, en el que la base de datos también se ejecuta en un contenedor, y un entorno de demostración en Google Cloud Platform \cite{gcpComputeEngine}, accesible desde cualquier navegador mediante HTTPS y destinado a la prueba piloto.
+
+El diagrama de despliegue de la Figura~\ref{fig:diagrama_despliegue} distribuye las responsabilidades en nodos conceptuales. En la implementación, el \textit{frontend}, el \textit{backend} y el proxy inverso comparten una sola máquina virtual, y la base de datos se aloja en un servicio administrado. Esta consolidación reduce el costo de operación durante la etapa de pruebas sin modificar la separación lógica entre componentes.
+
+% ------------------------------------------------------------
+\subsubsection{Contenedorización de los componentes}
+% ------------------------------------------------------------
+
+Cada componente de la aplicación cuenta con un archivo \texttt{Dockerfile} que define la imagen a partir de la cual se crea su contenedor.
+
+\textbf{A. Imagen del \textit{backend}}
+
+La imagen del \textit{backend} parte de \texttt{python:3.11-slim}. Además de las dependencias de Python, instala el controlador ODBC 18 de Microsoft, requerido por la biblioteca \texttt{pyodbc} para conectarse a SQL Server. La aplicación FastAPI \cite{fastapiDocs} se ejecuta con el servidor ASGI Uvicorn en el puerto 8000.
+
+En el Código~\ref{lst:dockerfile_backend} se presenta la definición simplificada de la imagen del \textit{backend}.
+
+\begin{lstlisting}[language=bash, caption={Definición simplificada de la imagen del backend}, label={lst:dockerfile_backend}]
+FROM python:3.11-slim
+WORKDIR /app
+
+# Controlador ODBC de Microsoft para SQL Server
+RUN apt-get update && apt-get install -y \
+        curl gnupg2 g++ unixodbc-dev \
+    && ACCEPT_EULA=Y apt-get install -y msodbcsql18
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+
+EXPOSE 8000
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+\end{lstlisting}
+
+\textbf{B. Imagen del \textit{frontend}}
+
+La imagen del \textit{frontend} se construye en tres etapas sobre \texttt{node:20-alpine}. La primera instala las dependencias con \texttt{npm ci}, la segunda compila la aplicación Next.js \cite{nextjsDocs} y la tercera conserva únicamente los artefactos necesarios para ejecutarla. La construcción en etapas evita que las herramientas de compilación formen parte de la imagen final.
+
+La dirección del \textit{backend} se recibe como argumento de construcción (\texttt{NEXT\_PUBLIC\_API\_URL}), ya que Next.js incorpora las variables públicas en el código que se envía al navegador. En el Código~\ref{lst:dockerfile_frontend} se muestra la estructura de esta imagen.
+
+\begin{lstlisting}[language=bash, caption={Construcción en etapas de la imagen del frontend}, label={lst:dockerfile_frontend}]
+# Etapa 1: dependencias
+FROM node:20-alpine AS deps
+COPY package*.json ./
+RUN npm ci
+
+# Etapa 2: compilacion
+FROM node:20-alpine AS builder
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+RUN npm run build
+
+# Etapa 3: ejecucion
+FROM node:20-alpine AS runner
+ENV NODE_ENV=production
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
+EXPOSE 3000
+CMD ["npm", "start"]
+\end{lstlisting}
+
+En ambos componentes, el archivo \texttt{.dockerignore} excluye los archivos \texttt{.env}, las credenciales y los directorios generados (\texttt{node\_modules}, \texttt{.next}, \texttt{\_\_pycache\_\_}). De esta forma, ninguna contraseña ni clave queda almacenada dentro de una imagen.
+
+% ------------------------------------------------------------
+\subsubsection{Orquestación en el entorno de desarrollo}
+% ------------------------------------------------------------
+
+En el entorno local, los contenedores se coordinan con Docker Compose mediante el archivo \texttt{docker-compose.yml}. Este archivo define cuatro servicios, descritos en la Tabla~\ref{tab:servicios_locales}. Las credenciales se leen de un archivo \texttt{.env} que no forma parte del repositorio.
+
+\begin{longtable}{|p{2.6cm}|p{4.4cm}|p{6.6cm}|}
+\caption{Servicios del entorno local de desarrollo}
+\label{tab:servicios_locales} \\
+
+\hline
+\textbf{Servicio} & \textbf{Imagen} & \textbf{Función} \\
+\hline
+\endfirsthead
+
+\hline
+\textbf{Servicio} & \textbf{Imagen} & \textbf{Función} \\
+\hline
+\endhead
+
+\texttt{database} & \texttt{mssql/server:2022} & Ejecuta SQL Server en el puerto 1433. Los datos se guardan en un volumen persistente y una verificación de salud comprueba que el servidor responde a consultas. \\
+\hline
+\texttt{db-init} & \texttt{mssql/server:2022} & Espera a que \texttt{database} esté disponible y ejecuta el script del esquema con \texttt{sqlcmd}. Termina al concluir. \\
+\hline
+\texttt{backend} & Imagen propia (Python) & Expone la API en el puerto 8000. Recibe por variables de entorno la conexión a la base, la clave de firma de los tokens JWT y la configuración de Cloud Vision y del correo. \\
+\hline
+\texttt{frontend} & Imagen propia (Node.js) & Sirve la interfaz web en el puerto 3000. \\
+\hline
+
+\end{longtable}
+
+Con este archivo, el equipo de desarrollo levanta el sistema completo con un solo comando (\texttt{docker compose up -d --build}), sin instalar SQL Server, Python ni Node.js en su equipo.
+
+% ------------------------------------------------------------
+\subsubsection{Inicialización y migraciones de la base de datos}
+% ------------------------------------------------------------
+
+Durante el desarrollo, el esquema de la base de datos se modificó varias veces después de su creación. Para aplicar esos cambios sobre una base que ya contiene información, se implementó el script \texttt{inicializar\_demo.py}, que se ejecuta antes de iniciar el \textit{backend}. El script realiza las siguientes acciones:
+
+\begin{enumerate}
+    \item Se conecta a la base \texttt{master} y ejecuta \texttt{esquemaBD.sql}, que crea la base \texttt{TT} y sus tablas solo si todavía no existen.
+    \item Crea, si no existe, la tabla \texttt{SchemaMigrations}, que registra el nombre y la fecha de cada migración aplicada.
+    \item Recorre en orden alfabético los archivos de la carpeta \texttt{migraciones} y ejecuta únicamente los que no aparecen en \texttt{SchemaMigrations}.
+\end{enumerate}
+
+Si alguna sentencia falla, el script termina con error y el \textit{backend} no se inicia. Así se evita que la aplicación opere sobre un esquema incompleto. En el Código~\ref{lst:migraciones} se presenta el ciclo que aplica las migraciones pendientes.
+
+\begin{lstlisting}[language=Python, caption={Aplicación de migraciones pendientes}, label={lst:migraciones}]
+for archivo in sorted((carpeta / "migraciones").glob("*.sql")):
+    ya_aplicada = conexion.execute(
+        "SELECT 1 FROM dbo.SchemaMigrations WHERE nombre=?",
+        archivo.name).fetchone()
+    if ya_aplicada:
+        continue
+    ejecutar_archivo(conexion, archivo)
+    conexion.execute(
+        "INSERT INTO dbo.SchemaMigrations(nombre) VALUES (?)",
+        archivo.name)
+\end{lstlisting}
+
+La Tabla~\ref{tab:migraciones} resume las migraciones incorporadas al sistema. Todas pueden ejecutarse más de una vez sin duplicar información, ya que verifican la existencia de cada columna, índice, tabla o registro antes de crearlo o eliminarlo.
+
+\begin{longtable}{|p{5.2cm}|p{8.4cm}|}
+\caption{Migraciones de la base de datos}
+\label{tab:migraciones} \\
+
+\hline
+\textbf{Migración} & \textbf{Cambio que introduce} \\
+\hline
+\endfirsthead
+
+\hline
+\textbf{Migración} & \textbf{Cambio que introduce} \\
+\hline
+\endhead
+
+\texttt{001\_google\_vision} & Almacena el resultado completo del reconocimiento OCR y guarda la transcripción en formato Unicode. \\
+\hline
+\texttt{002\_evaluacion\_preliminar} & Configura las respuestas de referencia de los ejercicios para la evaluación preliminar. \\
+\hline
+\texttt{003\_dictados} & Agrega \texttt{id\_tutor\_creador} a \texttt{Ejercicios} para los dictados creados por cada tutor. \\
+\hline
+\texttt{004\_progreso\_vista} & Crea índices sobre \texttt{Intentos} y sustituye las tablas \texttt{Progreso\_Alumno} e \texttt{Historial\_Alumno} por la vista \texttt{vw\_Progreso\_Alumno}, que calcula el progreso a partir de los intentos calificados. \\
+\hline
+\texttt{005\_catalogo\_ejercicios} & Reemplaza el catálogo de ejemplo por el catálogo organizado por método de enseñanza y error ortográfico. Desactiva los ejercicios anteriores sin borrarlos, porque existen intentos que los referencian. \\
+\hline
+
+\end{longtable}
+
+% ------------------------------------------------------------
+\subsubsection{Infraestructura en Google Cloud Platform}
+% ------------------------------------------------------------
+
+El entorno de demostración se desplegó en un proyecto propio de Google Cloud Platform. La Tabla~\ref{tab:recursos_gcp} describe los recursos utilizados.
+
+\begin{longtable}{|p{3.4cm}|p{10.2cm}|}
+\caption{Recursos del entorno de demostración en Google Cloud Platform}
+\label{tab:recursos_gcp} \\
+
+\hline
+\textbf{Recurso} & \textbf{Configuración} \\
+\hline
+\endfirsthead
+
+\hline
+\textbf{Recurso} & \textbf{Configuración} \\
+\hline
+\endhead
+
+Máquina virtual (Compute Engine) & Tipo \texttt{e2-medium} (2 vCPU compartidas y 4~GB de memoria), Ubuntu 24.04 LTS, disco de 40~GB en la zona \texttt{us-central1-a} y dirección IPv4 estática. Ejecuta los contenedores de la aplicación. \\
+\hline
+Red virtual & Red y subred propias (\texttt{grafia-demo}). El cortafuegos solo admite tráfico web en los puertos 80 y 443. El acceso SSH no está expuesto a Internet: solo se permite a través de Identity-Aware Proxy (IAP). \\
+\hline
+Cloud SQL para SQL Server & SQL Server 2022 Express con 1 vCPU, 3.75~GB de memoria y un disco SSD de 10~GB que crece automáticamente. Solo tiene dirección IP privada dentro de la red del proyecto, por lo que no es accesible desde Internet. Tiene respaldos automáticos diarios y protección contra borrado. \\
+\hline
+Cuenta de servicio & Identidad de la máquina virtual. Permite llamar a Cloud Vision mediante credenciales predeterminadas de la aplicación, sin almacenar claves en archivos, y tiene únicamente los permisos que necesita. \\
+\hline
+Secret Manager & Guarda la conexión a la base de datos (\texttt{grafia-sql}) y la cuenta de correo que envía los códigos de verificación (\texttt{grafia-smtp}). \\
+\hline
+Cloud Storage & Depósito privado que recibe las exportaciones \texttt{.bak} de la base de datos. Elimina automáticamente los archivos con más de 30 días. \\
+\hline
+Cloud Vision & Servicio externo de reconocimiento de escritura (Sección~\ref{sec:vision-implementacion}). \\
+\hline
+
+\end{longtable}
+
+Se eligió SQL Server 2022 en su edición Express porque no tiene costo de licencia y es compatible con el esquema y las sentencias T-SQL desarrolladas. Esta edición limita cada base de datos a 10~GB. Este límite debe vigilarse, porque las imágenes de los intentos se almacenan codificadas en Base64 dentro de la base.
+
+Inicialmente, la base de datos se ejecutaba en un contenedor dentro de la misma máquina virtual. Posteriormente se trasladó a Cloud SQL, de modo que los datos ya no dependen del disco de la máquina virtual y esta puede recrearse sin pérdida de información. La migración se realizó con una exportación \texttt{.bak} de la base del contenedor, que después se importó en la instancia de Cloud SQL. Durante el proceso se detuvo el acceso web para evitar escrituras.
+
+En la Figura~\ref{fig:despliegue_gcp} se presenta la distribución de los contenedores y los servicios administrados en el entorno de demostración.
+
+\begin{figure}[H]
+    \centering
+    \resizebox{\textwidth}{!}{%
+    \begin{tikzpicture}[
+      font=\small,
+      comp/.style={rectangle, draw, fill=gray!8, rounded corners=1pt, minimum height=0.9cm, minimum width=4.2cm, align=center},
+      serv/.style={rectangle, draw, fill=blue!5, rounded corners=1pt, minimum height=0.9cm, minimum width=4.4cm, align=center},
+      zona/.style={rectangle, draw, thick, rounded corners=3pt, inner xsep=12pt, inner ysep=14pt},
+      flecha/.style={-{Stealth[length=2.2mm]}, thick}]
+
+    % Usuario
+    \node[comp] (nav) at (0,3.9) {\guillemotleft device\guillemotright\\Navegador del tutor o alumno};
+
+    % Contenedores en la VM
+    \node[comp] (web) at (0,0) {\guillemotleft container\guillemotright\\\texttt{web} (Caddy)\\puertos 80 / 443};
+    \node[comp] (front) at (-2.7,-2.6) {\guillemotleft container\guillemotright\\\texttt{frontend} (Next.js)\\puerto 3000};
+    \node[comp] (back) at (2.7,-2.6) {\guillemotleft container\guillemotright\\\texttt{backend} (FastAPI)\\puerto 8000};
+    \node[comp] (init) at (2.7,-5.0) {\guillemotleft container\guillemotright\\\texttt{db-init}\\migraciones};
+
+    % Servicios administrados
+    \node[serv] (sql) at (10,-3.8) {\guillemotleft service\guillemotright\\Cloud SQL\\SQL Server 2022 Express};
+    \node[serv] (vision) at (10,-1.2) {\guillemotleft service\guillemotright\\Cloud Vision};
+    \node[serv] (secret) at (10,1.6) {\guillemotleft service\guillemotright\\Secret Manager};
+    \node[serv] (gcs) at (10,-6.6) {\guillemotleft service\guillemotright\\Cloud Storage\\respaldos \texttt{.bak}};
+
+    \begin{scope}[on background layer]
+    \node[zona, fill=gray!3, fit=(web)(front)(back)(init)] (vm) {};
+    \node[anchor=south west, font=\small\bfseries] at (vm.north west) {VM \texttt{grafia-demo} (Docker Compose)};
+    \node[zona, dashed, fill=blue!2, fit=(secret)(vision)(sql)(gcs)] (gcp) {};
+    \node[anchor=south west, font=\small\bfseries] at (gcp.north west) {Servicios de Google Cloud};
+    \end{scope}
+
+    \draw[flecha] (nav) -- node[right, pos=0.3]{HTTPS} (web);
+    \draw[flecha] (web) -- node[left, pos=0.4]{\texttt{/*}} (front);
+    \draw[flecha] (web) -- node[right, pos=0.4]{\texttt{/api/*}} (back);
+    \draw[flecha] (back.east) -- node[above, sloped]{IP privada} (sql.west);
+    \draw[flecha, dashed] (init.east) -- (sql.west);
+    \draw[flecha] (back.north east) -- node[above, sloped]{HTTPS} (vision.west);
+    \draw[flecha, dashed] (vm.north east) -- node[above, sloped]{secretos} (secret.west);
+    \draw[flecha, dashed] (sql) -- node[right]{exportación diaria} (gcs);
+    \end{tikzpicture}}
+    \caption{Despliegue del sistema en Google Cloud Platform}
+    \label{fig:despliegue_gcp}
+\end{figure}
+
+% ------------------------------------------------------------
+\subsubsection{Orquestación en el entorno de demostración}
+% ------------------------------------------------------------
+
+El entorno de demostración utiliza el archivo \texttt{compose.demo.yml}, independiente del archivo de desarrollo. A diferencia del entorno local, no contiene el servicio de base de datos e incorpora un proxy inverso. Sus servicios se inician en el orden siguiente:
+
+\begin{enumerate}
+    \item \texttt{db-init} utiliza la imagen del \textit{backend} para ejecutar \texttt{inicializar\_demo.py} sobre Cloud SQL y termina.
+    \item \texttt{backend} se inicia solo si \texttt{db-init} terminó correctamente. Una verificación de salud consulta la API cada 15 segundos.
+    \item \texttt{frontend} se inicia cuando el \textit{backend} reporta un estado saludable.
+    \item \texttt{web} ejecuta Caddy, el único servicio que publica puertos hacia Internet.
+\end{enumerate}
+
+Los servicios se reinician automáticamente si se detienen por un error o si la máquina virtual se reinicia, y sus registros se limitan a tres archivos de 10~MB para no llenar el disco. En el Código~\ref{lst:compose_demo} se presenta un extracto de la definición de estas dependencias.
+
+\begin{lstlisting}[language=bash, caption={Extracto de compose.demo.yml: orden de arranque de los servicios}, label={lst:compose_demo}]
+services:
+  db-init:
+    build: ./BackEnd
+    command: [python, BD/inicializar_demo.py]
+
+  backend:
+    build: ./BackEnd
+    restart: unless-stopped
+    depends_on:
+      db-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request;
+             urllib.request.urlopen('http://localhost:8000/')"]
+      interval: 15s
+
+  frontend:
+    build:
+      context: ./FrontEnd
+      args:
+        NEXT_PUBLIC_API_URL: ""
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  web:
+    image: caddy:2-alpine
+    ports: ["80:80", "443:443"]
+\end{lstlisting}
+
+El argumento \texttt{NEXT\_PUBLIC\_API\_URL} se deja vacío para que el navegador envíe las peticiones a la API en el mismo dominio desde el que cargó la interfaz. Así, el \textit{frontend} y la API comparten el mismo origen, y el \textit{backend} solo acepta peticiones de origen cruzado (CORS) del dominio configurado.
+
+\textbf{Proxy inverso y HTTPS}
+
+Caddy recibe todas las peticiones y las dirige según su ruta: las que comienzan con \texttt{/api/} se envían al \textit{backend}, y el resto al \textit{frontend}. Además, Caddy obtiene y renueva automáticamente un certificado TLS, por lo que el sistema se sirve mediante HTTPS. Este protocolo es indispensable para la aplicación, ya que los navegadores solo permiten el acceso a la cámara en conexiones seguras. Como dominio se utilizó el servicio \texttt{sslip.io}, que resuelve un nombre de la forma \texttt{IP.sslip.io} a la dirección IP indicada sin necesidad de registrar un dominio propio.
+
+En el Código~\ref{lst:caddyfile} se presenta la configuración de Caddy, que además comprime las respuestas, limita el tamaño de las peticiones a 15~MB y agrega cabeceras de seguridad.
+
+\begin{lstlisting}[language=bash, caption={Configuración del proxy inverso (Caddyfile)}, label={lst:caddyfile}]
+{$APP_DOMAIN} {
+    encode zstd gzip
+    request_body {
+        max_size 15MB
+    }
+    header {
+        X-Content-Type-Options nosniff
+        Referrer-Policy strict-origin-when-cross-origin
+        -Server
+    }
+    handle /api/* {
+        reverse_proxy backend:8000
+    }
+    handle {
+        reverse_proxy frontend:3000
+    }
+}
+\end{lstlisting}
+
+% ------------------------------------------------------------
+\subsubsection{Gestión de secretos}
+% ------------------------------------------------------------
+
+Las credenciales del sistema no se almacenan en el repositorio ni en las imágenes. Se manejan de la siguiente manera:
+
+\begin{itemize}
+    \item \textbf{Clave de firma de los tokens JWT:} el script \texttt{configure.py} la genera aleatoriamente en el servidor y la escribe en el archivo \texttt{.env.demo}, legible solo por el administrador. El script nunca sobrescribe una configuración existente.
+    \item \textbf{Conexión a la base de datos:} la dirección privada de Cloud SQL y la contraseña del usuario se guardan en el secreto \texttt{grafia-sql}. El script \texttt{cargar-sql.sh} las lee con la identidad de la máquina virtual y las copia a \texttt{.env.demo} sin mostrarlas en pantalla.
+    \item \textbf{Cuenta de correo:} la contraseña de aplicación de la cuenta que envía los códigos de verificación se guarda en el secreto \texttt{grafia-smtp} y se carga de la misma forma.
+    \item \textbf{Acceso a Cloud Vision:} se autentica con la cuenta de servicio asociada a la máquina virtual, por lo que no se descarga ningún archivo de clave.
+\end{itemize}
+
+% ------------------------------------------------------------
+\subsubsection{Automatización de la instalación}
+% ------------------------------------------------------------
+
+Para que el servidor pueda reconstruirse sin intervención manual, se creó una plantilla de instancia (\texttt{grafia-demo-plantilla}) que ejecuta el script \texttt{startup.sh} al arrancar la máquina virtual. En el primer arranque, el script realiza los siguientes pasos:
+
+\begin{enumerate}
+    \item Instala Docker y Git, y crea un área de intercambio (\textit{swap}) de 2~GB.
+    \item Clona la rama del repositorio indicada en los metadatos de la instancia.
+    \item Genera \texttt{.env.demo} y carga desde Secret Manager la conexión a Cloud SQL y la cuenta de correo.
+    \item Construye las imágenes y levanta los servicios.
+    \item Programa el respaldo diario de la base de datos.
+\end{enumerate}
+
+Las imágenes se construyen una por una porque compilar el \textit{frontend} y el \textit{backend} al mismo tiempo puede agotar los 4~GB de memoria de la máquina virtual. En los arranques posteriores, el script solo verifica que los contenedores estén en ejecución. El Código~\ref{lst:startup} muestra la parte final del script.
+
+\begin{lstlisting}[language=bash, caption={Construccion y arranque en startup.sh}, label={lst:startup}]
+echo '== Construyendo imagenes (una a la vez por memoria)'
+dc build db-init backend
+dc build frontend
+dc up -d
+cat > /etc/cron.d/grafia-respaldo <<EOF
+0 8 * * * root bash $app/deploy/respaldo-nube.sh
+EOF
+touch "$app/.instalado"
+\end{lstlisting}
+
+Como los datos residen en Cloud SQL, recrear la máquina virtual desde la plantilla no implica pérdida de información. La única consecuencia es que se genera una nueva clave JWT y las sesiones abiertas se cierran.
+
+% ------------------------------------------------------------
+\subsubsection{Respaldos de la información}
+% ------------------------------------------------------------
+
+Se configuraron dos mecanismos de respaldo independientes:
+
+\begin{enumerate}
+    \item \textbf{Respaldos automáticos de Cloud SQL:} se generan diariamente a las 06:00~UTC y se conservan los siete más recientes. Se restauran directamente sobre la instancia, pero se eliminan si la instancia se borra.
+    \item \textbf{Exportación a Cloud Storage:} el script \texttt{respaldo-nube.sh} solicita a Cloud SQL una exportación \texttt{.bak} de la base \texttt{TT} hacia el depósito de respaldos. Se ejecuta diariamente a las 08:00~UTC, al apagar la máquina virtual y antes de cada actualización. Estos archivos se conservan aunque se elimine la instancia y pueden importarse en otro servidor SQL Server.
+\end{enumerate}
+
+Para la exportación, la cuenta de servicio de la máquina virtual tiene un rol personalizado que solo le permite consultar la instancia y solicitar exportaciones. La restauración se ensaya importando el archivo en una base de prueba independiente (\texttt{TT\_prueba}), sin afectar la base en uso.
+
+% ------------------------------------------------------------
+\subsubsection{Actualización del sistema}
+% ------------------------------------------------------------
+
+Para publicar una nueva versión se sigue este procedimiento:
+
+\begin{enumerate}
+    \item Se genera un respaldo bajo demanda con \texttt{deploy/backup.sh}.
+    \item Se obtiene el código actualizado con \texttt{git pull}.
+    \item Se reconstruyen y reinician los contenedores con \texttt{docker compose up -d --build}.
+\end{enumerate}
+
+Al reiniciarse, \texttt{db-init} aplica las migraciones pendientes antes de que el \textit{backend} vuelva a atender peticiones. Por ejemplo, la migración \texttt{005} instala el nuevo catálogo de ejercicios durante la actualización. Después, cada tutor debe activar los nuevos ejercicios para sus alumnos, porque las asignaciones del catálogo anterior se desactivan.
+
+% ------------------------------------------------------------
+\subsubsection{Verificación del despliegue}
+% ------------------------------------------------------------
+
+Después de cada despliegue se ejecuta la siguiente prueba de aceptación:
+
+\begin{enumerate}
+    \item Abrir la aplicación en el navegador y verificar que el certificado sea válido y que se solicite el permiso de cámara.
+    \item Registrar un tutor, dar de alta un alumno y activar un ejercicio.
+    \item Iniciar sesión como alumno y entregar el ejercicio mediante el lienzo o una fotografía.
+    \item Revisar en el panel del tutor la transcripción y la evaluación preliminar.
+    \item Reiniciar los contenedores y comprobar que los usuarios y las entregas se conservan.
+\end{enumerate}
+
+Durante el desarrollo, las pruebas automatizadas del \textit{backend} se ejecutaron dentro de un contenedor creado a partir de la imagen del \textit{backend}, de modo que se validaron con las mismas versiones de Python y del controlador ODBC que se usan en el servidor.
+
+\textbf{Limitaciones}
+
+El entorno descrito está orientado a la demostración y a la prueba piloto. Al ejecutarse en una sola máquina virtual y una instancia de Cloud SQL en una sola zona, no ofrece alta disponibilidad. El dominio depende de un servicio de resolución de terceros. La edición Express de SQL Server limita el tamaño de la base de datos. Un uso escolar a mayor escala requeriría un dominio propio, una instancia con alta disponibilidad y una revisión de seguridad específica.
