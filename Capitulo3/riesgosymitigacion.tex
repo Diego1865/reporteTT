@@ -132,7 +132,7 @@ Errores en evaluación ortográfica &
 Una transcripción OCR incorrecta podría producir un puntaje CLS que no corresponde a lo que escribió el alumno. &
 Media &
 Medio &
-Confirmación obligatoria del puntaje por el tutor y comparación con la puntuación CLS manual. &
+Revisión de la imagen y confirmación del CLS por el tutor; comparación con la puntuación manual. &
 \cellcolor{RiskYellow} Medio \\
 \hline
 
@@ -172,7 +172,7 @@ Pérdida de información &
 Fallos en base de datos o errores del sistema. &
 Baja &
 Alto &
-Implementar respaldos automáticos y validaciones de integridad. &
+Comprobar los respaldos de Cloud SQL y las exportaciones; ensayar su restauración. &
 \cellcolor{RiskYellow} Medio \\
 \hline
 
@@ -201,9 +201,11 @@ La implementación de estas medidas permite disminuir la exposición a riesgos c
 
 En el caso del módulo OCR, las estrategias de mitigación se enfocan principalmente en reducir errores ocasionados por imágenes de baja calidad o variaciones en la escritura manuscrita. Para ello, se contempla la implementación de técnicas de preprocesamiento de imágenes, validaciones de resolución y una alternativa de captura manual mediante un lienzo digital, permitiendo disminuir problemas asociados a iluminación, desenfoque o ruido presentes en fotografías tomadas por el usuario.
 
-Por otra parte, los riesgos asociados a la evaluación ortográfica serán mitigados mediante la confirmación del puntaje CLS por parte del tutor antes de incorporarlo al progreso del alumno, y mediante la comparación periódica con la puntuación CLS manual, con el propósito de evitar que un error de transcripción se registre como un error ortográfico.
+La evaluación ortográfica requiere que el tutor contraste el CLS con la imagen antes de confirmarlo. Su comparación con una puntuación manual permitirá identificar errores derivados de la transcripción. Las sugerencias de legibilidad también dependen de la calidad de las regiones reconocidas y de la imagen; deberán calibrarse con muestras y valoraciones docentes. Las medidas no calculables se conservarán sin valor.
 
 Respecto a la seguridad de la información, se consideran mecanismos de autenticación mediante JWT, cifrado de contraseñas y control de acceso por roles para reducir riesgos relacionados con accesos no autorizados o exposición de datos almacenados en la plataforma.
 
 Finalmente, para disminuir riesgos relacionados con la experiencia de usuario, se contempla la realización de pruebas de usabilidad orientadas a estudiantes de educación primaria, permitiendo identificar posibles problemas de interacción y mejorar la accesibilidad de la aplicación.
 El uso de Cloud Vision introduce dependencia de conectividad, credenciales, cuota y disponibilidad del proveedor. Se deberán registrar fallos y latencias y mostrar al usuario cuándo debe reenviar la entrega. Actualmente la llamada no realiza reintentos automáticos; una cola de procesamiento requeriría implementación adicional.
+
+La demo concentra la interfaz y el servidor en una VM y utiliza una instancia zonal de Cloud SQL. Una interrupción en cualquiera de estos recursos puede impedir el uso del sistema. La mitigación requiere verificar los respaldos, ensayar una restauración y documentar el tiempo de recuperación. El almacenamiento de imágenes y las solicitudes OCR deben incluirse en el seguimiento del gasto.

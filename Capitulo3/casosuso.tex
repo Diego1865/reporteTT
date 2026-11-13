@@ -2,7 +2,7 @@
 
 En esta sección se describen los requerimientos del usuario, los cuales representan las expectativas y servicios que esperan los usuarios finales de la aplicación web. Estos requerimientos han sido identificados con base al análisis del problema, con el objetivo de propiciar que la solución desarrollada sea útil.
 
-Los requerimientos del usuario se definen, de manera general, qué debe hacer la aplicación web desde la perspectiva del usuario en un lenguaje natural, sin entregar detalles técnicos de implementación. Estos servirán como base para la definición de requerimientos funcionales y no funcionales. 
+Los requerimientos del usuario describen los servicios esperados por alumnos y tutores. Sirven como base para los requisitos funcionales y no funcionales del sistema.
 
 En la Tabla~\ref{tab:ru} se presentan los requerimientos del usuario, con su identificador, descripción y prioridad.
 
@@ -22,6 +22,7 @@ En la Tabla~\ref{tab:ru} se presentan los requerimientos del usuario, con su ide
 
 \hline
 \endfoot
+\endlastfoot
 
 % RU-01
 RU-01 &
@@ -40,14 +41,14 @@ Alta \\
 % RU-03
 RU-03 &
 Visualización de estado de alumnos. &
-El tutor debe poder visualizar el estado de desempeño de sus alumnos, clasificándolos como bajo desempeño, desempeño regular y desempeño de excelencia, con el fin de identificar su progreso. &
+El tutor debe consultar a sus alumnos por promedio general, ortografía o legibilidad, en las categorías En riesgo, Regular, Excelencia y Sin calificar. &
 Alta \\
 \hline
 
 % RU-04
 RU-04 &
 Clasificación de alumnos. &
-La aplicación web debe mostrar un gráfico con la cantidad de alumnos clasificados según su nivel de desempeño (bajo, regular y excelencia), actualizándose conforme a los resultados obtenidos en ortografía y legibilidad. &
+La gráfica y los contadores deben coincidir con las listas de alumnos para la dimensión seleccionada. La clasificación se obtiene de notas confirmadas por el tutor; los alumnos sin notas en esa dimensión aparecen como Sin calificar. &
 Media \\
 \hline
 
@@ -137,8 +138,8 @@ Media \\
 
 % RU-17
 RU-17 &
-Modificación de resultados. &
-El tutor debe poder modificar los resultados de un ejercicio realizado por el alumno, en caso de no estar de acuerdo con el análisis ortográfico y caligráfico. &
+Revisión y confirmación de resultados. &
+El tutor debe revisar la imagen del intento y confirmar o corregir el CLS y las medidas de legibilidad antes de incorporarlos al progreso del alumno. &
 Baja \\
 \hline
 
@@ -156,6 +157,18 @@ El alumno debe poder realizar las actividades sugeridas por la aplicación web, 
 Media \\
 \hline
 
+% RU-20
+RU-20 & Creación de dictados. &
+El tutor debe crear y activar dictados para sus alumnos con palabras de los bancos disponibles o con palabras propias, y una fecha límite opcional. & Alta \\ \hline
+
+% RU-21
+RU-21 & Reproducción de dictados. &
+El alumno debe escuchar, repetir y recorrer las palabras de un dictado mientras escribe su respuesta en el lienzo o en papel. & Alta \\ \hline
+
+% RU-22
+RU-22 & Consulta del perfil. &
+Cada usuario debe consultar su perfil. La interfaz del alumno es de solo lectura; el tutor dispone de opciones para modificar sus datos. & Media \\ \hline
+
 \end{tabularx}
 
 %------- Reglas de negocio
@@ -164,7 +177,7 @@ Media \\
 
 En la Tabla~\ref{tab:rn} se especifican las reglas de negocio (RN) que rigen el registro de usuarios, la realización de ejercicios y el procesamiento de sus resultados.
 
-\begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}m{2cm}|m{3.6cm}|Y|>{\centering\arraybackslash}m{2.0cm}|}
+\begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}m{2cm}|m{3.6cm}|Y|}
 \caption{Reglas de negocio.}
 \label{tab:rn} \\
 
@@ -180,6 +193,7 @@ En la Tabla~\ref{tab:rn} se especifican las reglas de negocio (RN) que rigen el 
 
 \hline
 \endfoot
+\endlastfoot
 
 RN-01 & Registro de tutores &
 Todo usuario que actúe como tutor debe estar registrado en el sistema con el rol de tutor. \\ \hline
@@ -215,19 +229,19 @@ RN-11 & Registro de fecha y hora &
 Cada intento debe almacenar la fecha y hora en que fue enviado. \\ \hline
 
 RN-12 & Análisis caligráfico único &
-Cada intento debe generar exactamente un análisis caligráfico. \\ \hline
+Cada intento puede tener un registro de legibilidad confirmado por el tutor. La ausencia de ese registro indica que aún no hay medidas confirmadas. \\ \hline
 
 RN-13 & Análisis ortográfico único &
-Cada intento debe generar exactamente un análisis ortográfico. \\ \hline
+Cada intento puede tener un registro ortográfico confirmado por el tutor. Una nueva revisión actualiza ese registro. \\ \hline
 
 RN-14 & Generación automática de análisis &
-Los análisis del intento deben generarse automáticamente a partir del contenido del intento. \\ \hline
+El envío debe ejecutar el reconocimiento y generar sugerencias de evaluación cuando existan datos suficientes. Un fallo o una medida no calculable debe conservar su estado, sin convertirse en una nota. \\ \hline
 
 RN-15 & Métricas caligráficas mínimas &
 El análisis caligráfico debe evaluar, como mínimo: alineación, tamaño, inclinación y espaciado. \\ \hline
 
 RN-16 & Rango de métricas caligráficas &
-Cada métrica caligráfica debe tener un valor dentro del rango de 0 a 10. \\ \hline
+Las medidas confirmadas de legibilidad deben estar entre 0 y 10. Una sugerencia automática puede quedar sin valor si faltan datos; ese estado no equivale a cero. \\ \hline
 
 RN-17 & Observaciones del análisis &
 El análisis caligráfico puede incluir observaciones adicionales generadas por el tutor. \\ \hline
@@ -239,19 +253,19 @@ RN-19 & Registro de secuencias &
 El sistema debe almacenar, por intento, el número de secuencias correctas obtenidas y el número de secuencias posibles. \\ \hline
 
 RN-20 & Confirmación del tutor &
-El puntaje CLS solo debe incorporarse al progreso del alumno cuando el tutor lo confirme. \\ \hline
+El CLS y las medidas de legibilidad solo deben incorporarse al progreso cuando el tutor los confirme o corrija al calificar el intento. \\ \hline
 
 RN-21 & Puntuación ortográfica &
 El análisis ortográfico debe asignar una puntuación de 0 a 10 proporcional al cociente entre las secuencias correctas obtenidas y las secuencias posibles. \\ \hline
 
 RN-22 & Historial y progreso del alumno &
-El historial y el progreso del alumno deben generarse a partir de los datos de análisis de sus intentos. \\ \hline
+El historial debe consultarse desde los intentos y sus análisis. Los promedios deben obtenerse de los valores confirmados mediante \texttt{vw\_Progreso\_Alumno}, sin mantener copias en tablas de historial o progreso. \\ \hline
 
 RN-23 & Consulta por tutor &
 Un tutor puede consultar los resultados de los alumnos a su cargo. \\ \hline
 
 RN-24 & Modificación por tutor &
-Un tutor puede modificar los resultados de los alumnos a su cargo únicamente si la política del sistema lo permite y queda registro del cambio. \\ \hline
+El tutor responsable puede confirmar o corregir los resultados de sus alumnos. Se conserva la sugerencia automática junto con el valor confirmado; esto no implica un historial de todas las ediciones. \\ \hline
 
 RN-25 & Consulta por alumno &
 Un alumno solo puede visualizar sus propios resultados. \\ \hline
@@ -261,6 +275,15 @@ Un ejercicio correctivo automático solo puede generarse si el conteo de errores
 
 RN-27 & Disponibilidad de impresión &
 Todo ejercicio debe poder renderizarse para visualización e impresión/exportación. \\ \hline
+
+RN-28 & Propiedad del dictado &
+Un dictado debe pertenecer al tutor que lo crea. Su consulta y activación se restringen a ese tutor, y sus entregas a los alumnos vinculados con él. \\ \hline
+
+RN-29 & Contenido del dictado &
+El dictado admite entre 1 y 50 palabras de hasta 40 letras cada una. Se eliminan duplicados sin distinguir mayúsculas y se conserva el orden. La respuesta esperada es la secuencia de palabras seleccionada. \\ \hline
+
+RN-30 & Datos ausentes en el progreso &
+Si solo existe promedio confirmado de ortografía o de legibilidad, el promedio general toma el disponible. Si no hay ninguno, el alumno aparece como Sin calificar. \\ \hline
 
 \end{tabularx}
 
@@ -275,16 +298,11 @@ Cada caso de uso representa una tarea discreta que implica interacción externa 
 
 En la Figura~\ref{fig:casos_uso} se muestra el diagrama de casos de uso, que relaciona a los actores con las funcionalidades de la aplicación.
 
-\begin{figure}[H]
-  \centering
-  \includegraphics[height=0.82\textheight,keepaspectratio]{Imagenes/DiagramaCU-3.png}
-  \caption{Diagrama de casos de uso}
-  \label{fig:casos_uso}
-\end{figure}
+\input{Capitulo3/diagramacasosuso}
 
 \subsubsection{Especificación de los casos de uso}
 
-De la Tabla~\ref{tab:cu01} a la Tabla~\ref{tab:cu22} se especifican los casos de uso del sistema, incluidos sus subcasos, mediante la descripción de los actores, las precondiciones, los flujos de interacción y las postcondiciones correspondientes.
+De la Tabla~\ref{tab:cu01} a la Tabla~\ref{tab:cu24} se especifican los casos de uso del sistema, incluidos sus subcasos, mediante la descripción de los actores, las precondiciones, los flujos de interacción y las postcondiciones correspondientes.
 
 \begin{longtable}{|p{4cm}|p{11cm}|}
 \caption{Tabla de especificación CU-01}
@@ -302,6 +320,7 @@ De la Tabla~\ref{tab:cu01} a la Tabla~\ref{tab:cu22} se especifican los casos de
 
 \hline
 \endfoot
+\endlastfoot
 
 Actor & Tutor \\
 \hline
@@ -339,6 +358,7 @@ Comentarios & El correo electrónico y nombre de usuario debe ser único en la a
 
 \hline
 \endfoot
+\endlastfoot
 
 Actor & Tutor \\
 \hline
@@ -373,6 +393,7 @@ Comentarios & El nombre de usuario del alumno debe ser único. Solo tutores regi
 
 \hline
 \endfoot
+\endlastfoot
 
 Actor & Tutor, Alumno \\
 \hline
@@ -407,18 +428,19 @@ Comentarios & Si las credenciales son incorrectas, se muestra un mensaje de erro
 
 \hline
 \endfoot
+\endlastfoot
 
 Actor & Tutor \\
 \hline
-Descripción & El tutor consulta el estado de desempeño de sus alumnos clasificados como bajo, regular y excelencia. \\
+Descripción & El tutor consulta el desempeño de sus alumnos según el promedio general, la ortografía o la legibilidad. \\
 \hline
-Datos & Lista de alumnos clasificados y métricas de progreso. \\
+Datos & Promedios confirmados y categorías En riesgo, Regular, Excelencia y Sin calificar. \\
 \hline
 Estímulo & El tutor autenticado accede a su panel principal. \\
 \hline
-Respuesta & La aplicación muestra la lista de alumnos agrupados por categoría de desempeño. \\
+Respuesta & La aplicación muestra los alumnos de cada categoría para la dimensión seleccionada, con los mismos criterios que utiliza la gráfica. \\
 \hline
-Comentarios & Solo se muestran alumnos asociados al tutor autenticado. \\
+Comentarios & Se incluyen los alumnos sin notas confirmadas. La falta de datos se muestra como Sin calificar y no como bajo desempeño. \\
 \hline
 
 \end{longtable}
@@ -441,18 +463,19 @@ Comentarios & Solo se muestran alumnos asociados al tutor autenticado. \\
 
 \hline
 \endfoot
+\endlastfoot
 
 Actor & Tutor \\
 \hline
 Descripción & La aplicación presenta al tutor un gráfico con la distribución de alumnos según su nivel de desempeño. \\
 \hline
-Datos & Cantidad de alumnos en bajo, regular y excelencia. \\
+Datos & Cantidad de alumnos en cada una de las cuatro categorías y dimensión seleccionada. \\
 \hline
 Estímulo & El tutor accede al panel principal donde se muestra el gráfico. \\
 \hline
-Respuesta & La aplicación genera y actualiza dinámicamente el gráfico. \\
+Respuesta & La gráfica y los contadores se calculan a partir de la misma lista clasificada que consulta el tutor. \\
 \hline
-Comentarios & Puede mostrarse mediante gráfica de barras o anillo. \\
+Comentarios & El tutor puede alternar entre General, Ortografía y Legibilidad. Los umbrales son decisiones del proyecto pendientes de validación pedagógica. \\
 \hline
 
 \end{longtable}
@@ -475,18 +498,19 @@ Comentarios & Puede mostrarse mediante gráfica de barras o anillo. \\
 
 \hline
 \endfoot
+\endlastfoot
 
 Actor & Tutor \\
 \hline
 Descripción & La aplicación presenta al tutor el catálogo de ejercicios disponibles para asignar. \\
 \hline
-Datos & Nombre, descripción y contenido base del ejercicio. \\
+Datos & Título, instrucciones, modalidad, método, error objetivo, habilidad, nivel y pista, cuando el ejercicio incluye información pedagógica. \\
 \hline
 Estímulo & El tutor accede a la sección de ejercicios. \\
 \hline
-Respuesta & La aplicación despliega el catálogo de ejercicios disponibles. \\
+Respuesta & La aplicación muestra el catálogo común y los dictados propios, con filtros por método y error objetivo para las actividades que tienen esos datos. \\
 \hline
-Comentarios & El tutor no crea ejercicios, solo los consulta y selecciona. \\
+Comentarios & El tutor selecciona actividades del catálogo común y puede crear dictados mediante CU-23. \\
 \hline
 
 \end{longtable}
@@ -509,6 +533,7 @@ Comentarios & El tutor no crea ejercicios, solo los consulta y selecciona. \\
 
 \hline
 \endfoot
+\endlastfoot
 
 Actor & Tutor \\
 \hline
@@ -520,7 +545,7 @@ Estímulo & El tutor selecciona ejercicios y confirma la activación. \\
 \hline
 Respuesta & La aplicación registra los ejercicios activos y los publica a los alumnos. \\
 \hline
-Comentarios & La fecha límite es opcional. \\
+Comentarios & La fecha límite es opcional. Los dictados creados mediante CU-23 se activan al guardarse y solo pueden gestionarse desde la cuenta del tutor propietario. \\
 \hline
 
 \end{longtable}
@@ -543,6 +568,7 @@ Comentarios & La fecha límite es opcional. \\
 
 \hline
 \endfoot
+\endlastfoot
 
 Actor & Tutor \\
 \hline
@@ -577,6 +603,7 @@ Comentarios & Debe distinguir ejercicios con y sin fecha límite. \\
 
 \hline
 \endfoot
+\endlastfoot
 
 Actor & Alumno \\
 \hline
@@ -610,6 +637,7 @@ Comentarios & Solo se muestran ejercicios vigentes. \\
 
 \hline
 \endfoot
+\endlastfoot
 
 Actor & Tutor \\
 \hline
@@ -649,6 +677,7 @@ Comentarios & Debe distinguirse visualmente si un ejercicio fue seleccionado y y
 
 \hline
 \endfoot
+\endlastfoot
 
 Actor & Alumno \\
 \hline
@@ -688,6 +717,7 @@ Comentarios & Se debe distinguir entre ejercicios vencidos sin extensión y aque
 
 \hline
 \endfoot
+\endlastfoot
 
 Actor & Alumno \\
 \hline
@@ -726,6 +756,7 @@ Comentarios & Solo se pueden realizar ejercicios de plazo vigente o extensión h
 
 \hline
 \endfoot
+\endlastfoot
 
 Actor & Alumno \\
 \hline
@@ -739,10 +770,10 @@ Datos & Trazos digitales, acciones de corrección, datos del ejercicio seleccion
 Estímulo & El alumno accede a la vista de captura (desde CU-12) y comienza a escribir sobre el lienzo digital con su dispositivo. \\
 \hline
 
-Respuesta & La aplicación web registra los trazos del alumno sobre el lienzo digital, habilitando las herramientas de corrección para que pueda corregir su trazo antes de enviarlo. \\
+Respuesta & La aplicación registra y permite corregir los trazos. Al cambiar el tamaño de la ventana o ampliar el lienzo, adapta su resolución y conserva la tinta. \\
 \hline
 
-Comentarios & El lienzo debe ser compatible con entrada táctil o con lápiz digital según el dispositivo. Esta opción es alternativa a CU-14 (carga de fotografía); el alumno usa una u otra. \\
+Comentarios & Admite ratón, entrada táctil y lápiz digital. El margen decorativo se presenta fuera de la imagen exportada. En un dictado también se ofrece el reproductor de CU-24. \\
 \hline
 
 \end{longtable}
@@ -765,6 +796,7 @@ Comentarios & El lienzo debe ser compatible con entrada táctil o con lápiz dig
 
 \hline
 \endfoot
+\endlastfoot
 
 Actor & Alumno \\
 \hline
@@ -805,6 +837,7 @@ Comentarios & La goma permite una corrección selectiva y precisa. \\
 
 \hline
 \endfoot
+\endlastfoot
 
 Actor & Alumno \\
 \hline
@@ -846,6 +879,7 @@ Comentarios & Puede ejecutarse de forma consecutiva para revertir múltiples acc
 
 \hline
 \endfoot
+\endlastfoot
 
 Actor & Alumno \\
 \hline
@@ -887,6 +921,7 @@ Comentarios & Es recomendable validar el tamaño y calidad mínima de la imagen.
 
 \hline
 \endfoot
+\endlastfoot
 
 Actor & Alumno \\
 \hline
@@ -928,6 +963,7 @@ Comentarios & Este caso solo aplica cuando el alumno eligió “Tomar foto”. \
 
 \hline
 \endfoot
+\endlastfoot
 
 Actor & Alumno \\
 \hline
@@ -966,17 +1002,18 @@ Comentarios & Una vez enviado, el ejercicio no puede modificarse. Este es el úl
 \endhead
 \hline
 \endfoot
+\endlastfoot
 Actor & Ninguno (proceso interno de la aplicación web) \\
 \hline
-Descripción & El sistema analiza automáticamente el intento de escritura enviado por el alumno, evaluando aspectos caligráficos y ortográficos mediante el reconocimiento OCR y la evaluación ortográfica por CLS, con el fin de generar un resultado que refleje el desempeño del alumno. \\
+Descripción & El sistema transcribe la imagen y genera sugerencias ortográficas y de legibilidad para su revisión por el tutor. \\
 \hline
 Datos & Imagen del intento enviado (trazo digital o fotografía), identificador del ejercicio, identificador del alumno, resultado del análisis caligráfico y puntaje CLS generados por el sistema. \\
 \hline
 Estímulo & El módulo de análisis se activa automáticamente una vez que el alumno confirma el envío del ejercicio en CU-15. \\
 \hline
-Respuesta & Google Cloud Vision transcribe la imagen y el módulo de evaluación ortográfica calcula el puntaje CLS respecto a las respuestas aceptadas del ejercicio. Se almacenan los resultados para que el tutor los confirme. El análisis caligráfico complementario permanece pendiente de implementación; su integración permitirá consultar esas métricas en CU-16 y CU-17. \\
+Respuesta & Cloud Vision devuelve el texto y sus regiones. La evaluación calcula el CLS respecto a una respuesta aceptada; el módulo de legibilidad estima alineación, tamaño, espaciado e inclinación cuando hay información suficiente. Los resultados se guardan con el intento, sin incorporarse todavía al progreso. \\
 \hline
-Comentarios & Este caso de uso es un \textit{\textlangle\textlangle include\textrangle\textrangle} de CU-15, ya que el análisis siempre ocurre tras cada envío sin excepción. Al tratarse de un proceso interno, no requiere intervención del usuario.  \\
+Comentarios & Este proceso se invoca desde CU-15. Las medidas no calculables quedan sin valor. Un fallo de legibilidad no cancela por sí solo el registro de la entrega; el tutor puede revisar la imagen. La confirmación se realiza en CU-18. \\
 \hline
 \end{longtable}
 
@@ -999,6 +1036,7 @@ Comentarios & Este caso de uso es un \textit{\textlangle\textlangle include\text
 
 \hline
 \endfoot
+\endlastfoot
 
 Actor & Alumno \\
 \hline
@@ -1015,7 +1053,7 @@ Estímulo & El alumno autenticado, accede a la sección de ejercicios completado
 Respuesta & La aplicación web muestra el historial de ejercicios completados por el alumno, mostrando para cada ejercicio el resultado de su análisis. \\
 \hline
 
-Comentarios & Solo se muestran ejercicios que el alumno haya enviado previamente (CU-15). Los resultados deben estar disponibles una vez que la aplicación web haya procesado el análisis del ejercicio enviado. \\
+Comentarios & Solo se muestran intentos enviados por el alumno. El historial distingue las entregas pendientes de revisión de los resultados que ya confirmó el tutor. \\
 \hline
 
 \end{longtable}
@@ -1039,6 +1077,7 @@ Comentarios & Solo se muestran ejercicios que el alumno haya enviado previamente
 
 \hline
 \endfoot
+\endlastfoot
 
 Actor & Tutor \\
 \hline
@@ -1052,10 +1091,10 @@ Datos & Lista de alumnos con sus ejercicios completados, fecha de entrega y resu
 Estímulo & El tutor accede a la vista de alumnos y selecciona al alumno que desea consultar. \\
 \hline
 
-Respuesta & La aplicación web muestra el historial de ejercicios completados por el alumno seleccionado, incluyendo los resultados del análisis de escritura para cada uno. \\
+Respuesta & La aplicación muestra los intentos del alumno seleccionado, las sugerencias de evaluación y los valores confirmados. La imagen se solicita al abrir la revisión de un intento. \\
 \hline
 
-Comentarios & Solo se muestran alumnos vinculados al tutor autenticado. Este caso de uso es el punto de entrada a CU-18, donde el tutor puede modificar los resultados si no está de acuerdo con el análisis. \\
+Comentarios & Solo se consultan alumnos vinculados al tutor autenticado. Desde esta vista se accede a CU-18 para confirmar o corregir los resultados. \\
 \hline
 
 \end{longtable}
@@ -1069,34 +1108,35 @@ Comentarios & Solo se muestran alumnos vinculados al tutor autenticado. Este cas
 \label{tab:cu18} \\
 
 \hline
-\multicolumn{2}{|c|}{\textbf{CU-18 Modificar análisis}} \\
+\multicolumn{2}{|c|}{\textbf{CU-18 Confirmar o corregir resultados}} \\
 \hline
 \endfirsthead
 
 \hline
-\multicolumn{2}{|c|}{\textbf{CU-18 Modificar análisis}} \\
+\multicolumn{2}{|c|}{\textbf{CU-18 Confirmar o corregir resultados}} \\
 \hline
 \endhead
 
 \hline
 \endfoot
+\endlastfoot
 
 Actor & Tutor \\
 \hline
 
-Descripción & El tutor modifica los resultados del análisis ortográfico y caligráfico de un ejercicio realizado por un alumno, en caso que el análisis de la aplicación web no refleja correctamente su desempeño. \\
+Descripción & El tutor compara la imagen con las sugerencias del sistema y confirma o corrige el CLS y las medidas de legibilidad. \\
 \hline
 
-Datos & Ejercicio seleccionado, resultados originales del análisis automático, correcciones o ajustes realizados por el tutor, alumno al que corresponde el intento. \\
+Datos & Imagen, texto reconocido, respuesta esperada, secuencias correctas y posibles, medidas de legibilidad y retroalimentación del tutor. \\
 \hline
 
-Estímulo & El tutor accede a la vista de alumnos, selecciona al alumno que desea consultar, el ejercicio completado y elige la opción de modificar análisis. \\
+Estímulo & El tutor abre la revisión de un intento y guarda la calificación con los valores que decide confirmar. \\
 \hline
 
-Respuesta & La aplicación guarda los cambios realizados por el tutor, actualiza los resultados del ejercicio y los refleja en la vista del alumno (CU-16). \\
+Respuesta & La aplicación guarda los valores confirmados y conserva las sugerencias automáticas. Las siguientes consultas de progreso incorporan las dimensiones confirmadas. \\
 \hline
 
-Comentarios & Solo el tutor responsable del alumno puede modificar sus resultados. \\
+Comentarios & La cantidad de secuencias posibles se obtiene de la respuesta esperada. Las cuatro medidas de legibilidad confirmadas deben estar entre 0 y 10. Guardar una calificación general sin confirmar estas dimensiones no genera sus promedios. \\
 \hline
 
 \end{longtable}
@@ -1121,6 +1161,7 @@ Comentarios & Solo el tutor responsable del alumno puede modificar sus resultado
 
 \hline
 \endfoot
+\endlastfoot
 
 Actor & Alumno \\
 \hline
@@ -1162,6 +1203,7 @@ Comentarios & Si el alumno no tiene ejercicios completados aún, esta sección p
 
 \hline
 \endfoot
+\endlastfoot
 
 Actor & Alumno \\
 \hline
@@ -1202,11 +1244,12 @@ Comentarios & Las actividades sugeridas son distintas a los ejercicios asignados
 
 \hline
 \endfoot
+\endlastfoot
 
 Actor & Tutor, Alumno \\
 \hline
 
-Descripción & El usuario podrá verificar sus datos personales en la vista de "Ver perfil". \\
+Descripción & El usuario consulta los datos de su cuenta en la vista de perfil. \\
 \hline
 
 Datos & Datos personales del usuario, registrados en la plataforma. \\
@@ -1215,10 +1258,10 @@ Datos & Datos personales del usuario, registrados en la plataforma. \\
 Estímulo & El usuario desde el panel principal accede a la vista de "Ver perfil". \\
 \hline
 
-Respuesta & La aplicación web carga la información del usuario. \\
+Respuesta & La aplicación consulta el recurso \texttt{GET /perfil} del rol autenticado y muestra sus datos. El perfil del alumno incluye los datos de su tutor. \\
 \hline
 
-Comentarios & Los alumnos no pueden modificar su información. \\
+Comentarios & La interfaz del alumno es de solo lectura. La API conserva las rutas \texttt{PUT /info} y \texttt{PUT /act/password} del alumno; la restricción visible no equivale a su eliminación. \\
 \hline
 
 \end{longtable}
@@ -1239,25 +1282,56 @@ Comentarios & Los alumnos no pueden modificar su información. \\
 
 \hline
 \endfoot
+\endlastfoot
 
 Actor & Tutor \\
 \hline
 
-Descripción & El podrá modificar sus datos personales, mostrados en la vista "Ver perfil". \\
+Descripción & El tutor modifica los datos de su cuenta desde la vista de perfil. \\
 \hline
 
 Datos & Datos modificados por el tutor. \\
 \hline
 
-Estímulo & El tutor desde la vista "Ver perfil" preciona el botón para editar el campo que decida. \\
+Estímulo & El tutor selecciona el campo que desea editar, introduce el nuevo valor y confirma el cambio. \\
 \hline
 
-Respuesta & La aplicación web recibe el campo que se va a modificar y actualiza la pagina "Ver perfil" para visualizar sus datos modificados. \\
+Respuesta & La aplicación valida el cambio, lo guarda y actualiza la información visible. El cambio de correo requiere verificar un código. \\
 \hline
 
-Comentarios & Solo el tutor puede modificar su información. \\
+Comentarios & Este caso describe las opciones de edición disponibles en el perfil del tutor. La consulta del perfil del alumno se describe en CU-21. \\
 \hline
 
+\end{longtable}
+
+\begin{longtable}{|p{3.2cm}|p{11.8cm}|}
+\caption{Tabla de especificación CU-23}\label{tab:cu23} \\ \hline
+\multicolumn{2}{|p{15cm}|}{\textbf{CU-23 Crear y activar dictado}} \\ \hline
+\endfirsthead
+\hline
+\multicolumn{2}{|p{15cm}|}{\textbf{CU-23 Crear y activar dictado}} \\ \hline
+\endhead
+\textbf{Actor:} & Tutor \\ \hline
+\textbf{Descripción:} & El tutor prepara un dictado con palabras de uno o varios bancos o con palabras propias. \\ \hline
+\textbf{Datos:} & Título, lista ordenada de palabras y fecha límite opcional. \\ \hline
+\textbf{Estímulo:} & El tutor abre Nuevo dictado, revisa la selección y solicita crear y activar la actividad. \\ \hline
+\textbf{Respuesta:} & El sistema valida el contenido, guarda el ejercicio con su tutor creador y registra su activación para los alumnos de ese tutor. \\ \hline
+\textbf{Comentarios:} & La lista admite de 1 a 50 palabras, con un máximo de 40 letras por palabra. La fecha límite debe ser futura e incluir zona horaria. La evaluación usa como referencia las palabras en el orden guardado. \\ \hline
+\end{longtable}
+
+\begin{longtable}{|p{3.2cm}|p{11.8cm}|}
+\caption{Tabla de especificación CU-24}\label{tab:cu24} \\ \hline
+\multicolumn{2}{|p{15cm}|}{\textbf{CU-24 Escuchar y responder un dictado}} \\ \hline
+\endfirsthead
+\hline
+\multicolumn{2}{|p{15cm}|}{\textbf{CU-24 Escuchar y responder un dictado}} \\ \hline
+\endhead
+\textbf{Actor:} & Alumno \\ \hline
+\textbf{Descripción:} & El alumno escucha las palabras de un dictado activo y escribe su respuesta en el lienzo o en papel. \\ \hline
+\textbf{Datos:} & Dictado asignado, palabra seleccionada y respuesta manuscrita. \\ \hline
+\textbf{Estímulo:} & El alumno abre la actividad y utiliza los controles Escuchar, Repetir, Anterior y Siguiente. \\ \hline
+\textbf{Respuesta:} & El navegador reproduce una palabra por vez. El alumno escribe en el orden indicado, sin numerar, y envía la imagen mediante CU-15. \\ \hline
+\textbf{Comentarios:} & La interfaz muestra la posición de la palabra y permite detener el audio. Si la síntesis de voz no está disponible, indica que se solicite ayuda al profesor. El intento se evalúa y confirma mediante CU-15.1 y CU-18. \\ \hline
 \end{longtable}
 
 \subsection{Requerimientos del sistema.}

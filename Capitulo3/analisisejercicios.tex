@@ -2,16 +2,13 @@
 %  Sección: Módulo de Ejercicios y Retroalimentación (enfoque primer grado, CLS)
 % ─────────────────────────────────────────────────────────────────────────────
 
-\subsection{Módulo de Ejercicios y Retroalimentación}
+\subsection{Módulo de ejercicios y retroalimentación}
 
-El módulo de ejercicios y retroalimentación es el componente pedagógico
-central del sistema. Su propósito es ofrecer al alumno práctica focalizada en
-los errores más frecuentes de la escritura inicial y dar al tutor la
-información necesaria para supervisar y complementar dicho proceso. A
-diferencia de los módulos de captura y análisis, de naturaleza
-predominantemente técnica, este módulo establece el puente entre el
-procesamiento computacional y el contexto pedagógico en el que opera la
-aplicación.
+El módulo reúne las actividades que el tutor selecciona para la práctica de
+sus alumnos. Incluye un catálogo común organizado por habilidades y errores
+objetivo, así como dictados creados por cada tutor. Las respuestas manuscritas
+se evalúan mediante CLS y sugerencias de legibilidad que el tutor revisa antes
+de incorporarlas al progreso.
 
 % ─────────────────────────────────────────────────────────
 \subsubsection{Justificación pedagógica de los ejercicios}
@@ -25,7 +22,7 @@ intervención temprana y focalizada \cite{berninger2010teaching, graham2010handw
 
 \paragraph{Métodos de enseñanza de la lectoescritura}
 
-El catálogo adopta el \textbf{método ecléctico}, que combina los dos caminos
+El catálogo adopta el método ecléctico, que combina los dos caminos
 clásicos de la enseñanza de la lectoescritura y los ordena en una ruta
 progresiva \cite{ortega2009eclectico}:
 
@@ -42,9 +39,9 @@ progresiva \cite{ortega2009eclectico}:
     completar una oración con significado decidiendo una grafía específica.
 \end{itemize}
 
-Cada ejercicio declara el método al que pertenece y un nivel (1 a 3) que
-indica su lugar en la ruta: primero las unidades (nivel 1), después la
-palabra (nivel 2) y al final la oración (nivel 3).
+Las actividades del catálogo común declaran su método y un nivel de 1 a 3
+para orientar la selección del tutor. Esta clasificación organiza la práctica;
+la aplicación no impone una progresión automática por niveles.
 
 \paragraph{Errores ortográficos atendidos}
 
@@ -68,9 +65,9 @@ Omisión de tildes & Identificación de la sílaba tónica y uso de la tilde & D
 \end{tabular}
 \end{table}
 
-Además, se incluyen ejercicios de \textbf{refuerzo caligráfico} orientados a
-las métricas de trazo del módulo de análisis de imagen (alineación, tamaño,
-separación y uniformidad del trazo; Tabla~\ref{tab:parametros_evaluacion}): copia de
+Además, se incluyen ejercicios de refuerzo caligráfico orientados a
+las medidas de alineación, tamaño, espaciado e inclinación
+(Tabla~\ref{tab:medidas-legibilidad-analisis}): copia de
 vocales sobre el renglón, letras de giro similar (\textit{a, c, d, g, q}) y
 oraciones cortas con vocabulario infantil.
 
@@ -82,8 +79,8 @@ conocido, lo que permite medirla con la secuencia correcta de letras
 Por esa razón el catálogo no incluye escritura libre: cada ejercicio define una
 o más respuestas aceptadas (por ejemplo, \textit{uva} y \textit{uvas}).
 
-El CLS es especialmente adecuado para los errores atendidos porque los
-penaliza de forma proporcional a su gravedad:
+El CLS permite describir las secuencias que se conservan ante distintos
+errores de escritura:
 
 \begin{itemize}
     \item \textbf{Omisión:} escribir \textit{pato} en lugar de \textit{plato}
@@ -100,9 +97,9 @@ alumno cuando el tutor lo confirma al revisar el intento.
 
 \paragraph{Retroalimentación al alumno}
 
-Cada ejercicio incluye una \textbf{pista} redactada en lenguaje infantil (por
+Las actividades del catálogo común incluyen una pista redactada en lenguaje infantil (por
 ejemplo, «La \textit{b} tiene la panza a la derecha y la \textit{d}, a la
-izquierda»), que se muestra junto a la instrucción y se lee en voz alta. Los
+izquierda»), que se muestra junto a la instrucción y puede leerse en voz alta. Los
 ejercicios con imagen presentan dibujos numerados del 1 al 4 para que el orden
 de las palabras esperadas sea inequívoco.
 
@@ -141,9 +138,10 @@ El campo \texttt{contenido\_base} reúne tres partes:
     \item \textbf{Evaluación:} \texttt{evaluacion.modo} y
     \texttt{evaluacion.respuestas\_aceptadas}, contra las que se calcula el
     CLS.
-    \item \textbf{Pedagogía:} \texttt{pedagogia.metodo} (sintético, analítico o
-    ecléctico), \texttt{pedagogia.error\_objetivo}, \texttt{habilidad},
-    \texttt{estrategia}, \texttt{nivel}, \texttt{orden} y \texttt{pista}.
+    \item \textbf{Pedagogía:} el objeto \texttt{pedagogia} contiene los campos
+    \texttt{metodo} (sintético, analítico o ecléctico),
+    \texttt{error\_objetivo}, \texttt{habilidad}, \texttt{estrategia},
+    \texttt{nivel}, \texttt{orden} y \texttt{pista}.
 \end{itemize}
 
 Con la información pedagógica, el tutor puede filtrar el catálogo por método y
@@ -151,7 +149,49 @@ por error, y conocer la habilidad que fortalece cada ejercicio antes de
 activarlo. De esta forma la práctica asignada se elige según el área de
 oportunidad observada en los intentos del alumno.
 
+El catálogo se incorpora mediante dos lotes. La migración 005 carga las
+actividades pedagógicas y desactiva los ejercicios comunes de ejemplo y sus
+asignaciones, conservando los registros que permiten consultar intentos
+anteriores. La migración 006 amplía el catálogo con el segundo lote, sin
+desactivar las actividades existentes. Los ejercicios nuevos deben ser
+activados por cada tutor para aparecer entre los pendientes de sus alumnos.
+
 La relación entre el catálogo y el tutor se gestiona a través de la tabla
 \texttt{Ejercicios\_Tutor}, que representa la activación de un ejercicio del
 catálogo por parte de un tutor específico y tiene su propio ciclo de vida
 independiente, conforme al diseño descrito en la Sección~\ref{sec:diseno-bd}.
+
+\subsubsection{Dictados creados por el tutor}
+
+El tutor puede preparar un dictado desde su panel de ejercicios. Selecciona
+palabras de los bancos temáticos disponibles, combina bancos o agrega palabras
+propias. La lista admite de 1 a 50 palabras, con un máximo de 40 letras por
+palabra. Se eliminan duplicados sin distinguir mayúsculas y se conserva el
+orden seleccionado. El tutor asigna un título y, si lo necesita, una fecha
+límite futura.
+
+La creación guarda el ejercicio y su activación para los alumnos del tutor
+en una misma transacción. El campo \texttt{id\_tutor\_creador} identifica al
+propietario: otro tutor no puede consultar ni activar ese dictado como propio.
+La fecha límite se recibe con zona horaria y se almacena en tiempo universal
+coordinado (UTC). La entrega comprueba que la asignación pertenezca al tutor
+del alumno y que el dictado siga activo y dentro del plazo.
+
+El contenido conserva la lista en \texttt{dictado.palabras}, deja
+\texttt{texto\_guia} sin valor y configura la evaluación en modo
+\texttt{dictado}. La respuesta aceptada se forma con las palabras en el orden
+guardado. Los dictados personalizados no requieren la ficha pedagógica
+completa que acompaña al catálogo común.
+
+El alumno escucha una palabra por vez mediante la síntesis de voz del
+navegador. Puede repetirla, detener el audio o avanzar y retroceder; la
+interfaz muestra su posición sin presentar la palabra como texto para copiar.
+Escribe la respuesta en orden y sin numerarla, en el lienzo o en papel para
+subir una fotografía. Si el navegador no puede reproducir el audio, se le
+indica que solicite la lectura al profesor.
+
+La imagen enviada sigue el mismo proceso de OCR, cálculo de CLS y sugerencias
+de legibilidad que los demás ejercicios. El tutor revisa los resultados y
+confirma las medidas que se incorporarán al progreso. La disponibilidad de
+dictados amplía las actividades de práctica; su efecto en el aprendizaje debe
+evaluarse durante el piloto.

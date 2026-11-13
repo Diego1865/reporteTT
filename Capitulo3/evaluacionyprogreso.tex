@@ -1,0 +1,46 @@
+\subsection{Evaluación de la escritura y seguimiento del progreso}
+\label{sec:analisis-evaluacion}
+
+El análisis del intento utiliza dos fuentes: el texto transcrito permite evaluar la ortografía mediante CLS, mientras que las regiones reconocidas y la imagen permiten estimar la legibilidad. El tutor contrasta ambos resultados con la escritura original antes de confirmar las notas.
+
+\subsubsection{Evaluación ortográfica mediante CLS}
+
+La evaluación sigue el criterio de secuencias de letras expuesto en la Sección~\ref{sec:cls}: cuenta los pares adyacentes correctos, incluidos los límites inicial y final de cada palabra. Por ello, una palabra de $n$ letras aporta $n+1$ secuencias posibles \cite{treiman2016measures, aimswebplus2025manual}. El sistema requiere una respuesta esperada para determinar ese total.
+
+Cuando el ejercicio admite varias respuestas, la comparación preliminar selecciona la más cercana a la transcripción y calcula el CLS respecto a ella. La implementación conserva las diferencias entre mayúsculas, tildes y ñ; para el conteo extrae palabras y omite números y signos de puntuación. Los guiones entre letras separan unidades, como ocurre en ejercicios de sílabas. Una palabra esperada que falta aporta cero secuencias correctas. Las palabras adicionales se señalan en la comparación preliminar, aunque el cálculo actual de CLS no les asigna una penalización adicional.
+
+\begin{samepage}
+Si $C$ es el número de secuencias correctas y $P$ el de secuencias posibles, el puntaje sugerido se obtiene mediante:
+\[
+    S_{\mathrm{CLS}} = 10\frac{C}{P}, \qquad P>0.
+\]
+\end{samepage}
+La conversión a la escala de 0 a 10 es una decisión de la aplicación. El tutor puede corregir $C$ tras revisar la imagen; $P$ se obtiene de la referencia del ejercicio. Por ejemplo, escribir \textit{pato} frente a \textit{plato} conserva 4 de 6 secuencias y produce una sugerencia de 6.67. Esta medida expresa coincidencias ortográficas, sin medir por sí misma la legibilidad ni la gravedad pedagógica de un error.
+
+\subsubsection{Sugerencias de legibilidad}
+
+El servicio local de legibilidad utiliza los recuadros de letras que devuelve Cloud Vision. Agrupa las palabras en renglones y calcula las medidas de la Tabla~\ref{tab:medidas-legibilidad-analisis}. La inclinación requiere además los píxeles de la imagen. Estos procedimientos están implementados; sus umbrales son una calibración inicial que debe contrastarse con valoraciones docentes.
+
+\begin{longtable}{|p{2.4cm}|p{6.5cm}|p{5.7cm}|}
+\caption{Medidas implementadas para sugerir la legibilidad}
+\label{tab:medidas-legibilidad-analisis} \\ \hline
+\textbf{Medida} & \textbf{Cálculo} & \textbf{Condiciones y límites} \\ \hline
+\endfirsthead
+\hline
+\textbf{Medida} & \textbf{Cálculo} & \textbf{Condiciones y límites} \\ \hline
+\endhead
+Alineación & Desviación de la base de las letras respecto a una recta ajustada por renglón, normalizada por la altura mediana. & Excluye letras descendentes del ajuste y requiere al menos tres puntos útiles por renglón. \\ \hline
+Tamaño & Coeficiente de variación de las alturas de minúsculas comparables. & Requiere al menos tres letras del conjunto definido por el algoritmo. Mide consistencia relativa, no tamaño físico en milímetros. \\ \hline
+Espaciado & Coeficiente de variación de las separaciones entre palabras; si no hay dos separaciones, utiliza las existentes entre letras. & Requiere al menos dos separaciones. Una media no positiva recibe una sugerencia de cero por superposición. \\ \hline
+Inclinación & Promedio del ángulo absoluto respecto a la vertical, estimado con los momentos de la tinta y ponderado por su cantidad. & Requiere recortes con altura y tinta suficientes. La medida depende de la imagen y no equivale a uniformidad del trazo. \\ \hline
+\end{longtable}
+
+Cada valor crudo se transforma linealmente a una escala de 0 a 10, con límites propios para cada medida. El resultado conserva los valores crudos para facilitar su revisión. La sugerencia global de legibilidad promedia únicamente las medidas calculables. Si ninguna puede obtenerse, queda sin valor; una imagen sin letras reconocidas tampoco produce una sugerencia de legibilidad.
+
+\subsubsection{Confirmación docente y cálculo del progreso}
+
+Las sugerencias se guardan con el resultado del OCR en el intento. Al calificar, el tutor puede confirmar las secuencias correctas y las cuatro medidas de legibilidad. El sistema registra esas decisiones en \texttt{Analisis\_Ortografico} y \texttt{Analisis\_Caligrafico}, junto con la sugerencia que sirvió de apoyo. La nota general y el comentario del intento se conservan por separado: guardar una nota sin confirmar CLS o legibilidad no genera sus promedios.
+
+La vista \texttt{vw\_Progreso\_Alumno}, incorporada por la migración 004, calcula los promedios al consultarlos. El promedio ortográfico utiliza los puntajes CLS confirmados disponibles. Para legibilidad, calcula el promedio de cada una de las cuatro medidas confirmadas y después la media de esos cuatro resultados. Por tanto, este promedio requiere que estén disponibles las cuatro medidas; es distinto de la sugerencia automática, que puede usar menos medidas. El historial se reconstruye desde los intentos y sus análisis, sin las tablas \texttt{Historial\_Alumno} y \texttt{Progreso\_Alumno} eliminadas por esa migración.
+
+Si existen ambos promedios, el general es su media aritmética. Si solo existe uno, toma ese valor; si faltan ambos, queda sin valor. El panel del tutor aplica a la dimensión seleccionada las categorías En riesgo para valores menores que 6, Regular de 6 a 8 inclusive, Excelencia para valores mayores que 8 y Sin calificar cuando no hay promedio. La gráfica, los contadores y las listas comparten estos criterios. Los límites de clasificación son decisiones de la aplicación pendientes de validación pedagógica.
