@@ -1,33 +1,38 @@
 \section{Capítulo 3: Análisis}
 
-En este capítulo se trabajará el análisis de los módulos de la aplicación para su correcto funcionamiento abarcando desde los límites y capacidades de la aplicación, así como los requerimientos, riesgos y mitigación de estos para tener una base sólida para el diseño y posterior desarrollo de nuestra solución.
+Este capítulo define el alcance de la aplicación, los requisitos de sus usuarios y las condiciones necesarias para su operación. El análisis considera la captura de escritura, los ejercicios y dictados, la revisión de resultados por el tutor y el seguimiento del alumno. También examina la factibilidad del proyecto y los riesgos que deben atenderse durante las pruebas.
 
-\subsection{Alcance y Límites de la aplicación}
+\subsection{Alcance y límites de la aplicación}
 
-El propósito de este apartado es establecer de manera precisa el ámbito de desarrollo e implementación del proyecto. A continuación, se definen las capacidades operativas y el público objetivo que conforman el alcance del sistema, así como las restricciones técnicas, lingüísticas y de conectividad que delimitan su funcionamiento.
+El alcance comprende las funciones implementadas y su uso previsto con estudiantes de primer grado. La existencia de estas funciones se distingue de su validación: la precisión del reconocimiento, la calibración de las métricas y la utilidad pedagógica deberán evaluarse con muestras del contexto escolar.
 
 \subsubsection{Alcance de la aplicación web}
 
-La aplicación web está dirigida exclusivamente a estudiantes de primer grado de educación primaria. La plataforma permitirá la recolección de textos manuscritos en letra de molde mediante la escritura directa en un lienzo en pantalla o a través de la carga de imágenes.
+La aplicación web está dirigida a estudiantes de primer grado de educación primaria y a los tutores que supervisan su práctica. Recibe textos manuscritos en letra de molde mediante un lienzo digital, la carga de imágenes o una fotografía tomada con la cámara del dispositivo. El lienzo admite ratón, entrada táctil y lápiz digital; conserva la tinta al cambiar de tamaño y excluye el margen decorativo de la imagen enviada al reconocimiento.
 
-Una vez capturada la imagen, Google Cloud Vision transcribe la escritura. La implementación actual compara ese texto con las respuestas de referencia configuradas para el ejercicio y presenta las diferencias al tutor. Como parte del alcance por completar, el sistema calculará el puntaje de secuencia correcta de letras (CLS) de cada intento respecto a la respuesta esperada; este puntaje se incorporará al progreso del alumno solo cuando el tutor lo confirme.
+Google Cloud Vision transcribe la imagen y devuelve las regiones de texto reconocidas. El sistema compara la transcripción con las respuestas aceptadas del ejercicio, señala posibles diferencias y calcula la secuencia correcta de letras (\textit{Correct Letter Sequence}, CLS), descrita en el marco teórico (Sección~\ref{sec:cls}). La evaluación admite copia, completar, dictado y respuesta a partir de imágenes. La configuración del OCR utiliza español por defecto y permite autodetección del idioma cuando se selecciona \texttt{auto}.
 
-Como trabajo pendiente, el sistema incorporará métricas de alineación, tamaño, separación y uniformidad del trazo, calculadas mediante análisis de imagen y calibradas con criterios docentes.
+El módulo de legibilidad calcula sugerencias de alineación, tamaño, espaciado e inclinación a partir de las regiones del OCR y de la tinta de la imagen. Las medidas disponibles se expresan en una escala de 0 a 10; cuando faltan datos suficientes, la medida queda sin valor. La inclinación describe la desviación del trazo respecto a la vertical. La uniformidad general del trazo no constituye una quinta medida implementada ni es equivalente a la inclinación.
+
+El tutor revisa la imagen y puede confirmar o corregir tanto el CLS como las medidas de legibilidad. Solo esos valores confirmados alimentan los promedios del alumno. El historial se consulta desde los intentos y sus análisis, y el progreso se obtiene mediante la vista \texttt{vw\_Progreso\_Alumno}. Las sugerencias automáticas se conservan como apoyo a la revisión.
+
+El tutor puede activar ejercicios del catálogo común y crear dictados con palabras de los bancos disponibles o con palabras propias. Los dictados se habilitan para sus alumnos y se reproducen por palabra desde el navegador. El catálogo organiza las actividades por método de enseñanza, error objetivo, habilidad y nivel, e incluye pistas para acompañar la práctica.
 
 \subsubsection{Límites de la aplicación web}
 
-Las restricciones técnicas y operativas de la aplicación son en cuanto al estilo de escritura, el modelo de reconocimiento está estrictamente acotado al procesamiento de letra de molde (tipografía Century) \cite{troncoso2009sindrome}, excluyendo la evaluación de letra cursiva u otras tipografías.
+El trabajo se concentra en la práctica de letra de molde \cite{troncoso2009sindrome}. La evaluación de escritura cursiva queda fuera del alcance previsto. Esta delimitación corresponde al uso y a las pruebas del proyecto; el servicio OCR no aplica un filtro que restrinja el reconocimiento a una tipografía específica.
 
-Respecto a la restricción lingüística, la evaluación ortográfica se limitará a ejercicios con respuesta esperada conocida, con vocabulario correspondiente al primer grado de primaria; no se evaluará escritura libre.
+La evaluación ortográfica requiere una o más respuestas esperadas conocidas y vocabulario adecuado para primer grado. No se contempla evaluar escritura libre. En los dictados personalizados, el tutor debe seleccionar las palabras según el nivel de sus alumnos.
 
-En relación con el rol de la aplicación, el sistema funcionará exclusivamente como una herramienta de retroalimentación automatizada y complementaria, basada en un enfoque de aprendizaje ecléctico, sin sustituir la evaluación pedagógica integral del docente.
+La aplicación apoya la retroalimentación docente con un enfoque de aprendizaje ecléctico. Un error de transcripción puede afectar el CLS, y una región mal reconocida puede alterar las medidas de legibilidad. Por ello, la revisión de la imagen por el tutor forma parte del proceso de evaluación. Los umbrales de legibilidad y las categorías de desempeño son decisiones del proyecto pendientes de calibración y validación pedagógica.
 
-Finalmente, debido a su diseño basado en una arquitectura web cliente-servidor, existe una dependencia de conectividad, por lo que el funcionamiento del reconocimiento OCR y de la evaluación ortográfica requerirá una conexión activa a internet.
+El envío de intentos y su reconocimiento requieren conexión a internet y disponibilidad del servidor y de Cloud Vision. La reproducción de dictados depende de la síntesis de voz del navegador y de las voces instaladas; si no está disponible, la interfaz indica que se solicite la lectura al profesor. La configuración de demostración utiliza una sola máquina virtual y una instancia de Cloud SQL, por lo que no ofrece alta disponibilidad. Su configuración en el repositorio no acredita que los recursos estén desplegados o que las pruebas del piloto se hayan realizado.
 
 \input{Capitulo3/factibilidadeconomica}
 \input{Capitulo3/factibilidadlegal}
 \input{Capitulo3/riesgosymitigacion}
 \input{Capitulo3/casosuso}
 \input{Capitulo3/requerimientos}
+\input{Capitulo3/evaluacionyprogreso}
 \input{Capitulo3/analisisejercicios}
 \input{Capitulo3/dataset}

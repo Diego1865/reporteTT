@@ -1,7 +1,7 @@
 \subsection{Conjunto de datos para validación del reconocimiento}
 \label{sec:datos-validacion}
 
-El proyecto utiliza Google Cloud Vision como servicio de reconocimiento de escritura manuscrita. Por tanto, la recopilación de imágenes se orienta a evaluar la transcripción y calibrar las futuras métricas caligráficas. El equipo no entrena ni modifica los pesos del reconocedor del proveedor. La capacidad técnica del servicio para detectar escritura manuscrita no constituye, por sí sola, evidencia de precisión en alumnos de primer grado \cite{googlevisionHandwriting}.
+El proyecto utiliza Google Cloud Vision como servicio de reconocimiento de escritura manuscrita. La recopilación de imágenes se orienta a evaluar la transcripción y calibrar las métricas de alineación, tamaño, espaciado e inclinación ya implementadas. El equipo no entrena ni modifica los pesos del reconocedor del proveedor. La capacidad técnica del servicio para detectar escritura manuscrita no constituye, por sí sola, evidencia de precisión en alumnos de primer grado \cite{googlevisionHandwriting}.
 
 \subsubsection{Criterios de selección}
 El conjunto de evaluación deberá incluir muestras de letra de molde en español, obtenidas tanto del lienzo digital como de fotografías de trabajos en papel. Se buscará diversidad de alumnos, dispositivos, iluminación, tamaño de letra y separación entre palabras, así como presencia de mayúsculas, minúsculas, ñ, vocales acentuadas y puntuación. Cada imagen tendrá una transcripción manual que conserve exactamente lo escrito, incluidos los errores ortográficos del alumno.
@@ -14,4 +14,8 @@ Los conjuntos públicos revisados, como EMNIST e IAM, son antecedentes del recon
 La prueba piloto prevista con 25 alumnos permitirá reunir muestras del contexto de uso. Se separarán los alumnos utilizados para elegir parámetros de preprocesamiento y umbrales de aquellos utilizados para la evaluación final, evitando que imágenes del mismo alumno aparezcan en ambos grupos. El volumen definitivo y la distribución de muestras se documentarán al realizar el piloto; no se presentan como datos ya recopilados.
 
 \subsubsection{Criterios de evaluación}
-La transcripción obtenida con Cloud Vision se comparará con la transcripción manual, no con la respuesta ortográficamente correcta del ejercicio. Se reportarán la CER, la tasa de error por palabra (WER), la proporción de imágenes sin texto, los fallos del servicio y la latencia. Las métricas caligráficas se contrastarán de forma independiente con mediciones de imagen y valoraciones docentes. La confianza del OCR se utilizará como señal de revisión y no como una calificación de escritura.
+La transcripción de Cloud Vision se contrastará con la transcripción manual fiel a lo escrito, incluidos los errores del alumno. Se medirán la tasa de error por carácter (CER), la tasa de error por palabra (WER), las imágenes sin texto, los fallos y la latencia. La comparación entre el CLS calculado sobre ambas transcripciones permitirá estimar el efecto del OCR en el puntaje sugerido.
+
+Las medidas de legibilidad se contrastarán con mediciones de imagen y valoraciones docentes. Se conservarán los valores crudos, las medidas no calculables y las correcciones del tutor; las muestras de calibración quedarán separadas de la evaluación final. La confianza del OCR será una señal de revisión, sin valor de calificación.
+
+Las pruebas automatizadas verifican cálculos y reglas. La precisión con escritura infantil, la usabilidad y la validez pedagógica requieren muestras y usuarios.
