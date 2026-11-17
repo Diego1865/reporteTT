@@ -24,7 +24,38 @@ La migración \texttt{001\_google\_vision.sql} incorpora \texttt{resultado\_ocr\
 
 En el panel del tutor, el detalle de intentos muestra la imagen, la transcripción y la evaluación preliminar. El docente puede revisar las diferencias y redactar su retroalimentación antes de guardar la calificación. El resultado automático no reemplaza esa decisión.
 
+\subsubsection{Implementación del análisis de legibilidad}
+El servicio \texttt{Servicios/legibilidad.py} implementa el cálculo de alineación, tamaño, espaciado e inclinación. Utiliza las regiones de letras y palabras devueltas por Cloud Vision para agrupar renglones y obtener medidas geométricas. Para estimar la inclinación también utiliza los píxeles de tinta de la imagen. La inclinación mide la desviación respecto a la vertical, no la uniformidad del grosor del trazo.
+
+Al registrar un intento, \texttt{Modelo/dao\_alumno.py} invoca este servicio y conserva las sugerencias en la clave \texttt{legibilidad} de \texttt{resultado\_ocr\_json}. El resultado incluye valores crudos y puntuaciones sugeridas de 0 a 10. Las medidas que no pueden calcularse quedan sin valor; si falla este análisis complementario, la entrega se conserva sin una sugerencia de legibilidad.
+
+El tutor contrasta las sugerencias con la imagen y puede confirmar o corregir las cuatro medidas. \texttt{Modelo/dao\_tutor.py} registra los valores confirmados en \texttt{Analisis\_Caligrafico}; estos valores alimentan el progreso mediante la vista \texttt{vw\_Progreso\_Alumno}. Las sugerencias automáticas por sí solas no se incorporan a los promedios. Los cálculos y sus condiciones se describen en la Sección~\ref{sec:diseno-cls}.
+
+\subsubsection{Configuración de umbrales y verificación técnica}
+Se configuró una transformación lineal de cada medida cruda a la escala de 0 a 10. La Tabla~\ref{tab:umbrales-legibilidad-implementados} muestra los límites utilizados por el servicio: el primer límite asigna 10 puntos y el segundo 0; los valores intermedios se interpolan y los extremos se acotan. Estos parámetros constituyen la configuración técnica inicial del módulo.
+
+\begin{table}[H]
+\centering
+\caption{Umbrales implementados para las sugerencias de legibilidad}
+\label{tab:umbrales-legibilidad-implementados}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Medida cruda} & \textbf{Límite de 10 puntos} & \textbf{Límite de 0 puntos} \\
+\midrule
+Desviación de alineación normalizada & 0.05 & 0.35 \\
+Coeficiente de variación del tamaño & 0.10 & 0.50 \\
+Coeficiente de variación del espaciado & 0.15 & 0.80 \\
+Inclinación respecto a la vertical & $10^{\circ}$ & $40^{\circ}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+El 17 de noviembre de 2026 se ejecutaron las nueve pruebas unitarias de \texttt{tests/test\_legibilidad.py}, con nueve resultados satisfactorios. Los casos utilizan anotaciones geométricas e imágenes sintéticas y comprueban la regularidad y variación del tamaño, la alineación, la separación de renglones, el espaciado irregular, la ausencia de letras y la estimación de inclinación. En particular, se verifica una inclinación sintética de $30^{\circ}$ con tolerancia de $4^{\circ}$. Esta evidencia verifica el comportamiento del cálculo en los casos ensayados; no mide su concordancia con una valoración docente de escritura infantil.
+
+\subsubsection{Prueba exploratoria de uso}
+El equipo realizó una prueba exploratoria de la aplicación con un participante del entorno familiar de uno de sus integrantes. Esta experiencia se registra como un antecedente de uso previo a la sesión del 18 de noviembre de 2026. Por su alcance, no constituye el piloto de 25 alumnos ni permite estimar la precisión del reconocimiento o la concordancia de las medidas con una evaluación docente. No se atribuyen a esta prueba ajustes de umbrales ni resultados cuantitativos que no estén documentados.
+
 \subsubsection{Estado de avance}
 Se encuentran implementadas la validación de imágenes, la integración opcional con Cloud Vision, la persistencia de la anotación completa y la comparación de transcripciones con respuestas configuradas. La disponibilidad efectiva del servicio requiere credenciales, permisos y habilitación en el entorno de ejecución. La existencia de este código no acredita por sí sola la precisión objetivo ni la realización del piloto.
 
-Permanecen pendientes el cálculo de alineación, tamaño, separación y uniformidad del trazo, su calibración con una rúbrica docente y la integración de esas mediciones en el progreso. El procedimiento propuesto se detalla en la Sección~\ref{sec:vision-metricas}. Los ejemplos SQL anteriores documentan la estructura prevista para análisis y agregaciones; no demuestran que el flujo OCR actual genere puntuaciones caligráficas.
+También se encuentran implementados el cálculo de las cuatro medidas de legibilidad, su revisión y confirmación por el tutor y su incorporación al progreso. La revisión docente de los umbrales y la evaluación con muestras se integran en la sesión de pruebas programada para el 18 de noviembre de 2026, conforme al procedimiento de la Sección~\ref{sec:sesion-validacion-legibilidad}. Los resultados de esa sesión se registrarán por separado de la verificación técnica descrita anteriormente.

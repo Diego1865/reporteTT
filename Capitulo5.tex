@@ -177,7 +177,7 @@ Analisis\_Caligrafico & Intentos & 1:1 \\
 
 \paragraph{Obligatoriedad de campos}
 
-Se establecieron restricciones \texttt{NOT NULL} en los atributos indispensables para el funcionamiento del sistema. Los valores nulos representan información opcional o aún no disponible. En el flujo actual, la transcripción puede ser nula cuando Cloud Vision está desactivado; las puntuaciones caligráficas permanecen sin cálculo automático hasta implementar el módulo correspondiente.
+Se establecieron restricciones \texttt{NOT NULL} en los atributos indispensables para el funcionamiento del sistema. Los valores nulos representan información opcional o aún no disponible. En el flujo actual, la transcripción puede ser nula cuando Cloud Vision está desactivado. El módulo de legibilidad calcula sugerencias cuando dispone de regiones reconocidas y de los datos de imagen necesarios; una medida no calculable queda sin valor. Estas sugerencias se conservan en el resultado del OCR del intento, mientras que las puntuaciones de \texttt{Analisis\_Caligrafico} se registran cuando el tutor confirma las cuatro medidas.
 
 \subsubsection{Implementación de la vista vw\_historial\_alumno}
 

@@ -178,7 +178,7 @@ Diversos estudios sobre desarrollo de la escritura señalan que la evaluación d
 
 Desde una perspectiva computacional, algunos de estos parámetros pueden aproximarse mediante técnicas de análisis de imagen, tales como la medición de altura promedio de caracteres, la variación de inclinación o la separación entre segmentos gráficos \cite{marti2002iam, plamondon2000online}. Estas técnicas permiten cuantificar características del trazo que, de otra forma, serían evaluadas únicamente de manera subjetiva. Si bien estos indicadores no sustituyen la evaluación pedagógica, pueden ofrecer información cuantitativa útil para el seguimiento del progreso del estudiante a lo largo del tiempo.
 
-Los principales parámetros considerados para la evaluación básica del trazo en el presente proyecto se describen en la Tabla \ref{tab:parametros_evaluacion}, donde se establecen tanto los criterios pedagógicos como sus posibles aproximaciones computacionales, permitiendo vincular la evaluación tradicional con el análisis automatizado.
+Para apoyar la evaluación de la legibilidad, el presente proyecto implementa cuatro medidas: alineación, tamaño, espaciado e inclinación. La Tabla~\ref{tab:parametros_evaluacion} resume sus aproximaciones computacionales. La inclinación expresa la desviación del trazo respecto a la vertical; no equivale a una medida de uniformidad del grosor ni de la calidad general del trazo.
 
 \begin{table}[H]
 \centering
@@ -187,15 +187,15 @@ Los principales parámetros considerados para la evaluación básica del trazo e
 \renewcommand{\arraystretch}{1.5} % Da un poco más de espacio vertical entre las filas
 \begin{tabular}{|>{\centering\arraybackslash}m{3cm}|>{\centering\arraybackslash}m{5.5cm}|>{\centering\arraybackslash}m{6cm}|}
 \hline
-\textbf{Parámetro} & \textbf{Descripción} & \textbf{Posible aproximación computacional} \\ \hline
-Legibilidad & Claridad visual de los caracteres & Valoración docente apoyada en medidas del trazo \\ \hline
-Alineación & Ubicación uniforme sobre línea base & Desviación vertical promedio \\ \hline
-Tamaño & Proporción consistente de las letras & Altura mediana y dispersión de letras comparables \\ \hline
-Espaciado & Separación adecuada entre letras & Separaciones normalizadas entre letras y palabras \\ \hline
+\textbf{Parámetro} & \textbf{Descripción} & \textbf{Aproximación implementada} \\ \hline
+Alineación & Regularidad respecto a la línea base & Desviación respecto a una recta ajustada, normalizada por la altura mediana \\ \hline
+Tamaño & Consistencia de la altura de letras comparables & Coeficiente de variación de las alturas \\ \hline
+Espaciado & Regularidad de la separación entre palabras o letras & Coeficiente de variación de las separaciones disponibles \\ \hline
+Inclinación & Desviación del trazo respecto a la vertical & Ángulo absoluto estimado mediante los momentos de la tinta \\ \hline
 \end{tabular}
 \end{table}
 
-Como se observa en la Tabla \ref{tab:parametros_evaluacion}, los parámetros seleccionados combinan criterios pedagógicos tradicionales con posibles métricas de análisis digital. Esta integración permite establecer un modelo básico de evaluación que apoye el seguimiento del desempeño del estudiante sin reemplazar la interpretación docente, sino más bien complementándola.
+Las medidas de la Tabla~\ref{tab:parametros_evaluacion} se utilizan como sugerencias para la revisión docente. Sus umbrales iniciales requieren calibración y validación pedagógica. Cuando la imagen o las regiones reconocidas no aportan datos suficientes, la medida queda sin valor. Los procedimientos y sus límites se detallan en la Sección~\ref{sec:analisis-evaluacion}.
 
 La incorporación de estos indicadores dentro del sistema propuesto busca complementar la evaluación ortográfica realizada mediante CLS, ofreciendo una visión más integral del proceso de escritura. De esta manera, el sistema no solo evalúa la corrección del texto, sino también la calidad del trazo manuscrito, integrando así componentes visuales y lingüísticos dentro de una misma solución tecnológica.
 
@@ -203,7 +203,7 @@ La incorporación de estos indicadores dentro del sistema propuesto busca comple
 \subsection{Reconocimiento manuscrito mediante Google Cloud Vision}
 El OCR convierte el contenido textual de una imagen en texto procesable. En este proyecto se implementa mediante Google Cloud Vision, cuya operación de detección de texto en documentos admite escritura manuscrita \cite{googlevisionHandwriting}. El servicio se consume desde el Back-End; el equipo desarrolla la integración, la validación de entradas y el tratamiento de resultados.
 
-La Figura~\ref{fig:OCR} resume el flujo utilizado. El reconocimiento y el análisis caligráfico tienen responsabilidades distintas: la transcripción sirve para comparar el contenido escrito, mientras que las métricas pendientes requieren medir geometría y píxeles de la imagen.
+La Figura~\ref{fig:OCR} resume el flujo utilizado. El reconocimiento y el análisis caligráfico tienen responsabilidades distintas: la transcripción sirve para comparar el contenido escrito, mientras que el módulo local de legibilidad utiliza la geometría de las regiones reconocidas y los píxeles de la imagen para calcular las cuatro medidas implementadas.
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}[every node/.style={draw, rounded corners, align=center, text width=10cm, minimum height=0.75cm}]
@@ -222,7 +222,7 @@ La anotación completa representa el texto mediante páginas, bloques, párrafos
 
 La escritura infantil presenta variaciones de forma, tamaño y separación que pueden afectar la transcripción. También influyen el desenfoque, la iluminación y la perspectiva de las fotografías. Por ello, el proyecto conserva la imagen para revisión y deberá validar el servicio con muestras representativas. La meta de desempeño se evaluará con referencias manuales que mantengan lo realmente escrito, sin corregir sus faltas de ortografía.
 
-El análisis local del trazo utilizará una copia de la imagen para aislar tinta y medir características espaciales. La binarización de Otsu y los umbrales adaptativos son opciones de procesamiento que deberán evaluarse según la captura \cite{otsu1979threshold,opencvMetricas}. Estas operaciones pertenecen al diseño de las métricas; no se presentan como etapas internas conocidas del servicio de Google ni como procesamiento ya implementado en el proyecto.
+El análisis local de inclinación utiliza una copia de la imagen en escala de grises y un umbral fijo de intensidad para identificar tinta dentro de los recortes de letras reconocidas. La binarización de Otsu y los umbrales adaptativos son alternativas que podrían evaluarse según las condiciones de captura \cite{otsu1979threshold,opencvMetricas}; no forman parte del procesamiento actual ni se presentan como etapas internas conocidas del servicio de Google.
 
 \subsection{Arquitectura de la aplicación web}
 El desarrollo de aplicaciones web modernas suele estructurarse bajo patrones de diseño que permiten organizar de manera eficiente los componentes del sistema. Uno de los modelos más utilizados es la arquitectura Modelo Vista Controlador (Model-View-Controller, MVC por sus siglas en inglés), la cual divide la aplicación en tres capas principales: modelo, vista y controlador \cite{sommerville2015software}.

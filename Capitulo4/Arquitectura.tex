@@ -28,25 +28,29 @@ La Figura~\ref{fig:arquitectura_completa} identifica explícitamente la Vista, e
 
 \begin{figure}[H]
 \centering
+\begingroup
+\setstretch{1}
 \begin{tikzpicture}[
   bloque/.style={draw, rounded corners, fill=gray!8, text width=5.2cm, minimum height=1cm, align=center, font=\small},
   enlace/.style={-{Stealth},thick}, font=\small]
 \node[bloque] (fe) at (0,0) {\textbf{Vista (V)}\\Next.js / React\\Interfaz de alumno y tutor};
 \node[bloque] (api) at (0,-2.8) {\textbf{Controlador (C)}\\FastAPI: rutas de \texttt{Control}\\Validación, permisos y respuestas};
-\node[bloque] (dao) at (0,-5.8) {Datos y operaciones DAO\\Contratos, consultas y transacciones};
-\node[bloque] (db) at (7,-5.8) {SQL Server\\Persistencia del Modelo};
-\node[bloque] (serv) at (0,-8) {Servicios del Modelo\\OCR, CLS, legibilidad y progreso};
-\node[bloque] (google) at (7,-8) {Google Cloud Vision\\Reconocimiento externo};
+\node[font=\small\bfseries, minimum height=0.6cm] (modelo) at (0,-5.2) {Modelo (M)};
+\node[bloque] (dao) at (0,-6.6) {Datos y operaciones DAO\\Contratos, consultas y transacciones};
+\node[bloque] (db) at (7,-6.6) {SQL Server\\Persistencia del Modelo};
+\node[bloque] (serv) at (0,-8.8) {Servicios del Modelo\\OCR, CLS, legibilidad y progreso};
+\node[bloque] (google) at (7,-8.8) {Google Cloud Vision\\Reconocimiento externo};
 \begin{scope}[on background layer]
-\node[draw, thick, rounded corners, fit=(dao)(serv), inner sep=10pt,
-      label={[font=\small\bfseries]above:Modelo (M): datos y reglas de evaluación}] {};
+\node[draw, thick, rounded corners, fit=(modelo)(dao)(serv), inner sep=10pt] {};
 \end{scope}
 \draw[enlace,<->] (fe) -- node[right]{HTTP / JSON + JWT} (api);
-\draw[enlace,<->] (api) -- node[right]{Operaciones y resultados} (dao);
+\draw[enlace,<->] (api) -- node[right]{Operaciones y resultados} (modelo);
+\draw[enlace,<->] (modelo) -- (dao);
 \draw[enlace,<->] (dao) -- node[above]{SQL} (db);
 \draw[enlace,<->] (dao) -- (serv);
 \draw[enlace,<->] (serv) -- node[above]{OCR} (google);
 \end{tikzpicture}
+\endgroup
 \caption{Arquitectura MVC de la plataforma con evaluación mediante CLS}
 \label{fig:arquitectura_completa}
 \end{figure}
