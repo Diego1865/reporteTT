@@ -1,0 +1,114 @@
+\subsection{Diseño del reconocimiento y de la evaluación mediante CLS}
+\label{sec:vision-metricas}
+
+La evaluación ortográfica se basa en la secuencia correcta de letras (\textit{Correct Letter Sequence}, CLS), presentada en la Sección~\ref{sec:cls}. El diseño separa tres responsabilidades: obtener una transcripción con Google Cloud Vision, compararla con las respuestas aceptadas del ejercicio y someter el resultado a revisión del tutor. El cálculo CLS es determinista y se ejecuta en el servidor; no requiere entrenar un modelo lingüístico ni interpretar el significado de la respuesta.
+
+\subsubsection{Flujo de registro del intento}
+\begin{enumerate}
+    \item El alumno envía \texttt{id\_ejercicio\_tutor} e \texttt{imagen\_codificada} mediante \texttt{POST /api/alumno/intento}. La dependencia de autenticación identifica al alumno a partir del JWT.
+    \item \texttt{registrar\_intento\_dao}, en \texttt{Modelo/dao\_alumno.py}, verifica la pertenencia de la asignación al tutor del alumno y su estado activo. En dictados también verifica la fecha de vencimiento.
+    \item \texttt{Servicios/ocr.py} valida la imagen y, si el reconocimiento está habilitado, solicita \texttt{document\_text\_detection} a Google Cloud Vision. Recupera el texto y la anotación con la geometría de palabras y símbolos.
+    \item \texttt{Servicios/evaluacion.py} selecciona la referencia y llama a \texttt{calcular\_cls}, definido en \texttt{Servicios/cls.py}. En paralelo conceptual, la función de legibilidad usa la anotación y la imagen para proponer medidas del trazo; ambas operaciones se ejecutan dentro de la misma solicitud.
+    \item El DAO inserta en \texttt{Intentos} la imagen, la transcripción y \texttt{resultado\_ocr\_json}. Este JSON conserva \texttt{evaluacion\_preliminar}, incluido su objeto \texttt{cls}, y \texttt{legibilidad}. La respuesta HTTP 201 contiene el mensaje de registro y el objeto \texttt{ocr}.
+\end{enumerate}
+
+El reconocimiento y los cálculos preceden a la inserción del intento. No hay una cola de evaluación en segundo plano: si el OCR genera una excepción, la entrega no se inserta. Cuando está desactivado o devuelve una respuesta válida sin texto, se permite guardar el intento para revisión manual. Registrar una entrega no crea por sí mismo un análisis confirmado ni modifica los promedios.
+
+\subsubsection{Preparación de imagen y contrato del OCR}
+\texttt{preparar\_imagen} acepta PNG o JPEG como una URL de datos en Base64. Aplica límites de 10 MB a los bytes de entrada y al PNG procesado, y de 20 millones de píxeles a la imagen. Compone las transparencias sobre blanco y genera un PNG RGB sin cambiar sus dimensiones. No rectifica la perspectiva ni segmenta letras antes de enviarlas al proveedor.
+
+La variable \texttt{GOOGLE\_VISION\_ENABLED} habilita la llamada externa. El cliente utiliza credenciales predeterminadas de aplicación disponibles en el servidor, un tiempo de espera de 30 segundos y \texttt{retry=None}. \texttt{GOOGLE\_VISION\_LANGUAGE\_HINTS} permite configurar pistas de idioma: el código usa \texttt{es} cuando no hay un valor y una lista vacía cuando se establece \texttt{auto}. Estas opciones no corrigen la escritura del alumno.
+
+El servicio devuelve \texttt{proveedor}, \texttt{estado}, \texttt{texto} y \texttt{full\_text\_annotation}. Los estados son \texttt{desactivado}, \texttt{procesado} y \texttt{sin\_texto}. La anotación conserva la jerarquía de páginas, bloques, párrafos, palabras y símbolos. Sus cajas delimitadoras son información del reconocimiento, no máscaras exactas de la tinta.
+
+Los errores de imagen se comunican con 422 o 413; los problemas de credenciales o disponibilidad, con 503; y una respuesta del proveedor con un mensaje de error, con 502. El navegador no recibe las credenciales de Google.
+
+\subsubsection{Selección de la respuesta de referencia}
+La configuración se obtiene de \texttt{contenido\_base.evaluacion}. Los modos admitidos son \texttt{copia}, \texttt{completar}, \texttt{imagen} y \texttt{dictado}, con una lista no vacía de \texttt{respuestas\_aceptadas}. La comparación normaliza Unicode a NFC, trata los guiones entre caracteres de palabra como separadores y separa palabras y signos. Cuando hay varias respuestas, elige la de mayor similitud de tokens mediante \texttt{SequenceMatcher}, con \texttt{autojunk=False}; en un empate conserva la primera. Esta selección se realiza antes del conteo CLS y no equivale a elegir el mayor puntaje CLS.
+
+La comparación también produce observaciones de omisión, adición, sustitución, acentuación, mayúsculas y puntuación. Son indicios para contrastar con la imagen. El número de símbolos con confianza menor que 0.8 ayuda a orientar la revisión, sin expresar una probabilidad de error del alumno.
+
+\subsubsection{Reglas del cálculo CLS implementado}
+\label{sec:diseno-cls}
+El algoritmo extrae secuencias de letras después de normalizar a NFC. Conserva la distinción entre mayúsculas, acentos y la letra ñ; excluye números y signos de puntuación. Cada palabra esperada $w$ se delimita con marcadores de inicio y fin y aporta $|w|+1$ pares adyacentes. Por ejemplo, \texttt{casa} aporta los pares inicio--c, c--a, a--s, s--a y a--fin.
+
+Sean $B(w)$ y $B(v)$ los multiconjuntos de pares de una palabra esperada y su correspondencia escrita. El conteo se define como:
+\begin{equation}
+ C(w,v)=\sum_b \min\bigl(\operatorname{freq}_{B(w)}(b),
+                            \operatorname{freq}_{B(v)}(b)\bigr).
+\end{equation}
+Se conserva la multiplicidad de cada par: una repetición adicional no puede aportar más ocurrencias que las presentes en la referencia. La coincidencia exige adyacencia y orden dentro del par, pero no la misma posición absoluta dentro de la palabra.
+
+Las listas de palabras se alinean mediante \texttt{SequenceMatcher}. En los segmentos de sustitución se emparejan en orden; una palabra esperada sin correspondencia aporta cero secuencias correctas. Los segmentos de inserción se omiten: las palabras adicionales no aumentan el denominador ni descuentan puntos. Para las $m$ palabras de la referencia:
+\begin{equation}
+ C=\sum_{i=1}^{m}C(w_i,v_i),\qquad
+ P=\sum_{i=1}^{m}(|w_i|+1),\qquad
+ S_{\mathrm{CLS}}=10\frac{C}{P}\quad(P>0).
+ \label{eq:cls-implementado}
+\end{equation}
+El servicio redondea el puntaje sugerido a dos decimales y retorna \texttt{correctas}, \texttt{posibles}, \texttt{puntaje\_sugerido} y el detalle \texttt{por\_palabra}. Si no hay secuencias posibles, el puntaje es \texttt{null}.
+
+\begin{table}[H]
+\centering
+\caption{Ejemplos del comportamiento del cálculo CLS}
+\label{tab:ejemplos-cls-diseno}
+\begin{tabular}{llll}
+\toprule
+Referencia & Transcripción & $C/P$ & Puntaje \\
+\midrule
+casa & casa & $5/5$ & 10.00 \\
+casa & caza & $3/5$ & 6.00 \\
+casa & Casa & $3/5$ & 6.00 \\
+canción & cancion & $6/8$ & 7.50 \\
+perro & pero & $5/6$ & 8.33 \\
+El gato. & El gato & $8/8$ & 10.00 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Estas reglas delimitan el indicador: no mide puntuación, gramática, significado ni calidad del trazo. Una palabra añadida puede generar una observación sin reducir el CLS; por ejemplo, \texttt{El perro grande come} frente a \texttt{El perro come} obtiene $14/14$. Por ello, el puntaje y las observaciones se presentan como datos distintos y se conservan junto con la imagen original.
+
+\subsubsection{Estados y revisión por el tutor}
+La evaluación textual devuelve \texttt{no\_configurada} si falta una referencia válida, \texttt{sin\_texto} si no hay transcripción utilizable y \texttt{revision\_manual} si el texto o alguna referencia supera 10\,000 caracteres. Solo el estado \texttt{preliminar} incorpora el CLS calculado sobre la transcripción; todos los estados indican \texttt{requiere\_revision=true}.
+
+Para consultar intentos anteriores, \texttt{cls\_de\_intento} reutiliza el CLS guardado o lo calcula al consultar si hay una referencia válida. Cuando no existe texto puede obtener un conteo de cero y el total posible de la primera referencia para habilitar la captura manual del tutor. Ese valor no confirma un desempeño de cero ni se incorpora automáticamente al progreso.
+
+El tutor contrasta la imagen con la referencia y envía \texttt{cls\_correctas} mediante \texttt{PUT /api/tutor/calificar/\{id\_intento\}}. El servidor verifica la pertenencia del intento, obtiene las secuencias posibles desde la evaluación conservada o la referencia y exige $0\leq C\leq P$. El cliente no fija el denominador. El conteo confirmado actualiza o inserta \texttt{Analisis\_Ortografico}; su \texttt{ortografia\_score} se calcula con la Ecuación~\ref{eq:cls-implementado}.
+
+\noindent\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=JSON, caption={Ejemplo de CLS confirmado en sugerencias\_json}, label={lst:ocr-output}]
+{
+  "metrica": "CLS",
+  "correctas": 4,
+  "posibles": 5,
+  "sugerido": {
+    "correctas": 3,
+    "posibles": 5,
+    "puntaje_sugerido": 6.0
+  },
+  "confirmado_por_tutor": true
+}
+\end{lstlisting}
+\end{minipage}
+
+Los conteos y la confirmación son claves de \texttt{sugerencias\_json}, no columnas independientes. \texttt{cantidad\_errores} almacena $P-C$, es decir, secuencias no acreditadas; no representa un número de palabras incorrectas. La calificación general y la retroalimentación se guardan por separado en \texttt{Intentos}. Omitir \texttt{cls\_correctas} no crea ni elimina una confirmación anterior.
+
+\subsubsection{Legibilidad como evaluación complementaria}
+\label{sec:preparacion-metricas}
+\texttt{Servicios/legibilidad.py} ya propone cuatro medidas independientes del CLS: alineación, tamaño, espaciado e inclinación. Agrupa palabras en renglones por solapamiento vertical de sus cajas y utiliza las letras reconocidas como apoyo geométrico. La implementación no mide uniformidad del grosor.
+
+\begin{itemize}
+    \item \textbf{Alineación:} ajusta una recta por mínimos cuadrados a la base de letras sin descendentes, con al menos tres puntos por renglón. Calcula el error cuadrático medio de los residuos, lo divide entre la altura mediana y combina los renglones ponderando sus puntos.
+    \item \textbf{Tamaño:} calcula el coeficiente de variación de alturas de al menos tres minúsculas del conjunto de letras comparables definido en el servicio.
+    \item \textbf{Espaciado:} calcula el coeficiente de variación de los huecos entre palabras; si hay menos de dos, utiliza los huecos entre letras. Si la media de los huecos es no positiva, propone cero.
+    \item \textbf{Inclinación:} analiza píxeles con intensidad menor que 128 dentro de las cajas de letras y estima un ángulo respecto a la vertical mediante momentos de la tinta. Promedia los ángulos absolutos ponderados por la cantidad de tinta.
+\end{itemize}
+
+Las desviaciones se convierten a una sugerencia entre 0 y 10 mediante:
+\begin{equation}
+ Q(d)=10\max\left(0,\min\left(1,
+ \frac{t_{\mathrm{malo}}-d}{t_{\mathrm{malo}}-t_{\mathrm{bueno}}}\right)\right).
+\end{equation}
+Los pares de tolerancias iniciales $(t_{\mathrm{bueno}},t_{\mathrm{malo}})$ son $(0.05,0.35)$ para alineación, $(0.10,0.50)$ para tamaño, $(0.15,0.80)$ para espaciado y $(10,40)$ grados para inclinación. Son parámetros del código pendientes de calibración pedagógica, no resultados de una validación con alumnos.
+
+Una medida sin información suficiente se representa con \texttt{null}. La sugerencia global promedia solo las medidas disponibles y conserva los valores crudos en \texttt{detalle}. Para confirmar legibilidad, el contrato exige las cuatro medidas entre 0 y 10; el DAO las almacena en \texttt{Analisis\_Caligrafico}, con el contexto sugerido en \texttt{observaciones}. El OCR, CLS y la legibilidad deben validarse por separado según la Sección~\ref{sec:validacion-vision}.

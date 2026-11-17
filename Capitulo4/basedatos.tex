@@ -1,0 +1,119 @@
+\subsection{Diseño de la base de datos}
+\label{sec:diseno-bd}
+
+El modelo relacional se implementa en SQL Server mediante \texttt{BD/esquemaBD.sql} y sus migraciones. Se separan usuarios, asignaciones, entregas y análisis confirmados mediante llaves primarias y foráneas. Los datos variables de los ejercicios y las respuestas del reconocimiento se conservan como JSON; las puntuaciones consultadas por el módulo de progreso tienen columnas numéricas.
+
+\subsubsection{Modelo de entidades y relaciones}
+La Figura~\ref{fig:er} representa las entidades centrales. Un usuario tiene un perfil de tutor o alumno. Cada alumno pertenece a un tutor, y cada asignación vincula un ejercicio con el tutor que lo habilita para su grupo. El intento pertenece a un alumno y a una asignación.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  entidad/.style={draw, rounded corners, fill=gray!8, minimum width=3.3cm, minimum height=0.8cm, align=center, font=\small},
+  relacion/.style={thick}, font=\small]
+  \node[entidad] (u) at (0,0) {Usuario};
+  \node[entidad] (t) at (-3,-1.9) {Tutor};
+  \node[entidad] (a) at (3,-1.9) {Alumno};
+  \node[entidad] (e) at (-3,-4) {Ejercicios};
+  \node[entidad] (et) at (3,-4) {Ejercicios\_Tutor};
+  \node[entidad] (i) at (3,-6) {Intentos};
+  \node[entidad] (o) at (-3,-8) {Análisis ortográfico};
+  \node[entidad] (c) at (3,-8) {Análisis caligráfico};
+  \draw[relacion] (u) -- node[above left]{1 : 0..1} (t);
+  \draw[relacion] (u) -- node[above right]{1 : 0..1} (a);
+  \draw[relacion] (t) -- node[above]{1 : N} (a);
+  \draw[relacion] (e) -- node[above]{1 : N} (et);
+  \draw[relacion] (t.west) -- ++(-0.7,0) |- node[pos=0.3,left]{1 : N} (et.south west);
+  \draw[relacion] (et) -- node[right]{1 : N} (i);
+  \draw[relacion] (a.east) -- ++(1,0) |- node[pos=0.55,right]{1 : N} (i.east);
+  \draw[relacion] (i) -- node[above left]{1 : 0..1} (o);
+  \draw[relacion] (i) -- node[right]{1 : 0..1} (c);
+\end{tikzpicture}
+\caption{Entidades centrales del registro y revisión de escritura}
+\label{fig:er}
+\end{figure}
+
+Cada intento puede carecer de análisis confirmado o tener uno de cada tipo. La restricción única sobre \texttt{id\_intento} en las tablas de análisis impide duplicar resultados del mismo tipo. La revisión posterior actualiza ese registro, mientras la sugerencia original permanece en el JSON del intento. Por tanto, no se modela una evaluación confirmada obligatoria en el momento de la entrega.
+
+\subsubsection{Diccionario de entidades}
+\begin{longtable}{p{3.4cm}p{11cm}}
+\caption{Entidades de usuarios y asignaciones}\label{tab:entidades_usuarios}\\
+\toprule Entidad & Función y atributos principales \\ \midrule
+\endfirsthead
+\toprule Entidad & Función y atributos principales \\ \midrule
+\endhead
+Estatus & Catálogo de estados: \texttt{id\_estatus} y \texttt{descripcion}. Permite desactivar registros sin borrar su historial. \\
+Usuario & Identidad de acceso: \texttt{id\_usuario}, nombre, apellido paterno, \texttt{username}, hash de contraseña, tipo de usuario, fecha de registro y estado. \\
+Tutor & Perfil asociado a un usuario mediante una llave única. Contiene \texttt{id\_tutor}, \texttt{id\_usuario} y correo. \\
+Alumno & Perfil del estudiante: \texttt{id\_alumno}, \texttt{id\_usuario}, \texttt{id\_tutor}, apellido materno, grado y grupo. \\
+Ejercicios & Catálogo con título, descripción, tipo, \texttt{contenido\_base}, imagen guía opcional, tutor creador opcional y estado. El JSON configura las respuestas aceptadas. \\
+Ejercicios\_Tutor & Asignación del catálogo a un tutor: identificadores de ejercicio y tutor, estado, \texttt{fecha\_asignacion} y \texttt{fecha\_desactivacion}. \\
+\bottomrule
+\end{longtable}
+
+\begin{longtable}{p{3.4cm}p{11cm}}
+\caption{Entidades del proceso de evaluación}\label{tab:entidades_evaluacion}\\
+\toprule Entidad & Función y atributos principales \\ \midrule
+\endfirsthead
+\toprule Entidad & Función y atributos principales \\ \midrule
+\endhead
+Intentos & Entrega con \texttt{id\_intento}, alumno, asignación, \texttt{imagen\_codificada}, \texttt{texto\_detectado\_ocr}, \texttt{resultado\_ocr\_json}, fecha, tiempo de respuesta opcional, puntuación y retroalimentación. \\
+Análisis ortográfico & Tabla \texttt{Analisis\_Ortografico}: identificador, intento único, \texttt{ortografia\_score}, \texttt{cantidad\_errores}, \texttt{sugerencias\_json} y campo opcional \texttt{errores\_detectados}. El flujo CLS guarda los conteos y la confirmación dentro del JSON. \\
+Análisis caligráfico & Tabla \texttt{Analisis\_Caligrafico}: identificador, intento único, \texttt{alineacion\_score}, \texttt{tamano\_letra\_score}, \texttt{espaciado\_score}, \texttt{inclinacion\_score} y \texttt{observaciones}. \\
+\bottomrule
+\end{longtable}
+
+\subsubsection{Esquema relacional de la evaluación}
+La Figura~\ref{fig:rel} detalla las claves y campos que conectan la entrega con los resultados. PK denota llave primaria, FK llave foránea y UQ una restricción de unicidad. La vista de progreso deriva sus datos de los análisis y no constituye una tabla adicional.
+
+\begin{figure}[H]
+\centering
+\begingroup
+\setstretch{1}
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  tabla/.style={draw, fill=gray!5, text width=7cm, align=left, inner sep=8pt, font=\small},
+  enlace/.style={-{Stealth},thick}]
+\node[tabla] (i) at (0,0) {\textbf{Intentos}\\
+PK id\_intento : INT\\FK id\_alumno : INT\\FK id\_ejercicio\_tutor : INT\\
+imagen\_codificada : VARCHAR(MAX)\\texto\_detectado\_ocr : NVARCHAR(MAX)\\
+resultado\_ocr\_json : NVARCHAR(MAX)\\fecha\_envio : DATETIME2\\
+puntuacion : INT\\retroalimentacion : VARCHAR(MAX)};
+\node[tabla] (o) at (-4.5,-7) {\textbf{Analisis\_Ortografico}\\
+PK id\_analisis\_ortografico : INT\\FK, UQ id\_intento : INT\\
+ortografia\_score : DECIMAL(5,2)\\cantidad\_errores : INT\\
+sugerencias\_json : NVARCHAR(MAX)\\errores\_detectados : VARCHAR(MAX)};
+\node[tabla] (c) at (4.5,-7) {\textbf{Analisis\_Caligrafico}\\
+PK id\_analisis\_caligrafico : INT\\FK, UQ id\_intento : INT\\
+alineacion\_score : DECIMAL(5,2)\\tamano\_letra\_score : DECIMAL(5,2)\\
+espaciado\_score : DECIMAL(5,2)\\inclinacion\_score : DECIMAL(5,2)\\
+observaciones : VARCHAR(MAX)};
+\node[tabla] (v) at (0,-11.5) {\textbf{vw\_Progreso\_Alumno (vista)}\\Promedios por alumno calculados al consultar.};
+\draw[enlace] (i) -- node[left]{1 : 0..1} (o);
+\draw[enlace] (i) -- node[right]{1 : 0..1} (c);
+\draw[enlace,dashed] (o) -- (v);
+\draw[enlace,dashed] (c) -- (v);
+\end{tikzpicture}}
+\endgroup
+\caption{Esquema relacional de intentos, análisis y progreso derivado}
+\label{fig:rel}
+\end{figure}
+
+\subsubsection{Persistencia, confirmación y trazabilidad}
+\texttt{texto\_detectado\_ocr} almacena la transcripción, mientras \texttt{resultado\_ocr\_json} conserva las anotaciones del proveedor y las sugerencias locales. Se distingue así la evidencia automática del resultado confirmado. La revisión guarda la puntuación y retroalimentación del intento y, cuando se proporcionan, los análisis de ortografía y legibilidad dentro de una misma transacción. Una excepción provoca la reversión de esos cambios.
+
+El historial se consulta directamente sobre \texttt{Intentos}, sus ejercicios y sus análisis. La migración \texttt{004\_progreso\_vista.sql} define \texttt{vw\_Progreso\_Alumno} y sustituye las tablas antiguas de promedios e instantáneas. El diseño vigente no utiliza disparadores para sincronizar el progreso ni una vista denominada \texttt{vw\_historial\_alumno}. Corregir un análisis cambia el promedio consultado; no se conserva una versión histórica de cada corrección del tutor.
+
+\subsubsection{Estructuras reservadas para recomendaciones}
+\begin{table}[H]
+\centering
+\caption{Estructuras de seguimiento y ampliación}\label{tab:entidades_SR}
+\begin{tabular}{p{3.8cm}p{10.4cm}}
+\toprule Estructura & Responsabilidad \\ \midrule
+Vista de progreso & \texttt{vw\_Progreso\_Alumno} obtiene los promedios derivados de los análisis por alumno. \\
+Actividad\_Sugerida & Catálogo previsto para actividades por tipo de error y ejercicio. \\
+Recomendacion & Relaciona \texttt{id\_intento} con \texttt{id\_actividad}; conserva fecha de generación, estado y prioridad. \\
+\bottomrule
+\end{tabular}
+\end{table}
+Las dos últimas tablas existen en el esquema, pero no hay un servicio que genere recomendaciones ni un flujo de consulta y resolución en los controladores revisados. La retroalimentación disponible es la registrada por el tutor. Su ampliación se distingue del seguimiento CLS ya implementado.

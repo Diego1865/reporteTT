@@ -1,614 +1,143 @@
-\subsection{Arquitectura del Sistema}
+\subsection{Arquitectura del sistema basada en MVC}
+\label{sec:arquitectura-mvc}
 
-La arquitectura implementada en el TT I se enfoca en establecer una base sólida y escalable para la aplicación web. Esta sección documenta el estado actual de la implementación, dejando clara la separación de responsabilidades entre módulos y la organización de rutas por tipo de usuario.
+La arquitectura de la plataforma se basa en el patrón Modelo--Vista--Controlador (MVC), que organiza el sistema según tres responsabilidades: representar los datos y las reglas de la aplicación, presentar la información al usuario y atender sus solicitudes. En este proyecto, la Vista se implementa con Next.js y componentes React; el Controlador, con las rutas y dependencias de FastAPI; y el Modelo, con los módulos de datos, acceso a persistencia y servicios de evaluación del Back-End. SQL Server proporciona el almacenamiento del Modelo.
 
-\subsubsection{Visión General de la Arquitectura}
+MVC se aplica en una organización web con el Front-End separado de la API. La Vista envía solicitudes HTTP al Controlador y actualiza sus componentes con las respuestas JSON. El Controlador valida la solicitud, verifica permisos y delega las operaciones al Modelo. El cambio de la evaluación ortográfica a CLS modifica las reglas de evaluación dentro del Modelo y los datos mostrados en la Vista, manteniendo esta organización MVC.
 
-La aplicación backend implementa una arquitectura en capas que separa claramente las responsabilidades de acceso a datos, lógica de negocio y gestión de rutas. El sistema está desarrollado con FastAPI como framework principal, proporcionando una base robusta para la gestión de solicitudes del Protocolo de Transferencia de Hipertexto (\textit{Hypertext Transfer Protocol}, HTTP por sus siglas en inglés) y la validación automática de datos.
-
-La arquitectura se organiza en los siguientes componentes principales:
-
+\subsubsection{Correspondencia de MVC con el proyecto}
 \begin{itemize}
-    \item \textbf{Capa de Acceso a Datos:} Encargada de todas las operaciones con la base de datos SQL Server
-    \item \textbf{Capa de Autenticación y Autorización:} Gestión de tokens JWT y control de acceso basado en roles
-    \item \textbf{Capa de Rutas (Routers):} Endpoints organizados por tipo de actor (Alumno, Tutor, Autenticación)
-    \item \textbf{Capa de Validación (Schemas):} Modelos Pydantic que aseguran la integridad de datos entrantes
+    \item \textbf{Modelo (M):} representa los datos y las operaciones sobre usuarios, ejercicios, intentos y evaluaciones. Los módulos \texttt{Modelo/dao\_auth.py}, \texttt{Modelo/dao\_alumno.py} y \texttt{Modelo/dao\_tutor.py} encapsulan el acceso a SQL Server y las transacciones. Los módulos de \texttt{Servicios} apoyan las operaciones del Modelo: \texttt{ocr.py} obtiene la transcripción; \texttt{evaluacion.py} selecciona la referencia; \texttt{cls.py} cuenta las secuencias; \texttt{legibilidad.py} propone medidas del trazo; y \texttt{progreso.py} resume los resultados. Los esquemas Pydantic de \texttt{Modelo} definen contratos de datos que el Controlador utiliza para validar las solicitudes.
+    \item \textbf{Vista (V):} corresponde a los componentes React del Front-End. \texttt{MainAlumno.jsx}, \texttt{LienzoDigital.jsx} y \texttt{CapturaEscritura.jsx} organizan la práctica y la captura; \texttt{MainTutor.jsx} y \texttt{EvaluacionPreliminar.jsx} presentan la revisión; y los componentes de progreso muestran los resultados confirmados. La Vista recoge acciones y presenta información, sin acceder directamente a SQL Server ni confirmar por sí misma un resultado CLS.
+    \item \textbf{Controlador (C):} corresponde a \texttt{Control/auth.py}, \texttt{Control/alumno.py} y \texttt{Control/tutor.py}. Sus rutas reciben las acciones de la Vista, utilizan los esquemas de validación, verifican autenticación y permisos mediante las dependencias de \texttt{Control/dependencies.py} y las comprobaciones de propiedad, llaman a las operaciones del Modelo y construyen las respuestas HTTP.
 \end{itemize}
 
-Esta separación en capas facilita el mantenimiento, las pruebas unitarias y futuras mejoras del sistema, especialmente la integración del OCR y de la evaluación ortográfica mediante CLS en TT II.
+El patrón de acceso a datos DAO es una decisión interna del Modelo dentro de MVC. En la implementación actual, el DAO del alumno coordina el reconocimiento, el cálculo preliminar y el registro del intento; el DAO del tutor coordina la persistencia de la confirmación. Por ello, el Modelo comprende tanto las operaciones de negocio como su persistencia, y no se limita a las tablas de la base de datos. Los servicios de cálculo son módulos del Back-End que apoyan esas operaciones.
 
-\subsubsection{Patrón de Diseño DAO}
-
-El patrón Objeto de Acceso a Datos (\textit{Data Access Object}, DAO por sus siglas en inglés) implementado en este proyecto abstrae completamente la lógica de acceso a datos, permitiendo una separación clara entre la lógica de negocio y la persistencia de datos en SQL Server. Esta arquitectura facilita el mantenimiento, las pruebas y futuras migraciones de bases de datos.
-
-\subsubsection{Estructura del DAO}
-
-El proyecto organiza las funciones DAO en módulos específicos para cada dominio del sistema:
-
-\begin{itemize}
-    \item \texttt{dao\_alumno.py}: Operaciones relacionadas con perfiles y datos de alumnos
-    \item \texttt{dao\_tutor.py}: Operaciones de gestión de alumnos y reportes de tutores
-    \item \texttt{dao\_auth.py}: Operaciones de autenticación y contraseñas
-\end{itemize}
-
-Cada módulo DAO encapsula las consultas SQL y la conexión a la base de datos, exponiendo funciones con nombres descriptivos que reflejan la operación que realizan.
-
-En el Código~\ref{lst:dao_estructura} se muestran las funciones de acceso a datos organizadas por módulo.
-
-\begin{lstlisting}[language=Python, label=lst:dao_estructura, caption={Estructura de funciones DAO por módulo}]
-# dao_alumno.py
-def actualizar_info_alumno_dao(nombre, apellido_paterno, 
-                                apellido_materno, grupo, id_usuario)
-def actualizar_password_alumno_dao(nueva_contrasena, id_usuario)
-def verificar_estado_tutor_dao(id_usuario)
-def registrar_intento_dao(ejercicio_tutor_id, imagen_codificada, 
-                          id_usuario)
-def obtener_ejercicios_proximos_dao(id_usuario)
-def obtener_ejercicios_completados_dao(id_usuario)
-def obtener_ejercicios_vencidos_dao(id_usuario)
-
-# dao_tutor.py
-def registrar_alumno_dao(alumno_data, hashed_password)
-def obtener_alumnos_por_tutor_dao(id_tutor)
-def obtener_alumnos_en_riesgo_dao(id_tutor)
-def calificar_intento_dao(id_intento, calificacion, 
-                          retroalimentacion)
-def activar_ejercicio_tutor_dao(id_ejercicio, id_usuario, fecha_fin)
-def get_ejercicios_dao()
-
-# dao_auth.py
-def login_dao(username)
-def register_dao(username, email, hashed_password, nombre, apellido)
-def obtener_hash_contrasena_dao(id_usuario)
-\end{lstlisting}
-
-\textbf{Ventajas de esta aproximación:}
-
-\begin{itemize}
-    \item Centraliza todas las operaciones de base de datos en un único lugar
-    \item Facilita cambios en la implementación de consultas SQL sin afectar las rutas
-    \item Permite reutilizar código de acceso a datos en múltiples endpoints
-    \item Mejora significativamente la testabilidad del código
-    \item Reduce el riesgo de inyección SQL mediante el uso consistente de parámetros preparados
-\end{itemize}
-
-\subsubsection{Ejemplo de Implementación DAO}
-
-En el Código~\ref{lst:dao_ejemplo} se muestra una función DAO para consultar ejercicios próximos, que ilustra la abstracción de la lógica de acceso a la base de datos:
-
-\begin{lstlisting}[language=Python, label=lst:dao_ejemplo, caption={Ejemplo de función DAO para obtener ejercicios próximos}]
-def obtener_ejercicios_proximos_dao(id_usuario):
-    conn = connect_to_database()
-    if not conn:
-        raise ConnectionError("Error de conexion a la BD")
-    cursor = conn.cursor()
-    try:
-        query = """
-            -- Consulta SQL para obtener ejercicios proximos asignados a un alumno
-        """
-        # Resto de la implementacion con manejo de errores y retorno de resultados
-    finally:
-        cursor.close()
-        conn.close()
-\end{lstlisting}
-
-\subsubsection{Organización de Rutas por Actor}
-
-El backend organiza los endpoints en tres grupos principales basados en el tipo de usuario y el nivel de autorización requerido. La estructura base de rutas es \texttt{/api/\{actor\}/\{endpoint\}}, donde \textit{actor} puede ser \texttt{alumno}, \texttt{tutor} o \texttt{auth}.
-
-\subsubsection{Rutas de Autenticación (Prefix: /api/auth)}
-
-El módulo de autenticación (implementado en \texttt{Control/auth.py}) gestiona la creación de sesiones, login y validación de credenciales. Los endpoints en esta sección no requieren autenticación previa.
-
-En la Tabla~\ref{tab:arquitectura_auth} se describen los endpoints de autenticación, sus métodos HTTP y su propósito.
-
-\begin{table}[H]
-\centering
-\caption{Endpoints de Autenticación}
-\label{tab:arquitectura_auth}
-\begin{tabular}{|l|c|p{8cm}|} % Se modificó la última columna a p{8cm}
-\hline
-\textbf{Método} & \textbf{Endpoint} & \textbf{Descripción} \\
-\hline
-POST & \texttt{/api/auth/login} & Autenticar usuario y obtener token JWT \\
-\hline
-POST & \texttt{/api/auth/register} & Registrar nueva cuenta de tutor \\
-\hline
-POST & \texttt{/api/auth/refresh} & Renovar token JWT expirado \\
-\hline
-\end{tabular}
-\end{table}
-
-El login verifica las credenciales contra la tabla \texttt{Usuario} y retorna un token JWT que incluye el \texttt{id\_usuario}, \texttt{tipo\_usuario}, \texttt{id\_estatus} e identificadores específicos del rol (\texttt{id\_tutor} o \texttt{id\_alumno}).
-
-\subsubsection{Rutas para Alumnos (Prefix: /api/alumno)}
-
-Estos endpoints (implementados en \texttt{Control/alumno.py}) permiten a los alumnos interactuar con la plataforma de práctica. Todos requieren autenticación y verifican que el usuario sea de tipo \texttt{alumno} mediante el decorador \texttt{@require\_alumno}.
-
-En la Tabla~\ref{tab:arquitectura_alumnos} se describen los endpoints disponibles para los alumnos y las operaciones que permiten realizar.
-
-\begin{table}[H]
-\centering
-\caption{Endpoints para Alumnos}
-\label{tab:arquitectura_alumnos}
-\begin{tabular}{|l|c|l|}
-\hline
-\textbf{Método} & \textbf{Endpoint} & \textbf{Descripción} \\
-\hline
-PUT & \texttt{/api/alumno/info} & Actualizar información del perfil \\
-\hline
-PUT & \texttt{/api/alumno/act/password} & Cambiar contraseña \\
-\hline
-GET & \texttt{/api/alumno/estado-tutor} & Verificar si tutor está activo \\
-\hline
-POST & \texttt{/api/alumno/intento} & Registrar nuevo intento de práctica \\
-\hline
-GET & \texttt{/api/alumno/ejercicios/proximos} & Listar ejercicios pendientes \\
-\hline
-GET & \texttt{/api/alumno/ejercicios/completados} & Obtener historial de intentos \\
-\hline
-GET & \texttt{/api/alumno/ejercicios/vencidos} & Listar ejercicios vencidos \\
-\hline
-\end{tabular}
-\end{table}
-
-\subsubsection{Rutas para Tutores (Prefix: /api/tutor)}
-
-Estos endpoints (implementados en \texttt{Control/tutor.py}) permiten a los tutores gestionar sus grupos de alumnos, revisar su progreso y activar ejercicios. Todos requieren autenticación y verifican que el usuario sea de tipo \texttt{tutor} mediante el decorador \texttt{@require\_tutor}.
-
-En la Tabla~\ref{tab:arquitectura_tutor_alumnos} se describen los endpoints del tutor para registrar alumnos, consultar su desempeño y gestionar su estado.
-
-\begin{table}[H]
-\centering
-\small
-\caption{Endpoints para Tutores - Gestión de Alumnos}
-\label{tab:arquitectura_tutor_alumnos}
-\begin{tabular}{|l|c|l|}
-\hline
-\textbf{Método} & \textbf{Endpoint} & \textbf{Descripción} \\
-\hline
-POST & \texttt{/api/tutor/registrar} & Crear nuevo alumno \\
-\hline
-GET & \texttt{/api/tutor/alumnos/\{id\_tutor\}} & Listar alumnos asignados \\
-\hline
-PUT & \texttt{/api/tutor/baja/\{id\_alumno\}} & Dar de baja a alumno \\
-\hline
-GET & \texttt{/api/tutor/riesgo/\{id\_tutor\}} & Alumnos con bajo desempeño \\
-\hline
-GET & \texttt{/api/tutor/regular/\{id\_tutor\}} & Alumnos con desempeño regular \\
-\hline
-GET & \texttt{/api/tutor/excelencia/\{id\_tutor\}} & Alumnos con desempeño alto \\
-\hline
-GET & \texttt{/api/tutor/progreso/\{id\_tutor\}} & Gráfico de progreso general \\
-\hline
-\end{tabular}
-\end{table}
-
-En la Tabla~\ref{tab:arquitectura_tutor_perfil} se describen los endpoints para actualizar los datos del tutor y desactivar su cuenta.
-
-\begin{table}[H]
-\centering
-\caption{Endpoints para Tutores - Gestión de Perfil}
-\label{tab:arquitectura_tutor_perfil}
-\begin{tabular}{|l|c|l|}
-\hline
-\textbf{Método} & \textbf{Endpoint} & \textbf{Descripción} \\
-\hline
-PUT & \texttt{/api/tutor/act/nombre} & Actualizar nombre \\
-\hline
-PUT & \texttt{/api/tutor/act/correo} & Cambiar correo electrónico \\
-\hline
-PUT & \texttt{/api/tutor/act/password} & Cambiar contraseña \\
-\hline
-DELETE & \texttt{/api/tutor/eliminar} & Desactivar cuenta \\
-\hline
-\end{tabular}
-\end{table}
-
-En la Tabla~\ref{tab:arquitectura_tutor_ejercicios} se describen los endpoints del tutor para consultar intentos, asignar calificaciones y gestionar ejercicios.
-
-\begin{table}[H]
-\centering
-\caption{Endpoints para Tutores - Gestión de Intentos y Ejercicios}
-\label{tab:arquitectura_tutor_ejercicios}
-\begin{tabular}{|l|c|l|}
-\hline
-\textbf{Método} & \textbf{Endpoint} & \textbf{Descripción} \\
-\hline
-GET & \texttt{/api/tutor/intentos/\{id\_tutor\}} & Obtener intentos de todos sus alumnos \\
-\hline
-PUT & \texttt{/api/tutor/calificar/\{id\_intento\}} & Asignar calificación y retroalimentación \\
-\hline
-GET & \texttt{/api/tutor/ejercicios} & Listar todos los ejercicios disponibles \\
-\hline
-GET & \texttt{/api/tutor/ejercicios/\{id\_usuario\}} & Ejercicios activados por el tutor \\
-\hline
-POST & \texttt{/api/tutor/ejercicio/activar} & Activar ejercicio para sus alumnos \\
-\hline
-DELETE & \texttt{/api/tutor/ejercicio/desactivar/\{id\}/\{id\_ej\}} & Desactivar ejercicio \\
-\hline
-\end{tabular}
-\end{table}
-
-\subsection{Diseño de Tokens JWT y Control de Acceso}
-
-Los tokens JWT se utilizan para autenticar y autorizar las solicitudes posteriores al login. Cada token contiene información sobre el usuario y su rol, permitiendo al servidor validar permisos sin consultar la base de datos en cada solicitud.
-
-\subsubsection{Estructura del Token JWT}
-
-En el Código~\ref{lst:jwt_payload} se muestra la estructura del payload de un token JWT con los campos que identifican al usuario.
-
-\begin{lstlisting}[language=JSON, label=lst:jwt_payload, caption={Estructura del payload de un token JWT generado por el sistema}]
-{
-  "sub": "id_usuario",
-  "username": "usuario_tutor",
-  "tipo_usuario": "tutor",
-  "id_estatus": 1,
-  "id_tutor": 5,
-  "id_alumno": null,
-  "iat": 1705267200,
-  "exp": 1705270800
-}
-\end{lstlisting}
-
-El campo \texttt{sub} (subject) contiene el \texttt{id\_usuario}, que es el identificador único en el sistema. Los campos \texttt{id\_tutor} e \texttt{id\_alumno} se incluyen solo si aplican al tipo de usuario, facilitando las validaciones posteriores.
-
-\subsubsection{Control de Acceso Basado en Roles (RBAC)}
-
-El sistema implementa un control de acceso basado en roles que asegura que cada usuario solo pueda acceder a los endpoints correspondientes a su rol. Las validaciones se realizan mediante decoradores llamados en cada endpoint.
-
-\begin{itemize}
-    \item \textbf{Rol Alumno (\texttt{tipo\_usuario='alumno'}):} 
-    \begin{itemize}
-        \item Acceso solo a \texttt{/api/alumno/\{endpoint\}}
-        \item Puede ver y registrar intentos de ejercicios asignados
-        \item Puede actualizar su perfil
-    \end{itemize}
-    \item \textbf{Rol Tutor (\texttt{tipo\_usuario='tutor'}):} 
-    \begin{itemize}
-        \item Acceso a \texttt{/api/tutor/\{endpoint\}}
-        \item Puede registrar, ver y gestionar sus alumnos
-        \item Puede calificar intentos de sus alumnos
-        \item Puede activar y desactivar ejercicios
-    \end{itemize}
-\end{itemize}
-
-En el Código~\ref{lst:rbac_decorator} se muestra la validación del rol de alumno mediante una dependencia de FastAPI que verifica el token JWT:
-
-\begin{lstlisting}[language=Python, label=lst:rbac_decorator, caption={Validación de rol mediante decoradores - Alumno}]
-from fastapi import Depends
-from Control.dependencies import require_alumno
-
-@router.put("/info")
-def actualizar_info_alumno(
-    data: AlumnoUpdate, 
-    current_user: dict = Depends(require_alumno)
-):
-    # current_user contiene la informacion decodificada del JWT
-    id_usuario = current_user["id_usuario"]
-    # Logica del endpoint usando el DAO
-    actualizar_info_alumno_dao(data.nombre, data.apellido_paterno,
-                               data.apellido_materno, data.grupo, 
-                               id_usuario)
-    return {"message": "Informacion actualizada correctamente"}
-\end{lstlisting}
-
-En el Código~\ref{lst:rbac_decorator_tutor} se muestran la validación del rol de tutor y la comprobación de acceso a los alumnos que le corresponden.
-
-\begin{lstlisting}[language=Python, label=lst:rbac_decorator_tutor, caption={Validación de rol mediante decoradores - Tutor}]
-from fastapi import Depends
-from Control.dependencies import require_tutor
-
-@router.get("/alumnos/{id_tutor}")
-def obtener_alumnos_por_tutor(
-    id_tutor: int, 
-    current_user: dict = Depends(require_tutor)
-):
-    # Validacion adicional: verificar que el tutor solo vea sus propios alumnos
-    if current_user["id_usuario"] != id_tutor:
-        raise HTTPException(status_code=403, 
-                          detail="No tiene permiso para ver alumnos de otro tutor")
-    
-    return obtener_alumnos_por_tutor_dao(id_tutor)
-\end{lstlisting}
-
-La función \texttt{require\_alumno} y \texttt{require\_tutor} en el módulo \texttt{Control/dependencies.py} decodifica el token JWT y verifica que sea válido y del tipo correcto.
-
-\subsubsection{Flujo Completo de Autenticación}
-
-El flujo de autenticación y autorización sigue estos pasos:
-
+\subsubsection{Interacción MVC durante la evaluación CLS}
 \begin{enumerate}
-    \item El usuario proporciona credenciales (\texttt{username} y \texttt{password}) al endpoint \texttt{POST /api/auth/login}
-    \item El servidor:
-    \begin{enumerate}
-        \item Valida que el usuario existe usando \texttt{login\_dao(username)}
-        \item Verifica que la contraseña es correcta comparándola contra el hash almacenado
-        \item Obtiene el \texttt{tipo\_usuario} (\texttt{alumno} o \texttt{tutor})
-        \item Genera un token JWT que incluye \texttt{id\_usuario}, \texttt{tipo\_usuario}, \texttt{id\_estatus}, e identificadores adicionales
-        \item Retorna el token en una respuesta \texttt{LoginResponse}
-    \end{enumerate}
-    \item El cliente almacena el token en su almacenamiento local
-    \item En posteriores solicitudes, el cliente envía el token en el header: \texttt{Authorization: Bearer <token>}
-    \item El servidor valida el token usando el decorador \texttt{Depends(require\_alumno)} o \texttt{Depends(require\_tutor)}
-    \item Si el token es válido y el usuario tiene permiso, la solicitud se procesa
-    \item Si hay un error de autenticación o autorización, se retorna un \texttt{HTTPException} con código 401 o 403
+    \item La Vista del alumno obtiene la imagen y envía la entrega mediante \texttt{POST /api/alumno/intento}.
+    \item El Controlador del alumno valida la solicitud y el rol autenticado, y llama a \texttt{registrar\_intento\_dao}.
+    \item El Modelo comprueba la asignación, solicita el OCR, calcula el CLS sugerido y la legibilidad y guarda el intento con su evidencia. El Controlador devuelve la respuesta JSON y la Vista muestra el registro de la entrega.
+    \item La Vista del tutor consulta el intento y permite contrastar las sugerencias con la imagen. Al guardar la revisión, envía el conteo confirmado al Controlador del tutor.
+    \item El Controlador verifica el acceso al intento y delega al Modelo la validación del conteo y la persistencia. Las consultas posteriores recuperan los promedios actualizados y la Vista los presenta al usuario.
 \end{enumerate}
 
-\subsection{Contratos de Datos (Schemas Pydantic)}
+\subsubsection{Diagrama de arquitectura MVC}
+La Figura~\ref{fig:arquitectura_completa} identifica explícitamente la Vista, el Controlador y el Modelo, así como las dependencias de este último. Los bloques DAO y Servicios forman parte de las responsabilidades del Modelo. SQL Server y Google Cloud Vision se muestran como infraestructura y servicio externo, respectivamente. Solo el servidor se autentica ante Google.
 
-Los contratos de datos definen la estructura de los objetos que se intercambian entre el cliente y el servidor, así como entre diferentes módulos del sistema. Esto asegura que todos los componentes trabajen con la misma representación de datos y permite la validación automática.
-
-\subsubsection{Esquemas de Autenticación}
-
-En el Código~\ref{lst:schemas_auth} se muestran los esquemas de datos utilizados en las operaciones de autenticación y administración de la cuenta.
-
-\begin{lstlisting}[language=Python, label=lst:schemas_auth, caption={Schemas de autenticación}]
-class LoginRequest(BaseModel):
-    username: str
-    password: str
-
-class LoginResponse(BaseModel):
-    message: str
-    token: str
-
-class RegisterRequest(BaseModel):
-    nombre: str
-    apellido: str
-    username: str  # Validacion: min 6 caracteres, alfanumericos
-    email: str
-    password: str  # Validacion: min 8 caracteres, complejidad
-
-class PasswordUpdate(BaseModel):
-    contrasena_actual: str
-    nueva_contrasena: str
-
-class DeleteAccount(BaseModel):
-    contrasena_actual: str
-\end{lstlisting}
-
-\subsubsection{Esquemas de Alumno}
-
-En el Código~\ref{lst:schemas_alumno} se muestran los esquemas de datos para el registro, la consulta del progreso y el envío de intentos del alumno.
-
-\begin{lstlisting}[language=Python, label=lst:schemas_alumno, caption={Schemas de datos de Alumno}]
-class AlumnoCreate(BaseModel):
-    nombre: str
-    apellido_paterno: str
-    apellido_materno: Optional[str] = None
-    usuario: str
-    contrasena: str
-    grado: str
-    grupo: Optional[str] = None
-    id_tutor: int
-
-class AlumnoUpdate(BaseModel):
-    nombre: str
-    apellido_paterno: str
-    apellido_materno: Optional[str]
-    grupo: Optional[str]
-
-class AlumnoResponse(BaseModel):
-    id_alumno: int
-    nombre: str
-    apellido_paterno: str
-    apellido_materno: Optional[str]
-    usuario: str
-    grado: str
-    grupo: Optional[str]
-
-class AlumnoProgresoResponse(BaseModel):
-    id_alumno: int
-    nombre: str
-    apellido_paterno: str
-    apellido_materno: str
-    promedio_ortografia: Decimal
-    promedio_legibilidad: Decimal
-
-class IntentoCreate(BaseModel):
-    id_ejercicio_tutor: int
-    imagen_codificada: str
-\end{lstlisting}
-
-\subsubsection{Esquemas de Tutor}
-
-En el Código~\ref{lst:schemas_tutor} se muestran los esquemas de datos para actualizar la información del tutor.
-
-\begin{lstlisting}[language=Python, label=lst:schemas_tutor, caption={Schemas de datos de Tutor}]
-class TutorUpdate(BaseModel):
-    nombre: str
-
-class EmailUpdate(BaseModel):
-    correo: str
-    contrasena_actual: str
-
-class CalificarIntentoRequest(BaseModel):
-    calificacion: int
-    retroalimentacion: Optional[str] = None
-
-class IntentoTutorResponse(BaseModel):
-    id_intento: int
-    id_alumno: int
-    nombre_completo: str
-    id_ejercicio_tutor: int
-    titulo_ejercicio: str
-    fecha_envio: datetime
-    imagen_codificada: str
-    texto_detectado_ocr: Optional[str] = None
-    puntuacion: Optional[int] = None
-    retroalimentacion: Optional[str] = None
-
-class EjercicioTutorCreate(BaseModel):
-    id_ejercicio: int
-    id_usuario: int
-    fecha_fin: Optional[datetime] = None
-\end{lstlisting}
-
-\subsection{Arquitectura de Componentes del Front-End}
- 
-El Front-End de la aplicación está desarrollado con Next.js y sigue una arquitectura basada en componentes React, organizados jerárquicamente según el rol del usuario y la funcionalidad que ofrecen. La comunicación con el Back-End se realiza exclusivamente a través de la API REST, utilizando el token JWT almacenado en \texttt{localStorage} como mecanismo de autenticación.
- 
-\subsubsection{Estructura General de Componentes}
- 
-La aplicación se organiza en dos grandes árboles de componentes según el tipo de usuario autenticado:
- 
-\begin{itemize}
-    \item \textbf{Flujo de Autenticación:} Componentes compartidos entre ambos roles, accesibles sin token.
-    \item \textbf{Flujo del Alumno:} Árbol de componentes cargado cuando \texttt{tipo\_usuario = 'alumno'}.
-    \item \textbf{Flujo del Tutor:} Árbol de componentes cargado cuando \texttt{tipo\_usuario = 'tutor'}.
-\end{itemize}
- 
-El token JWT se decodifica en el cliente mediante una función local (\texttt{decodificarJwt}) para extraer el \texttt{tipo\_usuario}, \texttt{id\_usuario} y \texttt{nombre} sin necesidad de una petición adicional al servidor.
- 
-\subsubsection{Componentes de Autenticación}
- 
-Estos componentes son el punto de entrada a la aplicación y no requieren token JWT.
- 
-En la Tabla~\ref{tab:componentes_auth} se describen los componentes que intervienen en el flujo de autenticación de la interfaz.
-
-\begin{table}[H]
+\begin{figure}[H]
 \centering
-\caption{Componentes del flujo de autenticación}
-\label{tab:componentes_auth}
-\begin{tabular}{|l|p{10cm}|} % Se modificó la última columna a p{10cm}
-\hline
-\textbf{Componente} & \textbf{Responsabilidad} \\
-\hline
-\texttt{Login.jsx} & Formulario de inicio de sesión. Envía \texttt{POST /api/auth/login}, almacena el token y redirige según el rol del usuario \\
-\hline
-\texttt{Registro.jsx} & Formulario de alta de tutor. Valida formato de username (mín. 6 caracteres, alfanumérico) y contraseña (mín. 8 caracteres, mayúscula, minúscula, número y carácter especial) antes de enviar \texttt{POST /api/auth/register} \\
-\hline
-\end{tabular}
-\end{table}
- 
-\subsubsection{Componentes del Alumno}
- 
-El componente raíz \texttt{MainAlumno.jsx} actúa como controlador del flujo del alumno. Al montarse, decodifica el JWT para verificar que el usuario sea de tipo \texttt{alumno} (cierra sesión si no) y consulta \texttt{GET /api/alumno/estado-tutor} para determinar si el tutor asignado está activo. Si el tutor está inactivo, muestra un mensaje de aviso en lugar del contenido.
- 
-El componente organiza la interfaz en cuatro pestañas y gestiona además la vista de resolución de ejercicios:
- 
-En la Tabla~\ref{tab:componentes_alumno} se describen los componentes hijos de \texttt{MainAlumno} y sus responsabilidades dentro de la interfaz.
+\begin{tikzpicture}[
+  bloque/.style={draw, rounded corners, fill=gray!8, text width=5.2cm, minimum height=1cm, align=center, font=\small},
+  enlace/.style={-{Stealth},thick}, font=\small]
+\node[bloque] (fe) at (0,0) {\textbf{Vista (V)}\\Next.js / React\\Interfaz de alumno y tutor};
+\node[bloque] (api) at (0,-2.8) {\textbf{Controlador (C)}\\FastAPI: rutas de \texttt{Control}\\Validación, permisos y respuestas};
+\node[bloque] (dao) at (0,-5.8) {Datos y operaciones DAO\\Contratos, consultas y transacciones};
+\node[bloque] (db) at (7,-5.8) {SQL Server\\Persistencia del Modelo};
+\node[bloque] (serv) at (0,-8) {Servicios del Modelo\\OCR, CLS, legibilidad y progreso};
+\node[bloque] (google) at (7,-8) {Google Cloud Vision\\Reconocimiento externo};
+\begin{scope}[on background layer]
+\node[draw, thick, rounded corners, fit=(dao)(serv), inner sep=10pt,
+      label={[font=\small\bfseries]above:Modelo (M): datos y reglas de evaluación}] {};
+\end{scope}
+\draw[enlace,<->] (fe) -- node[right]{HTTP / JSON + JWT} (api);
+\draw[enlace,<->] (api) -- node[right]{Operaciones y resultados} (dao);
+\draw[enlace,<->] (dao) -- node[above]{SQL} (db);
+\draw[enlace,<->] (dao) -- (serv);
+\draw[enlace,<->] (serv) -- node[above]{OCR} (google);
+\end{tikzpicture}
+\caption{Arquitectura MVC de la plataforma con evaluación mediante CLS}
+\label{fig:arquitectura_completa}
+\end{figure}
 
-\begin{table}[H]
-\centering
-\caption{Componentes hijos de \texttt{MainAlumno}}
-\label{tab:componentes_alumno}
-\small
-\begin{tabular}{|l|l|p{8cm}|}
-\hline
-\textbf{Componente} & \textbf{Pestaña / Vista} & \textbf{Responsabilidad} \\
-\hline
-\texttt{TabProximos} & Próximos & Lista ejercicios activos sin intento. Llama a \texttt{GET /api/alumno/ejercicios/proximos} \\
-\hline
-\texttt{TabCompletados} & Completados & Lista el último intento por ejercicio. Llama a \texttt{GET /api/alumno/ejercicios/completados} \\
-\hline
-\texttt{TabVencidos} & Vencidos & Lista ejercicios cerrados sin intento. Llama a \texttt{GET /api/alumno/ejercicios/vencidos} \\
-\hline
-\texttt{PerfilAlumno} & Perfil & Permite actualizar datos personales. Llama a \texttt{PUT /api/alumno/info} y \texttt{PUT /api/alumno/act/password} \\
-\hline
-\texttt{LienzoDigital} & Vista ejercicio & Lienzo de trazado digital (canvas HTML5). Envía a \texttt{POST /api/alumno/intento} \\
-\hline
-\texttt{CapturaEscritura} & Vista ejercicio & Captura mediante cámara o archivo. Envía a \texttt{POST /api/alumno/intento} \\
-\hline
-\end{tabular}
-\end{table}
- 
-La transición entre la vista de pestañas y la vista de resolución de ejercicio es gestionada internamente por \texttt{MainAlumno} mediante el estado \texttt{modoVista}, que puede tomar los valores \texttt{'tabs'}, \texttt{'lienzo'} o \texttt{'camara'}. Al seleccionar un ejercicio en \texttt{TabProximos}, el alumno puede elegir entre ambos modos de captura.
- 
-\subsubsection{Componentes de Captura de Escritura}
- 
-Estos dos componentes comparten la misma responsabilidad final —enviar la imagen codificada al Back-End— pero difieren en el método de obtención de la imagen.
- 
-\textbf{LienzoDigital:}
- 
-Implementa un lienzo de escritura manual utilizando la API Canvas de HTML5. Sus funcionalidades principales son:
- 
-\begin{itemize}
-    \item Trazado libre con lápiz (tamaño ajustable) y goma de borrar
-    \item Historial de trazos para deshacer acciones
-    \item Modo pantalla completa para mayor área de escritura
-    \item Exportación del canvas como imagen PNG en Base64 al finalizar
-\end{itemize}
- 
-\textbf{CapturaEscritura:}
- 
-Implementa la captura de imágenes del trabajo manuscrito en papel. Sus funcionalidades son:
- 
-\begin{itemize}
-    \item Captura mediante la cámara del dispositivo (modo nativo en móvil o cámara web en escritorio)
-    \item Carga de archivo con validación de tipo de Extensiones Multipropósito de Correo de Internet (\textit{Multipurpose Internet Mail Extensions}, MIME por sus siglas en inglés) (\texttt{image/*}) y tamaño máximo de 10\,MB
-    \item Redimensionado automático a un máximo de 1\,200\,px para optimizar el payload
-    \item Herramientas de edición: rotación en 90° y recorte interactivo con control por arrastre
-    \item Conversión final a Base64 en formato del Grupo Conjunto de Expertos en Fotografía (\textit{Joint Photographic Experts Group}, JPEG por sus siglas en inglés) con calidad del 80\%
-\end{itemize}
- 
-En el Código~\ref{lst:fetch-intento} se muestra cómo ambos componentes construyen y envían el mismo payload al endpoint de registro de intentos:
- 
-\begin{lstlisting}[language=JSX, caption={Envío de intento desde el Front-End}, label={lst:fetch-intento}]
-const response = await fetch(
-  `${process.env.NEXT_PUBLIC_API_URL}/api/alumno/intento`,
-  {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify({
-      id_ejercicio_tutor: idEjercicioTutor,
-      imagen_codificada: imagenBase64
-    })
+\subsubsection{Autenticación y control de acceso}
+El inicio de sesión valida las credenciales y el estado activo del usuario. El token se firma con HS256 y contiene \texttt{id\_usuario}, \texttt{nombre}, \texttt{tipo\_usuario}, \texttt{id\_tutor}, \texttt{id\_alumno} y \texttt{exp}. La vigencia configurada es de 1440 minutos. La implementación no ofrece un endpoint de renovación de token.
+
+Las dependencias \texttt{require\_alumno} y \texttt{require\_tutor} validan el JWT y el rol mediante \texttt{Depends}; los controladores y DAO verifican además la propiedad de los recursos. Por ejemplo, calificar un intento requiere comprobar que el alumno pertenece al tutor autenticado. Las rutas heredadas que nombran un parámetro \texttt{id\_tutor} lo comparan con \texttt{id\_usuario} del token y resuelven después la clave del perfil de tutor en la base de datos. Ambos identificadores no deben tratarse como intercambiables en el modelo relacional.
+
+El cliente conserva el token en \texttt{localStorage} y lo envía como \texttt{Authorization: Bearer}. La decodificación del rol en el navegador organiza las vistas; la autorización efectiva se ejecuta en el servidor. Los códigos de correo participan en el registro, la recuperación de contraseña y el cambio de correo del tutor.
+
+\subsubsection{Organización de la API}
+\texttt{main.py} registra los prefijos \texttt{/api/auth}, \texttt{/api/alumno} y \texttt{/api/tutor}. Las Tablas~\ref{tab:arquitectura_auth}, \ref{tab:arquitectura_alumnos} y \ref{tab:arquitectura_tutor_ejercicios} reúnen las rutas principales para acceso, evaluación y seguimiento. Las rutas del alumno y tutor requieren el rol correspondiente.
+
+\begin{longtable}{p{1.7cm}p{7.1cm}p{5.4cm}}
+\caption{Rutas de autenticación, relativas a /api/auth}\label{tab:arquitectura_auth}\\
+\toprule Método & Ruta & Propósito \\ \midrule
+POST & \texttt{/login} & Iniciar sesión. \\
+POST & \texttt{/registro/codigo} & Solicitar código de registro. \\
+POST & \texttt{/register} & Registrar tutor con verificación. \\
+POST & \texttt{/recuperar/codigo} & Solicitar código de recuperación. \\
+POST & \texttt{/recuperar/cambiar} & Restablecer contraseña. \\
+\bottomrule
+\end{longtable}
+
+\begin{longtable}{p{1.7cm}p{7.1cm}p{5.4cm}}
+\caption{Rutas del alumno, relativas a /api/alumno}\label{tab:arquitectura_alumnos}\\
+\toprule Método & Ruta & Propósito \\ \midrule
+GET & \texttt{/perfil} & Consultar datos personales. \\
+PUT & \texttt{/info} & Actualizar perfil. \\
+PUT & \texttt{/act/password} & Cambiar contraseña. \\
+GET & \texttt{/estado-tutor} & Consultar disponibilidad del tutor. \\
+POST & \texttt{/intento} & Registrar imagen y sugerencias. \\
+GET & \texttt{/progreso} & Resumir CLS confirmado. \\
+GET & \texttt{/ejercicios/proximos} & Consultar pendientes. \\
+GET & \texttt{/ejercicios/completados} & Consultar entregas y resultados. \\
+GET & \texttt{/ejercicios/vencidos} & Consultar ejercicios vencidos. \\
+\bottomrule
+\end{longtable}
+
+\begin{longtable}{p{1.7cm}p{7.1cm}p{5.4cm}}
+\caption{Rutas de revisión del tutor, relativas a /api/tutor}\label{tab:arquitectura_tutor_ejercicios}\\
+\toprule Método & Ruta & Propósito \\ \midrule
+\endfirsthead
+\toprule Método & Ruta & Propósito \\ \midrule
+\endhead
+GET & \texttt{/intentos/\{id\_tutor\}} & Intentos del grupo. \\
+GET & \texttt{/alumnos/\{id\_alumno\}/intentos} & Intentos de un alumno. \\
+GET & \texttt{/intentos/\{id\_intento\}/imagen} & Imagen para la revisión. \\
+PUT & \texttt{/calificar/\{id\_intento\}} & Guardar nota, comentarios y confirmaciones. \\
+GET & \texttt{/resumen-progreso} & Promedios de alumnos activos. \\
+GET & \texttt{/progreso/\{id\_tutor\}} & Conteos por categoría. \\
+GET & \texttt{/riesgo/\{id\_tutor\}} & Promedio general menor que 6. \\
+GET & \texttt{/regular/\{id\_tutor\}} & Promedio general de 6 a 8. \\
+GET & \texttt{/excelencia/\{id\_tutor\}} & Promedio general mayor que 8. \\
+GET & \texttt{/ejercicios} & Catálogo disponible. \\
+GET & \texttt{/ejercicios/\{id\_usuario\}} & Asignaciones del tutor. \\
+POST & \texttt{/ejercicio/activar} & Habilitar ejercicio. \\
+DELETE & \texttt{/ejercicio/desactivar/}\newline\texttt{\{id\_usuario\}/\{id\_ejercicio\}} & Desactivar asignación. \\
+GET & \texttt{/dictados/pools} & Consultar conjuntos de palabras. \\
+POST & \texttt{/dictados} & Crear dictado. \\
+\bottomrule
+\end{longtable}
+
+La gestión del tutor incluye también el registro y baja de alumnos, la consulta y edición del perfil y el restablecimiento de contraseñas de sus alumnos. Estas operaciones permanecen dentro de \texttt{/api/tutor}; no existen prefijos independientes \texttt{/api/perfil} ni \texttt{/api/alumnos}.
+
+\subsubsection{Contrato de confirmación}
+El esquema \texttt{CalificarIntentoRequest} requiere una calificación entera y acepta retroalimentación, \texttt{cls\_correctas} y \texttt{legibilidad} como campos opcionales. Si se envía legibilidad, sus cuatro medidas son obligatorias y deben estar entre 0 y 10. La confirmación de CLS exige un entero no negativo y el DAO comprueba que no exceda el total posible. El Código~\ref{lst:confirmacion-cls} muestra un ejemplo ilustrativo de solicitud.
+
+\noindent\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=JSON, caption={Solicitud de revisión del intento}, label={lst:confirmacion-cls}]
+{
+  "calificacion": 80,
+  "retroalimentacion": "Revisa las letras indicadas.",
+  "cls_correctas": 4,
+  "legibilidad": {
+    "alineacion": 8,
+    "tamano": 8,
+    "espaciado": 8,
+    "inclinacion": 8
   }
-);
+}
 \end{lstlisting}
- 
-\subsubsection{Componentes del Tutor}
- 
-El componente raíz \texttt{MainTutor.jsx} actúa como controlador del flujo del tutor. Al montarse, decodifica el JWT para obtener el \texttt{id\_usuario} del tutor y su nombre, y organiza la interfaz en cuatro pestañas principales:
- 
-En la Tabla~\ref{tab:componentes_tutor} se describen los componentes hijos de \texttt{MainTutor} y sus responsabilidades dentro de la interfaz.
+\end{minipage}
 
-\begin{table}[H]
-\centering
-\caption{Componentes hijos de \texttt{MainTutor}}
-\label{tab:componentes_tutor}
-\begin{tabular}{|l|l|p{8cm}|}
-\hline
-\textbf{Componente} & \textbf{Pestaña} & \textbf{Responsabilidad} \\
-\hline
-\texttt{AlumnosCategoria} & Alumnos & Muestra alumnos clasificados en tres categorías de desempeño: riesgo, regular y excelencia. Llama a \texttt{GET /api/tutor/riesgo}, \texttt{/regular} y \texttt{/excelencia} \\
-\hline
-\texttt{ProgresoAlumnos} & Progreso & Visualiza datos de progreso grupal. Llama a \texttt{GET /api/tutor/progreso/\{id\}} \\
-\hline
-\texttt{TabEjercicios} & Ejercicios & Gestiona el catálogo de ejercicios: lista, activa y desactiva. Llama a \texttt{GET}, \texttt{POST} y \texttt{DELETE /api/tutor/ejercicio/*} \\
-\hline
-\texttt{PerfilTutor} & Perfil & Permite actualizar nombre, correo y contraseña. Llama a \texttt{PUT /api/tutor/act/*} \\
-\hline
-\texttt{ModalDetalleAlumno} & (Modal) & Modal de seguimiento individual: lista los intentos de un alumno específico y permite asignar calificación y retroalimentación mediante \texttt{PUT /api/tutor/calificar/\{id\_intento\}} \\
-\hline
-\end{tabular}
-\end{table}
- 
-El \texttt{ModalDetalleAlumno} se instancia dentro de \texttt{MainTutor} y consume el endpoint \texttt{GET /api/tutor/intentos/\{id\_tutor\}}, filtrando los resultados en el cliente por \texttt{id\_alumno} para mostrar únicamente los intentos del alumno seleccionado.
+La interfaz usa una escala de 0 a 100 para la calificación general y de 0 a 10 para CLS y legibilidad. La calificación general es independiente: guardarla sin las confirmaciones no incorpora el intento a los promedios de esas dimensiones. El esquema actual declara el tipo entero de la calificación, pero no impone en ese campo los límites de la interfaz.
 
-\subsubsection{Estado actual e integración del reconocimiento}
-La aplicación dispone de autenticación JWT, rutas por actor, validación con Pydantic, acceso a datos mediante DAO y captura y registro de intentos. El reconocimiento ya está integrado mediante \texttt{Servicios/ocr.py}, que consume Google Cloud Vision cuando la configuración lo habilita. El DAO solicita el reconocimiento y la evaluación textual preliminar durante el registro, y conserva la respuesta en \texttt{resultado\_ocr\_json}.
+\subsubsection{Componentes de presentación}
+\texttt{MainAlumno.jsx} organiza los ejercicios, la captura, el perfil y el progreso del alumno. \texttt{LienzoDigital.jsx} y \texttt{CapturaEscritura.jsx} generan la imagen de la entrega. \texttt{TabProgreso.jsx} muestra el resumen obtenido de \texttt{/api/alumno/progreso}.
 
-El análisis automático de alineación, tamaño, separación y uniformidad del trazo está pendiente. También quedan por completar la calibración pedagógica y la incorporación de estas mediciones a los reportes de progreso. El diseño de este módulo se presenta en la Sección~\ref{sec:vision-metricas}; su estado se distingue del reconocimiento y la comparación textual ya implementados.
+En el panel del tutor, \texttt{MainTutor.jsx} coordina la revisión y \texttt{EvaluacionPreliminar.jsx} presenta las sugerencias CLS y sus observaciones. La lista de intentos por alumno puede solicitarse sin imagen; la imagen se recupera al abrir una entrega, evitando cargar todas las capturas en la consulta inicial. \texttt{ProgresoAlumnos.jsx} y \texttt{AlumnosCategoria.jsx} permiten consultar el desempeño; \texttt{TabEjercicios.jsx} gestiona las asignaciones.
 
-\subsubsection{Responsabilidades y extensiones previstas}
-El navegador envía la imagen al Back-End; solo el servidor se autentica ante Cloud Vision. El proveedor devuelve texto y anotaciones. El procesamiento local compara el contenido con referencias configuradas y, en una futura extensión, medirá el trazo sobre la imagen. Las respuestas automáticas requieren revisión del tutor y no asignan actualmente una calificación.
-
-La ejecución en segundo plano es una posible mejora futura. El flujo implementado espera la respuesta del servicio antes de insertar el intento. Incorporar una cola requerirá definir estados persistentes, reintentos y consulta de resultados, sin describirlos como mecanismos ya disponibles.
-
-\subsection{Diagrama de arquitectura del sistema}
-
-La Figura \ref{fig:arquitectura_completa} muestra el diagrama de arquitectura del sistema, como vista conceptual de sus capas. El componente OCR corresponde al servicio Google Cloud Vision, invocado desde el servidor; el análisis caligráfico completo permanece pendiente.
-
-\begin{landscape}
-    \begin{figure}[H]
-        \centering
-        \includegraphics[width=0.95\linewidth]{Imagenes/Arquitectura.png}
-        \caption{Diagrama de arquitectura del sistema}
-        \label{fig:arquitectura_completa}
-    \end{figure}
-\end{landscape}
+\subsubsection{Límites del diseño vigente}
+El OCR, CLS, las sugerencias de legibilidad y la confirmación están integrados. Permanecen pendientes la validación con muestras de alumnos y la calibración de las medidas geométricas. La generación automática de actividades personalizadas y una cola de procesamiento no forman parte del flujo implementado. Estas extensiones requieren contratos y estados propios, separados del registro síncrono descrito aquí.

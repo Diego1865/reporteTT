@@ -1,275 +1,77 @@
+\subsection{Diseño del progreso y la retroalimentación}
 
+El seguimiento distingue la entrega, la sugerencia automática y la evaluación confirmada. La imagen y sus sugerencias se guardan al registrar el intento; los indicadores de desempeño se derivan de los análisis que el tutor guarda durante la revisión. La calificación general de la entrega no sustituye al CLS confirmado.
 
-\textit{Alcance de esta sección: las agregaciones de análisis automáticos describen el diseño del módulo. El flujo actual de Cloud Vision guarda una transcripción y una evaluación textual preliminar; no genera puntuaciones caligráficas. El esquema descrito conserva inclinación como indicador previo. La incorporación de uniformidad requerirá una migración y la revisión de estas agregaciones, según la Sección~\ref{sec:vision-metricas}.}
+\subsubsection{Indicadores de ortografía y legibilidad}
+El promedio ortográfico es la media aritmética de \texttt{ortografia\_score} de los intentos con análisis registrado. Cada intento tiene el mismo peso, independientemente de la longitud de su referencia; no se suman todas las secuencias del alumno para calcular un único cociente global.
 
-\subsection{Arquitectura del Módulo de Progreso y Recomendaciones}
+La legibilidad usa las medidas confirmadas de alineación, tamaño, espaciado e inclinación. La vista \texttt{vw\_Progreso\_Alumno} promedia cada medida por alumno y calcula la media de las cuatro. El contrato de confirmación exige las cuatro medidas completas, lo que evita que una nueva evaluación parcial anule el promedio.
 
-El módulo de progreso y recomendaciones centraliza el seguimiento
-longitudinal del desempeño del alumno y expone al tutor las herramientas
-de supervisión grupal necesarias para tomar decisiones pedagógicas
-informadas. A diferencia de los módulos anteriores, cuyo alcance es
-transaccional —un intento, un ejercicio, una autenticación—, este módulo
-opera sobre el historial acumulado del alumno, sintetizando múltiples
-análisis en indicadores agregados que reflejan su evolución en el tiempo.
-
-La arquitectura del módulo se divide en tres componentes principales:
-
-\begin{enumerate}
-    \item \textbf{Capa de Presentación (Front-End):} Compuesta por el
-    componente \texttt{ProgresoAlumnos.jsx} en el panel del tutor, que
-    presenta gráficas de dona y de barras con la distribución del grupo
-    por categoría de desempeño, y por el componente
-    \texttt{PerfilAlumno.jsx} en el panel del alumno, que expone sus
-    datos personales y permite actualizarlos. La clasificación del grupo
-    se presenta en dos dimensiones independientes —ortografía y
-    legibilidad— seleccionables mediante pestañas, con soporte
-    responsivo para pantallas móviles.
-
-    \item \textbf{Capa de Lógica de Negocio (Back-End):} Implementada
-    en los controladores \texttt{alumnos.py} y \texttt{perfil.py}
-    mediante FastAPI. El primero gestiona el registro, la consulta y la
-    baja de alumnos, así como la clasificación del grupo por nivel de
-    desempeño y la generación de datos para las gráficas de progreso.
-    El segundo gestiona las operaciones de actualización de perfil tanto
-    del tutor como del alumno.
-
-    \item \textbf{Capa de Persistencia (Base de Datos):} El módulo opera
-    principalmente sobre las tablas \texttt{Progreso\_Alumno} e
-    \texttt{Historial\_Alumno}. La primera almacena el promedio acumulado
-    vigente del alumno en cada dimensión de evaluación; la segunda
-    registra una fotografía histórica del progreso cada vez que dicho
-    promedio es actualizado, permitiendo trazar la evolución del alumno
-    a lo largo del tiempo. Las tablas \texttt{Recomendacion} y
-    \texttt{Actividad\_Sugerida} soportan la generación de actividades
-    personalizadas a partir de los errores detectados.
-\end{enumerate}
-
-% ─────────────────────────────────────────────────────────
-\subsubsection{Diseño del Modelo de Progreso}
-
-El progreso del alumno se representa mediante dos dimensiones
-independientes pero complementarias:
-
-\begin{itemize}
-    \item \textbf{Promedio ortográfico} (\texttt{promedio\_ortografia}):
-    promedio acumulado del campo \texttt{ortografia\_score} de todos los
-    análisis ortográficos registrados para el alumno.
-
-    \item \textbf{Promedio de legibilidad} (calculado): promedio aritmético
-    de los cuatro scores caligráficos —\texttt{alineacion\_score},
-    \texttt{tamano\_letra\_score}, \texttt{espaciado\_score} e
-    \texttt{inclinacion\_score}— derivados de los análisis caligráficos
-    del alumno.
-\end{itemize}
-
-El \textbf{promedio general}, definido por los autores para este sistema, se obtiene como la media de ambas
-dimensiones y actúa como indicador sintético para la clasificación del
-alumno dentro de su grupo:
-
+En el resumen grupal, cuando existen ambas dimensiones se utiliza:
 \begin{equation}
-    Promedio\_general = \frac{Promedio\_ortográfico +
-    Promedio\_legibilidad}{2}
-    \label{eq:promedio-general}
+ G=\frac{O+L}{2},
+ \label{eq:promedio-general}
 \end{equation}
-
-Con base en el promedio general, el sistema clasifica a cada alumno en
-una de tres categorías, conforme a la Tabla~\ref{tab:categorias-progreso}:
+donde $O$ es el promedio ortográfico y $L$ el promedio de legibilidad. Si solo existe una dimensión, la vista usa su valor como promedio general. Si no existe ninguna, retorna \texttt{null}; la ausencia de datos no equivale a una puntuación de cero.
 
 \begin{table}[H]
 \centering
-\caption{Categorías de clasificación de alumnos por promedio general}
+\caption{Categorías operativas del seguimiento grupal}
 \label{tab:categorias-progreso}
-\begin{tabular}{|l|l|p{7cm}|}
-\hline
-\textbf{Categoría} & \textbf{Rango} & \textbf{Interpretación} \\
-\hline
-En riesgo   & $< 6.0$         & El alumno presenta deficiencias significativas en
-                                 ortografía o legibilidad que requieren atención
-                                 prioritaria del tutor. \\
-Regular     & $[6.0, \ 8.0]$  & El alumno mantiene un desempeño aceptable con
-                                 áreas de oportunidad identificadas. \\
-Excelencia  & $> 8.0$         & El alumno muestra un desempeño consistentemente
-                                 alto en ambas dimensiones evaluadas. \\
-\hline
+\begin{tabular}{lll}
+\toprule Categoría & Condición & Uso \\ \midrule
+En riesgo & $G<6$ & Priorizar revisión del tutor. \\
+Regular & $6\leq G\leq 8$ & Mantener seguimiento. \\
+Excelencia & $G>8$ & Identificar desempeño alto. \\
+Sin datos & $G=\texttt{null}$ & Esperar evaluaciones confirmadas. \\
+\bottomrule
 \end{tabular}
 \end{table}
-\newpage
-\noindent\textbf{Nota de diseño:} los umbrales de clasificación (6.0 y
-8.0) toman como referencia la escala numérica de evaluación de la
-educación básica en México, en la que 6 es la calificación mínima
-aprobatoria \cite{sep2023acuerdo1009}. El umbral de 8.0, que delimita el
-desempeño sobresaliente, es una decisión de diseño de este trabajo.
 
-% ─────────────────────────────────────────────────────────
-\subsubsection{Diseño del Flujo de Actualización de Progreso}
+Los cortes 6 y 8 son reglas operativas del proyecto. No constituyen una validación pedagógica ni un diagnóstico. Las consultas de riesgo, regular y excelencia excluyen los valores nulos; el resumen general conserva a los alumnos activos sin evaluaciones para que la interfaz los distinga.
 
-La tabla \texttt{Progreso\_Alumno} se actualiza cada vez que el tutor
-confirma el puntaje CLS de un intento o se registra su análisis caligráfico. El mecanismo de actualización
-opera en dos pasos:
-
+\subsubsection{Actualización y consulta}
 \begin{enumerate}
-    \item \textbf{Actualización del promedio vigente:} al persistir los
-    resultados de \texttt{Analisis\_Ortografico} y
-    \texttt{Analisis\_Caligrafico}, el proceso recalcula los promedios
-    acumulados del alumno mediante una consulta \texttt{UPDATE} con
-    subconsulta \texttt{AVG} sobre todos sus intentos analizados hasta
-    la fecha, y los escribe en \texttt{Progreso\_Alumno}.
-
-    \item \textbf{Registro histórico:} simultáneamente, se inserta un
-    nuevo registro en \texttt{Historial\_Alumno} con una instantánea
-    (\textit{snapshot}) del progreso en ese momento, incluyendo la fecha
-    con precisión \texttt{DATETIME2}. Este registro es inmutable y
-    permite reconstruir la curva de progreso del alumno a lo largo del
-    tiempo, independientemente de los cambios posteriores en
-    \texttt{Progreso\_Alumno}.
+    \item El tutor abre la imagen y revisa el texto y las sugerencias.
+    \item El servidor comprueba su acceso al intento y valida los valores recibidos.
+    \item El DAO actualiza la calificación y los comentarios y realiza un \texttt{MERGE} de cada análisis enviado. Al confirmar CLS, guarda el cociente en \texttt{ortografia\_score} y el conteo en \texttt{sugerencias\_json}; al confirmar legibilidad, guarda sus cuatro columnas numéricas.
+    \item La transacción se confirma. La siguiente consulta a la vista de progreso refleja los valores almacenados sin mantener una copia adicional de los promedios.
 \end{enumerate}
 
-La separación entre la tabla de progreso vigente y la tabla de historial
-responde a una decisión de diseño deliberada: \texttt{Progreso\_Alumno}
-es la fuente de verdad para las consultas actuales del tutor y los
-cálculos de clasificación, mientras que \texttt{Historial\_Alumno}
-es la fuente de verdad para la visualización de la evolución temporal.
-Ambas responsabilidades son distintas y justifican la existencia de dos
-tablas separadas.
+La vista agrega los registros de análisis existentes; no filtra expresamente la bandera de confirmación dentro del JSON. La regla de que solo cuentan resultados confirmados depende de que el flujo de la aplicación escriba en esas tablas únicamente al revisar. Una carga externa de análisis también afectaría el promedio y debe respetar esta condición.
 
-% ─────────────────────────────────────────────────────────
-\subsubsection{Diseño del Flujo de Recomendaciones}
+La corrección de un análisis reemplaza sus valores anteriores. El historial consultado conserva fechas de entrega y evaluaciones vigentes; no es una bitácora inmutable de todas las revisiones.
 
-Cuando el análisis de un intento es completado, el sistema genera
-recomendaciones de actividades personalizadas para el alumno. El flujo
-es el siguiente:
+\subsubsection{Resumen individual del alumno}
+\texttt{GET /api/alumno/progreso} consulta los intentos del usuario autenticado y llama a \texttt{resumir\_progreso}. Su campo \texttt{promedio\_general} representa exclusivamente el promedio CLS confirmado, aunque el resumen grupal del tutor utiliza ese nombre para combinar ortografía y legibilidad. Esta diferencia debe mantenerse visible al interpretar ambas pantallas.
 
-\begin{enumerate}
-    \item El proceso evalúa los resultados del análisis recién
-    completado e identifica el tipo de error predominante: ortográfico
-    si \texttt{ortografia\_score} está por debajo del umbral, caligráfico
-    si alguno de los cuatro scores de legibilidad lo está.
+El resultado incluye total de intentos, cantidad con CLS registrado, promedio, mejor puntuación, distribución por tipo de ejercicio y los ocho intentos más recientes. Un intento sin CLS aporta al total y al historial, pero no al promedio ni a la mejor puntuación. La racha cuenta días consecutivos con entregas, terminando hoy o ayer; no requiere que esas entregas ya estén evaluadas.
 
-    \item Se consulta la tabla \texttt{Actividad\_Sugerida} filtrando por
-    \texttt{tipo\_error} y \texttt{tipo\_ejercicio} correspondientes al
-    error identificado.
-
-    \item Se insertan registros en la tabla \texttt{Recomendacion}
-    vinculando el \texttt{id\_intento} con las actividades seleccionadas.
-    Cada recomendación recibe un valor de \texttt{prioridad}
-    (\texttt{alta}, \texttt{media} o \texttt{baja}) calculado con base
-    en la magnitud del error: a mayor desviación respecto al umbral,
-    mayor prioridad.
-
-    \item El alumno consulta sus recomendaciones pendientes, ordenadas
-    por prioridad, desde su panel. Al realizar una actividad sugerida,
-    el campo \texttt{estado} de la recomendación transiciona de
-    \texttt{pendiente} a \texttt{completada}.
-\end{enumerate}
-
-% ─────────────────────────────────────────────────────────
-\subsubsection{Diseño de APIs}
-
-Para soportar los flujos descritos, el diseño de la API contempla los
-siguientes endpoints distribuidos entre los controladores
-\texttt{alumnos.py} y \texttt{perfil.py}:
-
-\paragraph{Endpoints de gestión de alumnos (tutor)}
-
-En la Tabla~\ref{tab:endpoints-alumnos} se describen los endpoints que permiten al tutor registrar, consultar y dar de baja a sus alumnos.
-
-\begin{table}[H]
-\centering
-\caption{Endpoints de gestión de alumnos}
-\label{tab:endpoints-alumnos}
-\begin{tabular}{|l|l|l|}
-\hline
-\textbf{Endpoint} & \textbf{Método} & \textbf{Acceso} \\
-\hline
-\texttt{/api/alumnos/registrar}              & POST & Tutor (JWT) \\
-\texttt{/api/alumnos/tutor/\{id\_tutor\}}    & GET  & Tutor (JWT) \\
-\texttt{/api/alumnos/baja/\{id\_alumno\}}    & PUT  & Tutor (JWT) \\
-\hline
-\end{tabular}
-\end{table}
-
-\paragraph{Endpoints de clasificación y progreso grupal (tutor)}
-
-Los siguientes tres endpoints implementan la clasificación del grupo
-según las categorías definidas en la Tabla~\ref{tab:categorias-progreso}.
-Cada uno ejecuta la misma consulta CTE (\textit{Common Table Expression})
-sobre \texttt{Progreso\_Alumno}, variando únicamente el filtro de
-\texttt{promedio\_general} aplicado:
-
-En la Tabla~\ref{tab:endpoints-clasificacion} se describen los endpoints para consultar a los alumnos según su categoría de desempeño.
-
-\begin{table}[H]
-\centering
-\caption{Endpoints de clasificación de alumnos por desempeño}
-\label{tab:endpoints-clasificacion}
-\begin{tabular}{|l|l|l|}
-\hline
-\textbf{Endpoint} & \textbf{Método} & \textbf{Acceso} \\
-\hline
-\texttt{/api/alumnos/riesgo/\{id\_tutor\}}      & GET & Tutor (JWT) \\
-\texttt{/api/alumnos/regular/\{id\_tutor\}}     & GET & Tutor (JWT) \\
-\texttt{/api/alumnos/excelencia/\{id\_tutor\}}  & GET & Tutor (JWT) \\
-\hline
-\end{tabular}
-\end{table}
-
-El endpoint \texttt{/api/alumnos/progreso/\{id\_tutor\}} opera mediante
-el método \texttt{GET} y retorna los datos agrupados para las gráficas
-del panel del tutor. Ejecuta dos consultas independientes: una sobre
-el promedio ortográfico y otra sobre el promedio de legibilidad,
-retornando para cada dimensión la cantidad de alumnos por categoría.
-
-En el Código~\ref{lst:progreso-response} se muestra la estructura de respuesta con las cantidades de alumnos por categoría para las gráficas de progreso.
-
-\begin{lstlisting}[language=json, caption={Estructura de respuesta del endpoint de progreso gráfico}, label={lst:progreso-response}]
-/* Respuesta 200 OK */
+\noindent\begin{minipage}{\linewidth}
+\begin{lstlisting}[language=JSON, caption={Ejemplo ilustrativo del resumen individual}, label={lst:progreso-response}]
 {
-  "ortografia": [
-    { "categoria": "Buen Promedio",    "cantidad_alumnos": <int> },
-    { "categoria": "Promedio Regular", "cantidad_alumnos": <int> },
-    { "categoria": "Mal Promedio",     "cantidad_alumnos": <int> }
-  ],
-  "legibilidad": [
-    { "categoria": "Buena Legibilidad",    "cantidad_alumnos": <int> },
-    { "categoria": "Legibilidad Regular",  "cantidad_alumnos": <int> },
-    { "categoria": "Mala Legibilidad",     "cantidad_alumnos": <int> }
+  "total_intentos": 3,
+  "calificados": 2,
+  "promedio_general": 7.5,
+  "mejor_puntuacion": 9.0,
+  "racha_actual": 2,
+  "intentos_por_tipo": {
+    "copia": {"promedio": 7.5, "total": 3}
+  },
+  "historial_reciente": [
+    {"fecha": "2026-11-16T10:00:00", "titulo": "Copia",
+     "tipo": "copia", "puntuacion": null},
+    {"fecha": "2026-11-15T11:00:00", "titulo": "Copia",
+     "tipo": "copia", "puntuacion": 9.0},
+    {"fecha": "2026-11-15T10:00:00", "titulo": "Copia",
+     "tipo": "copia", "puntuacion": 6.0}
   ]
 }
 \end{lstlisting}
+\end{minipage}
 
-\paragraph{Endpoints de perfil (tutor y alumno)}
+\subsubsection{Seguimiento del tutor}
+\texttt{GET /api/tutor/resumen-progreso} devuelve los promedios de todos sus alumnos activos. Las rutas de riesgo, regular y excelencia filtran el promedio general de la vista; \texttt{GET /api/tutor/progreso/\{id\_tutor\}} cuenta alumnos por categoría en ortografía y legibilidad por separado, excluyendo los casos sin datos de cada dimensión. Las rutas se describen en la Tabla~\ref{tab:arquitectura_tutor_ejercicios}.
 
-En la Tabla~\ref{tab:endpoints-perfil} se describen los endpoints para consultar y actualizar los perfiles de tutor y alumno.
-
-\begin{table}[H]
-\centering
-\caption{Endpoints del módulo de perfil}
-\label{tab:endpoints-perfil}
-\begin{tabular}{|l|l|l|}
-\hline
-\textbf{Endpoint} & \textbf{Método} & \textbf{Acceso} \\
-\hline
-\texttt{/api/perfil/tutor/nombre}             & PUT    & Tutor (JWT) \\
-\texttt{/api/perfil/tutor/correo}             & PUT    & Tutor (JWT) \\
-\texttt{/api/perfil/tutor/password}           & PUT    & Tutor (JWT) \\
-\texttt{/api/perfil/tutor/cuenta}             & DELETE & Tutor (JWT) \\
-\texttt{/api/perfil/alumno/info}              & PUT    & Alumno (JWT) \\
-\texttt{/api/perfil/alumno/password}          & PUT    & Alumno (JWT) \\
-\texttt{/api/perfil/alumno/estado-tutor}      & GET    & Alumno (JWT) \\
-\hline
-\end{tabular}
-\end{table}
-
-El endpoint \texttt{/api/perfil/alumno/estado-tutor} merece una mención
-especial: su propósito es verificar si el tutor asociado al alumno
-sigue activo en el sistema (\texttt{id\_estatus = 1}). Esta verificación
-protege al alumno de intentar acceder a funcionalidades dependientes
-del tutor cuando este ha sido dado de baja, retornando un indicador
-booleano (\texttt{tutor\_activo: true | false}) que el Front-End
-utiliza para condicionar la renderización del panel del alumno.
-
-\noindent\textbf{Nota de diseño:} todas las operaciones de actualización
-de perfil que involucran datos sensibles —correo electrónico, contraseña
-o eliminación de cuenta— requieren la verificación de la contraseña
-actual antes de ejecutar el cambio, como capa adicional de seguridad
-frente a sesiones comprometidas.
+\subsubsection{Retroalimentación y recomendaciones}
+La retroalimentación disponible consiste en los comentarios del tutor y las diferencias textuales presentadas para revisión. Las tablas \texttt{Actividad\_Sugerida} y \texttt{Recomendacion} reservan una posible extensión para actividades personalizadas, pero el flujo actual no las genera ni cambia automáticamente su estado al completar ejercicios. Diseñar esa extensión requeriría definir criterios a partir de resultados confirmados y validar su pertinencia con el docente.
