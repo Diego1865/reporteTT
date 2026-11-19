@@ -25,7 +25,7 @@ manuscrito, lo que afecta la claridad de los textos producidos por los alumnos.
 
 La evaluación de estos aspectos depende principalmente de la revisión manual realizada por el docente. Aunque esta intervención es esencial, en grupos numerosos puede limitarse la frecuencia y profundidad de la retroalimentación individualizada. La literatura pedagógica ha destacado que la retroalimentación oportuna y continua es un factor clave para la mejora del aprendizaje \cite{berninger2010teaching}.
 
-Paralelamente, la incorporación de tecnologías digitales en el ámbito educativo ha crecido de manera significativa en los últimos años; no obstante, muchas herramientas se centran en ejercicios mecanografiados y no abordan directamente la práctica y análisis de la escritura manuscrita \cite{pedregosa2011scikit}. Esta situación genera una brecha entre el avance tecnológico y la necesidad de fortalecer habilidades tradicionales mediante enfoques innovadores.
+Paralelamente, la incorporación de tecnologías digitales en el ámbito educativo ha crecido de manera significativa en los últimos años; no obstante, muchas herramientas se centran en ejercicios mecanografiados y no abordan directamente la práctica y análisis de la escritura manuscrita, a pesar de que la práctica a mano favorece el desarrollo de la lectoescritura en edades tempranas \cite{james2012effects}. Esta situación genera una brecha entre el avance tecnológico y la necesidad de fortalecer habilidades tradicionales mediante enfoques innovadores.
 
 Ante este panorama, surge la necesidad de explorar alternativas que permitan analizar textos manuscritos y ofrecer retroalimentación automatizada en un entorno educativo supervisado. En consecuencia, el problema central que da origen al presente trabajo se formula de la siguiente manera:
 
@@ -78,16 +78,16 @@ Los objetivos específicos del proyecto se centran en:
 Para comprender el panorama actual de las herramientas de asistencia a la escritura y el reconocimiento de texto, se realizó un estado del arte que permitió identificar soluciones existentes con funcionalidades similares a las propuestas en este proyecto.
 
 \subsubsection{Google Handwriting Input}
-Google Handwriting Input \cite{google2024handwriting} es una aplicación desarrollada para dispositivos Android que permite a los usuarios escribir a mano y convertir la escritura automáticamente a texto. Esta herramienta destaca por su compatibilidad con múltiples idiomas, su capacidad de escribir en cualquier campo de texto de forma seamless, y su reconocimiento en tiempo real que facilita la entrada de texto de manera intuitiva en dispositivos móviles.
+Google Handwriting Input \cite{google2024handwriting} es una aplicación desarrollada para dispositivos Android que permite a los usuarios escribir a mano y convertir la escritura automáticamente a texto. Esta herramienta destaca por su compatibilidad con múltiples idiomas, su capacidad de escribir en cualquier campo de texto de forma integrada, y su reconocimiento en tiempo real que facilita la entrada de texto de manera intuitiva en dispositivos móviles.
 
 \subsubsection{Tesseract OCR}
 Tesseract OCR \cite{smith2007overview} es un motor de reconocimiento óptico de caracteres de código abierto que convierte imágenes de texto manuscrito o tipografiado en texto editable. Su fortaleza radica en el soporte de más de 100 idiomas, su compatibilidad con imágenes escaneadas o fotografías, y su capacidad de ser utilizado para entrenar modelos personalizados de OCR. Sin embargo, requiere configuraciones específicas para mejorar su precisión en documentos con manuscritos complejos.
 
 \subsubsection{Grammarly}
-Grammarly \cite{grammarly2024} es una plataforma de corrección gramatical y ortográfica basada en inteligencia artificial, disponible como extensión de navegador, aplicación web y complemento para Microsoft Word y Google Docs. Ofrece corrección gramatical y ortográfica avanzada, recomendaciones de estilo personalizadas, y una versión gratuita con funciones limitados. Su amplia compatibilidad multiplataforma la convierte en una solución integral para la mejora de escritura en diversos contextos.
+Grammarly \cite{grammarly2024} es una plataforma de corrección gramatical y ortográfica basada en inteligencia artificial, disponible como extensión de navegador, aplicación web y complemento para Microsoft Word y Google Docs. Ofrece corrección gramatical y ortográfica avanzada, recomendaciones de estilo personalizadas, y una versión gratuita con funciones limitadas. Su amplia compatibilidad multiplataforma la convierte en una solución integral para la mejora de escritura en diversos contextos.
 
-\subsubsection{Calligrapher}
-Calligrapher \cite{calligraphr2024} es una aplicación especializada en la mejora de la caligrafía que proporciona retroalimentación en tiempo real sobre la legibilidad de la letra. Su enfoque está centrado en la evaluación de la legibilidad y la calidad caligráfica, con compatibilidad en dispositivos móviles y tabletas. La aplicación ofrece ejercicios estructurados y personalizados diseñados para mejorar progresivamente las habilidades de escritura manual del usuario.
+\subsubsection{Calligraphr}
+Calligraphr \cite{calligraphr2024} es una aplicación web que convierte la escritura a mano en una fuente tipográfica. El usuario llena una plantilla con sus caracteres, la escanea o fotografía y el servicio extrae cada carácter para generar la fuente. No evalúa la legibilidad ni ofrece ejercicios de práctica, pero muestra cómo una plantilla con regiones conocidas facilita la extracción de caracteres manuscritos a partir de una imagen.
 
 \subsubsection{WriteApp}
 WriteApp \cite{writeapp2024} es una plataforma educativa gamificada que combina elementos lúdicos con la mejora de la escritura manual. Proporciona un juego interactivo que permite el seguimiento de la calidad de letra y puntuación, genera reportes detallados para padres y maestros, y permite la personalización de ejercicios según el perfil de cada usuario, fomentando un aprendizaje adaptativo y motivador.
@@ -102,29 +102,35 @@ La comparación entre las herramientas analizadas en el estado del arte y la apl
 \setlength{\tabcolsep}{4pt}
 \caption{Comparativa de herramientas de asistencia a la escritura y reconocimiento de texto.}
 \label{tab:comparativa}
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{|l|c|c|c|c|c|c|}
 \hline
-\textbf{Característica} & \textbf{Google HW} \cite{google2024handwriting} & \textbf{Tesseract} \cite{smith2007overview} & \textbf{Grammarly} \cite{grammarly2024} & \textbf{Calligrapher} \cite{calligraphr2024} & \textbf{WriteApp} \cite{writeapp2024} & \textbf{Propuesta} \\
+\textbf{Característica} & \textbf{Google HW} & \textbf{Tesseract} & \textbf{Grammarly} & \textbf{Calligraphr} & \textbf{WriteApp} & \textbf{Propuesta} \\
 \hline
-Reconocimiento manual & $\checkmark$ & $\checkmark$ & $\times$ & $\checkmark$ & $\checkmark$ & $\checkmark$ \\
+Reconocimiento manuscrito & $\checkmark$ & $\checkmark$ & $\times$ & $\Delta$ & $\checkmark$ & $\checkmark$ \\
 \hline
-Corrección ortográfica & $\times$ & $\times$ & $\checkmark$ & $\times$ & $\checkmark$ & $\checkmark$ \\
+Evaluación ortográfica & $\times$ & $\times$ & $\checkmark$ & $\times$ & $\checkmark$ & $\checkmark$ \\
 \hline
-Evaluación de caligrafía & $\times$ & $\times$ & $\times$ & $\checkmark$ & $\checkmark$ & $\checkmark$ \\
+Sugerencia de corrección & $\times$ & $\times$ & $\checkmark$ & $\times$ & $\checkmark$ & $\Delta$ \\
 \hline
-Retroalimentación real & $\checkmark$ & $\times$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ \\
+Evaluación de caligrafía & $\times$ & $\times$ & $\times$ & $\times$ & $\checkmark$ & $\checkmark$ \\
 \hline
-Compatible móvil & $\checkmark$ & $\Delta$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ \\
+Retroalimentación en tiempo real & $\checkmark$ & $\times$ & $\checkmark$ & $\times$ & $\checkmark$ & $\Delta$ \\
 \hline
-Compatible web & $\times$ & $\times$ & $\checkmark$ & $\Delta$ & $\Delta$ & $\checkmark$ \\
+Compatible móvil & $\checkmark$ & $\Delta$ & $\checkmark$ & $\Delta$ & $\checkmark$ & $\checkmark$ \\
 \hline
-Múltiples idiomas & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\Delta$ & $\Delta$ & - \\
+Compatible web & $\times$ & $\times$ & $\checkmark$ & $\checkmark$ & $\Delta$ & $\checkmark$ \\
 \hline
-Gamificación & $\times$ & $\times$ & $\times$ & $\times$ & $\checkmark$ & - \\
+Múltiples idiomas & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\checkmark$ & $\Delta$ & $\times$ \\
 \hline
-Reportes educadores & $\times$ & $\times$ & $\times$ & $\checkmark$ & $\checkmark$ & $\checkmark$ \\
+Gamificación & $\times$ & $\times$ & $\times$ & $\times$ & $\checkmark$ & $\times$ \\
 \hline
-\end{tabular}
+Reportes educadores & $\times$ & $\times$ & $\times$ & $\times$ & $\checkmark$ & $\checkmark$ \\
+\hline
+\end{tabular}%
+}
 \end{table}
+
+En la propuesta, la evaluación ortográfica se realiza mediante CLS respecto a las respuestas esperadas del ejercicio; el sistema señala las diferencias con la palabra de referencia, pero no genera sugerencias de corrección para escritura libre. La retroalimentación se marca como parcial porque el puntaje y las medidas de legibilidad se calculan al enviar el intento, pero no se incorporan al progreso hasta que el tutor los confirma.
 
 \input{Capitulo3/metodologia}
