@@ -35,7 +35,7 @@ Los cortes 6 y 8 son reglas operativas del proyecto. No constituyen una validaci
     \item El tutor abre la imagen y revisa el texto y las sugerencias.
     \item El servidor comprueba su acceso al intento y valida los valores recibidos.
     \item El DAO actualiza la calificación y los comentarios y realiza un \texttt{MERGE} de cada análisis enviado. Al confirmar CLS, guarda el cociente en \texttt{ortografia\_score} y el conteo en \texttt{sugerencias\_json}; al confirmar legibilidad, guarda sus cuatro columnas numéricas.
-    \item La transacción se confirma. La siguiente consulta a la vista de progreso refleja los valores almacenados sin mantener una copia adicional de los promedios.
+    \item Con los promedios actualizados, el DAO evalúa si corresponde generar una recomendación para el intento y guarda el resultado en la misma transacción. La siguiente consulta a la vista de progreso refleja los análisis guardados.
 \end{enumerate}
 
 La vista agrega los registros de análisis existentes; no filtra expresamente la bandera de confirmación dentro del JSON. La regla de que solo cuentan resultados confirmados depende de que el flujo de la aplicación escriba en esas tablas únicamente al revisar. Una carga externa de análisis también afectaría el promedio y debe respetar esta condición.
@@ -74,4 +74,10 @@ El resultado incluye total de intentos, cantidad con CLS registrado, promedio, m
 \texttt{GET /api/tutor/resumen-progreso} devuelve los promedios de todos sus alumnos activos. Las rutas de riesgo, regular y excelencia filtran el promedio general de la vista; \texttt{GET /api/tutor/progreso/\{id\_tutor\}} cuenta alumnos por categoría en ortografía y legibilidad por separado, excluyendo los casos sin datos de cada dimensión. Las rutas se describen en la Tabla~\ref{tab:arquitectura_tutor_ejercicios}.
 
 \subsubsection{Retroalimentación y recomendaciones}
-La retroalimentación disponible consiste en los comentarios del tutor y las diferencias textuales presentadas para revisión. Las tablas \texttt{Actividad\_Sugerida} y \texttt{Recomendacion} reservan una posible extensión para actividades personalizadas, pero el flujo actual no las genera ni cambia automáticamente su estado al completar ejercicios. Diseñar esa extensión requeriría definir criterios a partir de resultados confirmados y validar su pertinencia con el docente.
+\label{sec:diseno-recomendaciones}
+
+Al guardar la calificación, la aplicación consulta en \texttt{vw\_Progreso\_Alumno} los promedios confirmados de ortografía y legibilidad. Considera los promedios disponibles que sean estrictamente menores que 6 sobre 10. Si ambos cumplen esa condición, elige el más bajo y da prioridad a legibilidad cuando empatan. El proceso genera como máximo una recomendación por intento. Si ningún promedio cumple la condición, el intento queda sin recomendación.
+
+Cuando se elige ortografía, la práctica usa hasta cinco palabras distintas de la primera respuesta aceptada del ejercicio que contenga texto. Si de ella no se obtienen palabras, se usa un modelo genérico. Cuando se elige legibilidad, el identificador del intento determina cuál de las tres actividades de motricidad fina se muestra. El área de legibilidad se usa como criterio de refuerzo general. Un promedio bajo por sí solo no permite identificar la causa de una dificultad motriz.
+
+La recomendación conserva el motivo y el promedio que se consultó al calificar. El alumno ve sus prácticas en orden de generación, con las más recientes primero. Puede imprimir la ficha y enviar una foto del trabajo si desea que el tutor la revise. El estado pasa de \texttt{sugerida} a \texttt{completada} al recibir la foto y a \texttt{validada} cuando el tutor confirma la revisión (Tabla~\ref{tab:rf31}). El registro de la práctica es independiente de los promedios de progreso.

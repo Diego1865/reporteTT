@@ -146,14 +146,14 @@ Baja \\
 % RU-18
 RU-18 &
 Visualización de actividades sugeridas. &
-El alumno debe poder observar las actividades sugeridas por la aplicación web, correspondientes a sus análisis ortográficos y caligráficos. &
+El alumno debe poder consultar sus recomendaciones de ortografía o legibilidad y descargar las fichas de práctica en PDF. &
 Media \\
 \hline
 
 % RU-19
 RU-19 &
 Realizar actividades sugeridas. &
-El alumno debe poder realizar las actividades sugeridas por la aplicación web, para trabajar en la mejora de los aspectos detectados en su escritura. &
+El alumno debe poder realizar la práctica sugerida, enviar una foto al tutor y consultar si fue validada. &
 Media \\
 \hline
 
@@ -270,8 +270,8 @@ El tutor responsable puede confirmar o corregir los resultados de sus alumnos. S
 RN-25 & Consulta por alumno &
 Un alumno solo puede visualizar sus propios resultados. \\ \hline
 
-RN-26 & Condición para ejercicio correctivo &
-Un ejercicio correctivo automático solo puede generarse si el conteo de errores del intento es menor que 5. \\ \hline
+RN-26 & Condición para recomendar una práctica &
+Al calificar un intento, se recomienda una práctica si al menos un promedio confirmado de ortografía o legibilidad es menor que 6 sobre 10. Se elige el área con el menor promedio y, en caso de empate, legibilidad. \\ \hline
 
 RN-27 & Disponibilidad de impresión &
 Todo ejercicio debe poder renderizarse para visualización e impresión/exportación. \\ \hline
@@ -1166,19 +1166,19 @@ Comentarios & La cantidad de secuencias posibles se obtiene de la respuesta espe
 Actor & Alumno \\
 \hline
 
-Descripción & El alumno consulta las actividades de mejora sugeridas por la aplicación web, recomendadas a partir de los resultados de sus análisis ortográficos y caligráficos previos. \\
+Descripción & El alumno consulta las prácticas opcionales generadas al calificar sus intentos, a partir de los promedios confirmados de ortografía y legibilidad. \\
 \hline
 
-Datos & Lista de recomendaciones con actividades sugeridas (nombre de la actividad, descripción y área de mejora asociada ortografía o caligrafía), vinculados al intento realizado. \\
+Datos & Recomendación vinculada al intento, con título, motivo, instrucciones y ficha de práctica. \\
 \hline
 
-Estímulo & El alumno, accede a la sección de actividades sugeridas desde su panel principal. \\
+Estímulo & El alumno abre la pestaña \textit{Retroalimentación} en su panel. \\
 \hline
 
-Respuesta & La aplicación web muestra las actividades recomendadas personalizadas para el alumno, basadas en las áreas de oportunidad detectadas en sus análisis de escritura. \\
+Respuesta & La aplicación muestra las recomendaciones del alumno, de la más reciente a la más antigua, y permite descargar la ficha PDF de cada una. \\
 \hline
 
-Comentarios & Si el alumno no tiene ejercicios completados aún, esta sección puede estar vacía o mostrar un mensaje orientador. \\
+Comentarios & Si todavía no hay recomendaciones, la pestaña muestra un mensaje que explica cuándo aparecen. \\
 \hline
 
 \end{longtable}
@@ -1211,16 +1211,16 @@ Actor & Alumno \\
 Descripción & El alumno realiza una actividad sugerida por la aplicación web con el fin de trabajar en la mejora de los aspectos ortográficos y caligráficos identificados en sus análisis previos. \\
 \hline
 
-Datos & Actividad sugerida seleccionada, área de mejora asociada (ortografía o caligrafía). \\
+Datos & Actividad sugerida, foto de la práctica terminada y estado de revisión. \\
 \hline
 
-Estímulo & El alumno, desde la sección de actividades sugeridas (CU-19), selecciona una actividad y confirma que desea realizarla. \\
+Estímulo & Al terminar la práctica, el alumno abre su recomendación (CU-19), toma o selecciona una foto y confirma el envío. \\
 \hline
 
-Respuesta & La aplicación web carga la actividad seleccionada y registra el ejercicio realizado por el alumno. \\
+Respuesta & La aplicación registra la práctica como completada. El tutor consulta la foto desde el intento original y puede cambiar su estado a validada. \\
 \hline
 
-Comentarios & Las actividades sugeridas son distintas a los ejercicios asignados por el tutor. \\
+Comentarios & La entrega es opcional. El alumno puede consultar el estado en la pestaña \textit{Retroalimentación}. \\
 \hline
 
 \end{longtable}

@@ -1,0 +1,18 @@
+\subsection{Implementación de recomendaciones y fichas de práctica}
+\label{sec:impl-recomendaciones}
+
+Al guardar una calificación, \texttt{dao\_tutor.py} actualiza el intento y los análisis confirmados. A continuación, \texttt{dao\_retroalimentacion.py} consulta los promedios del alumno y llama al servicio \texttt{retroalimentacion.py}. El servicio aplica la regla RN-26 y devuelve, si corresponde, el contenido de la práctica. El DAO guarda ese contenido antes de confirmar la transacción. Si falla el guardado de la recomendación, se revierte también la calificación.
+
+La ruta de consulta del alumno recupera las recomendaciones de sus intentos calificados. En el panel del tutor, la respuesta de calificación y el detalle del intento incluyen la recomendación disponible. Ambas vistas presentan la información con el componente \texttt{RetroalimentacionEjercicio.jsx}. Para los registros en formato anterior, el servicio adapta el contenido al formato de las fichas actuales al consultarlo y conserva el motivo y el promedio originales.
+
+\subsubsection{Generación y descarga de las fichas PDF}
+
+Al solicitar la descarga, el servidor verifica que el intento pertenezca al alumno autenticado o a un alumno a cargo del tutor autenticado. El servicio \texttt{ficha\_retroalimentacion.py} construye el PDF en memoria con ReportLab a partir de la recomendación recuperada. El documento incluye los pasos y el material de práctica. Las planas llevan renglones para copiar las palabras del modelo y escribir una oración. Las fichas de motricidad incluyen el laberinto o las guías de papel que corresponden a la actividad.
+
+El servidor entrega un archivo \texttt{practica-<id>.pdf} cuando se solicita. La base de datos conserva la descripción y el modelo de la actividad para reproducir la ficha en descargas posteriores. El alumno puede seguir las instrucciones en pantalla o imprimir el archivo para practicar.
+
+\subsubsection{Registro y validación de la práctica}
+
+Cuando el alumno envía la foto, el servidor valida el archivo y comprueba que la recomendación pertenezca a su intento. Guarda la imagen junto con la fecha de entrega y cambia el estado a \texttt{completada}. Si el tutor vuelve a calificar el intento, se conserva la evidencia ya recibida. Los reintentos de la misma solicitud conservan el registro original.
+
+El tutor solicita la imagen desde el detalle del intento. El servidor comprueba que el alumno esté a su cargo antes de mostrar la evidencia y antes de guardar la validación. Al validar, se registran el tutor, la fecha y el estado \texttt{validada}. La foto se guarda como evidencia de la práctica, sin crear un intento adicional ni ejecutar Cloud Vision.

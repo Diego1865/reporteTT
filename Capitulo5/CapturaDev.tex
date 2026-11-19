@@ -90,42 +90,28 @@ dimensiones y pesos muy variados. Para garantizar que el payload
 enviado al servidor sea manejable sin degradar la información útil
 para el OCR, la función \texttt{procesarArchivo} valida primero el
 tipo MIME y rechaza archivos que superen los 10\,MB, con lo que
-proporciona retroalimentación inmediata antes de iniciar cualquier
-transferencia. Si la imagen es válida, se aplica un redimensionamiento
-proporcional que limita el lado mayor a 1\,200 píxeles, y el resultado
-se recodifica como JPEG con calidad 0.8, como se muestra en el Código~\ref{lst:redimensionamiento}:
+proporciona retroalimentación antes del envío. La interfaz verifica
+que el lado mayor alcance 1\,024 píxeles y el menor 768. Si la imagen
+es válida, reduce su tamaño de forma proporcional cuando puede hacerlo
+sin bajar de esos mínimos y la recodifica como JPEG con calidad 0.8
+(Código~\ref{lst:redimensionamiento}).
 
-\begin{lstlisting}[language=Python, caption={Redimensionamiento y normalización de la imagen capturada}, label={lst:redimensionamiento}]
-const procesarArchivo = (file) => {
-  if (!file.type.startsWith('image/')) {
-    setError('Solo se admiten imagenes.'); return;
-  }
-  if (file.size > 10 * 1024 * 1024) {
-    setError('La imagen es demasiado grande. Maximo 10MB.');
-    return;
-  }
-  const reader = new FileReader();
-  reader.onloadend = () => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      let { width, height } = img;
-      const MAX = 1200;
-      if (width > height && width > MAX) {
-        height *= MAX / width; width = MAX;
-      } else if (height > MAX) {
-        width *= MAX / height; height = MAX;
-      }
-      canvas.width = width; canvas.height = height;
-      canvas.getContext('2d')
-            .drawImage(img, 0, 0, width, height);
-      setImagenPreview(canvas.toDataURL('image/jpeg', 0.8));
-    };
-    img.src = reader.result;
-  };
-  reader.readAsDataURL(file);
-};
+\begin{lstlisting}[language=JavaScript, caption={Validación y escala de una imagen cargada}, label={lst:redimensionamiento}]
+const { naturalWidth: ancho, naturalHeight: alto } = img;
+if (!tieneResolucionMinima(ancho, alto)) {
+  setError(MENSAJE_RESOLUCION);
+  return;
+}
+const largo = Math.max(ancho, alto);
+const corto = Math.min(ancho, alto);
+const escala = Math.min(1, Math.max(
+  1200 / largo, LADO_LARGO_MINIMO / largo, LADO_CORTO_MINIMO / corto
+));
+const width = Math.round(ancho * escala);
+const height = Math.round(alto * escala);
 \end{lstlisting}
+
+La captura desde la cámara y los recortes se someten al mismo mínimo. El lienzo exporta su dibujo en PNG y, si el área exportada es menor, añade espacio blanco para alcanzar las dimensiones requeridas sin estirar la escritura. El servidor comprueba las dimensiones antes de llamar al OCR o guardar la foto de una práctica.
 
 \subsubsection{Herramientas de edición: rotación y recorte}
 

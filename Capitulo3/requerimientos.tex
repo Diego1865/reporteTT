@@ -1073,21 +1073,21 @@ El alumno utiliza únicamente una de las dos modalidades por intento.
 \setlength{\tabcolsep}{6pt}
 \begin{tabular}{|p{7cm}|p{8cm}|}
 \hline
-\multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación web presentará al alumno actividades de mejora sugeridas, ordenadas por prioridad según las debilidades ortográficas y caligráficas.} \\ \hline
+\multicolumn{2}{|p{15cm}|}{\textbf{Requerimiento:} La aplicación mostrará al alumno sus recomendaciones de refuerzo, ordenadas por fecha de generación, y permitirá descargar sus fichas en PDF.} \\ \hline
 \textbf{Identificador:} RF-30 &
 \textbf{Nombre:} Visualización de actividades sugeridas. \\ \cline{1-1}
 \textbf{Prioridad de desarrollo:} Alta &
 \multicolumn{1}{p{8cm}|}{} \\ \hline
-\textbf{Entrada:} Resultados del análisis ortográfico (RF-27) y caligráfico (RF-26) generados a partir del intento de escritura del alumno. &
-\textbf{Salida:} Lista de actividades de refuerzo sugeridas enfocadas en las áreas de oportunidad detectadas. \\ \hline
+\textbf{Entrada:} Intento calificado y promedios confirmados de ortografía y legibilidad disponibles al guardar la revisión (RF-29). &
+\textbf{Salida:} Lista de prácticas sugeridas con su motivo, instrucciones y ficha PDF. \\ \hline
 \multicolumn{2}{|p{15cm}|}{
-\textbf{Descripción:} La aplicación web genera recomendaciones de actividades de mejora personalizadas para el alumno. 
+\textbf{Descripción:} Al guardar la calificación, la aplicación aplica la regla RN-26 y vincula al intento una práctica opcional cuando corresponde.
 
 \vspace{0.2cm}
-\textbf{Precondición:} El alumno debe haber completado y enviado al menos un intento con resultados de análisis OCR y puntaje CLS confirmado (RF-26, RF-27).
+\textbf{Precondición:} Para consultar la lista, el alumno debe iniciar sesión. La generación requiere que el tutor guarde una calificación y que haya al menos un promedio confirmado menor que 6 sobre 10.
 
 \vspace{0.2cm}
-\textbf{Postcondición:} Las actividades sugeridas quedan registradas y disponibles para que el alumno las consulte.
+\textbf{Postcondición:} La recomendación generada queda disponible en el panel del alumno y en el detalle del intento para el tutor.
 } \\ \hline
 \end{tabular}
 \label{tab:rf30}
@@ -1108,19 +1108,17 @@ El alumno utiliza únicamente una de las dos modalidades por intento.
     \textbf{Prioridad de desarrollo:} Alta &
     \multicolumn{1}{p{8cm}|}{} \\ \hline
     
-    \textbf{Entrada:} Actividad sugerida seleccionada por el alumno desde su lista de recomendaciones. &
-    \textbf{Salida:} Registro de la actividad de refuerzo realizada por el alumno y disponible para validación por parte del profesor. \\ \hline
+    \textbf{Entrada:} Recomendación seleccionada y foto de la práctica realizada. &
+    \textbf{Salida:} Registro de la práctica completada y disponible para que el tutor la valide. \\ \hline
     
     \multicolumn{2}{|p{15cm}|}{
-    \textbf{Descripción:} El alumno selecciona una actividad sugerida y la realiza mediante el módulo de captura de escritura (RF-17 al RF-25) con el propósito de reforzar las áreas de oportunidad identificadas previamente por el sistema.
-    
-    Las actividades de refuerzo tendrán un carácter complementario y de práctica autónoma, por lo que no generarán un nuevo intento evaluado ni serán sometidas nuevamente a análisis por el OCR (RF-26) ni por la evaluación ortográfica (RF-27). La realización de la actividad podrá ser consultada y validada posteriormente por el profesor.
+    \textbf{Descripción:} El alumno realiza la práctica opcional en papel. Si desea compartirla, toma o selecciona una foto mediante el módulo de captura y confirma el envío. El tutor revisa la foto desde el detalle del intento original y puede marcar la práctica como validada. La evidencia queda vinculada a la recomendación y se guarda sin OCR ni calificación.
     
     \vspace{0.2cm}
     \textbf{Precondición:} El alumno debe estar autenticado y tener actividades sugeridas disponibles.
     
     \vspace{0.2cm}
-    \textbf{Postcondición:} La actividad realizada queda registrada en el historial del alumno como actividad de práctica completada y disponible para revisión o validación docente.
+    \textbf{Postcondición:} El alumno consulta su práctica completada en \textit{Retroalimentación}. Cuando el tutor la valida, se actualiza el estado y se conserva la fecha de validación.
     } \\ \hline
 
 \end{longtable}
@@ -1223,7 +1221,7 @@ RNF-03 &
 Confiabilidad &
 La aplicación web debe prevenir fallos derivados de entradas incorrectas por parte del usuario y garantizar condiciones operativas mínimas.
 
-Especificación: Las imágenes procesadas deben cumplir con una resolución mínima de 1024 x 768 píxeles. Si la validación falla, la aplicación web debe interrumpir el flujo de envío y emitir un mensaje de alerta solicitando una captura válida.
+Especificación: Las imágenes deben medir al menos $1024 \times 768$ píxeles en horizontal o $768 \times 1024$ en vertical. La interfaz bloquea el envío y pide otra captura cuando la resolución es insuficiente. El servidor verifica las dimensiones del archivo recibido antes de procesarlo o guardarlo.
 \\ \hline
 
 RNF-04 &

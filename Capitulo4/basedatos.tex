@@ -104,16 +104,19 @@ observaciones : VARCHAR(MAX)};
 
 El historial se consulta directamente sobre \texttt{Intentos}, sus ejercicios y sus análisis. La migración \texttt{004\_progreso\_vista.sql} define \texttt{vw\_Progreso\_Alumno} y sustituye las tablas antiguas de promedios e instantáneas. El diseño vigente no utiliza disparadores para sincronizar el progreso ni una vista denominada \texttt{vw\_historial\_alumno}. Corregir un análisis cambia el promedio consultado; no se conserva una versión histórica de cada corrección del tutor.
 
-\subsubsection{Estructuras reservadas para recomendaciones}
+\subsubsection{Persistencia de las recomendaciones}
+\label{sec:bd-recomendaciones}
 \begin{table}[H]
 \centering
-\caption{Estructuras de seguimiento y ampliación}\label{tab:entidades_SR}
+\caption{Estructuras para generar y consultar recomendaciones}\label{tab:entidades_SR}
 \begin{tabular}{p{3.8cm}p{10.4cm}}
 \toprule Estructura & Responsabilidad \\ \midrule
-Vista de progreso & \texttt{vw\_Progreso\_Alumno} obtiene los promedios derivados de los análisis por alumno. \\
-Actividad\_Sugerida & Catálogo previsto para actividades por tipo de error y ejercicio. \\
-Recomendacion & Relaciona \texttt{id\_intento} con \texttt{id\_actividad}; conserva fecha de generación, estado y prioridad. \\
+Vista de progreso & \texttt{vw\_Progreso\_Alumno} proporciona los promedios de ortografía y legibilidad al guardar la calificación. \\
+Actividad\_Sugerida & Identifica los tipos de práctica asociados con un promedio bajo de ortografía o legibilidad. \\
+Recomendacion & Vincula el intento con un tipo de práctica. Guarda el contenido de la ficha en \texttt{detalle\_json}, el estado y la evidencia de la práctica. \\
 \bottomrule
 \end{tabular}
 \end{table}
-Las dos últimas tablas existen en el esquema, pero no hay un servicio que genere recomendaciones ni un flujo de consulta y resolución en los controladores revisados. La retroalimentación disponible es la registrada por el tutor. Su ampliación se distingue del seguimiento CLS ya implementado.
+La migración \texttt{007\_retroalimentacion.sql} agrega \texttt{detalle\_json}, un índice por intento y los tipos de actividad que utiliza el servicio. El JSON guarda, entre otros datos, el motivo de la recomendación, el promedio consultado, las instrucciones y el modelo que se imprime. Así, el panel del alumno, el detalle del tutor y la descarga recuperan la misma actividad.
+
+La migración \texttt{008\_seguimiento\_practicas.sql} agrega la imagen, las fechas de entrega y validación y el identificador del tutor que validó la actividad. Al volver a calificar, la aplicación puede reemplazar o retirar la recomendación si todavía está sin entregar. Una vez recibida la foto, se conservan la ficha y su seguimiento.

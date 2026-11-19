@@ -15,7 +15,7 @@ La evaluación ortográfica se basa en la secuencia correcta de letras (\textit{
 El reconocimiento y los cálculos preceden a la inserción del intento. No hay una cola de evaluación en segundo plano: si el OCR genera una excepción, la entrega no se inserta. Cuando está desactivado o devuelve una respuesta válida sin texto, se permite guardar el intento para revisión manual. Registrar una entrega no crea por sí mismo un análisis confirmado ni modifica los promedios.
 
 \subsubsection{Preparación de imagen y contrato del OCR}
-\texttt{preparar\_imagen} acepta PNG o JPEG como una URL de datos en Base64. Aplica límites de 10 MB a los bytes de entrada y al PNG procesado, y de 20 millones de píxeles a la imagen. Compone las transparencias sobre blanco y genera un PNG RGB sin cambiar sus dimensiones. No rectifica la perspectiva ni segmenta letras antes de enviarlas al proveedor.
+\texttt{preparar\_imagen} acepta PNG o JPEG como una URL de datos en Base64. Exige un lado largo de al menos 1024 píxeles y un lado corto de al menos 768. Aplica límites de 10 MB a los bytes de entrada y al PNG procesado, y de 20 millones de píxeles a la imagen. Compone las transparencias sobre blanco y genera un PNG RGB sin cambiar sus dimensiones. No rectifica la perspectiva ni segmenta letras antes de enviarlas al proveedor.
 
 La variable \texttt{GOOGLE\_VISION\_ENABLED} habilita la llamada externa. El cliente utiliza credenciales predeterminadas de aplicación disponibles en el servidor, un tiempo de espera de 30 segundos y \texttt{retry=None}. \texttt{GOOGLE\_VISION\_LANGUAGE\_HINTS} permite configurar pistas de idioma: el código usa \texttt{es} cuando no hay un valor y una lista vacía cuando se establece \texttt{auto}. Estas opciones no corrigen la escritura del alumno.
 
