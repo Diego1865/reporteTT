@@ -6,7 +6,7 @@
 \subsection{Despliegue del sistema}
 \label{sec:despliegue}
 
-En esta sección se describe el despliegue de la aplicación web, actividad que cierra la Iteración~4 de la metodología. El sistema se empaquetó en contenedores Docker \cite{dockerDocs}, de modo que el mismo código se ejecuta sin cambios en el equipo de desarrollo y en el servidor. Se prepararon dos entornos: un entorno local de desarrollo, en el que la base de datos también se ejecuta en un contenedor, y un entorno de demostración en Google Cloud Platform \cite{gcpComputeEngine}, accesible desde cualquier navegador mediante HTTPS y destinado a la prueba piloto.
+En esta sección se describe el despliegue de la aplicación web, actividad que cierra el \textit{Release}~4 (TT II) de la metodología Scrum. El sistema se empaquetó en contenedores Docker \cite{dockerDocs}, de modo que el mismo código se ejecuta sin cambios en el equipo de desarrollo y en el servidor. Se prepararon dos entornos: un entorno local de desarrollo, en el que la base de datos también se ejecuta en un contenedor, y un entorno de demostración en Google Cloud Platform \cite{gcpComputeEngine}, accesible desde cualquier navegador mediante HTTPS y destinado a la prueba piloto.
 
 El diagrama de despliegue de la Figura~\ref{fig:diagrama_despliegue} distribuye las responsabilidades en nodos conceptuales. En la implementación, el \textit{frontend}, el \textit{backend} y el proxy inverso comparten una sola máquina virtual, y la base de datos se aloja en un servicio administrado. Esta consolidación reduce el costo de operación durante la etapa de pruebas sin modificar la separación lógica entre componentes.
 

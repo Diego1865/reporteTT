@@ -15,3 +15,7 @@
 *.synctex.DS_Store
 *.synctex(busy)
 *.md
+
+# Documento de revisión del director (no subir)
+REVISADO*.docx
+~$*.docx
