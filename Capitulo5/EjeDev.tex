@@ -1,141 +1,19 @@
 \subsection{Desarrollo del módulo de ejercicios}
 
-En esta sección se describe el desarrollo del módulo de ejercicios, 
-el cual gestiona la consulta del catálogo, la asignación de ejercicios 
-a los alumnos y el monitoreo de su progreso. Se implementaron 
-funcionalidades diferenciadas por rol: el tutor puede consultar el 
-catálogo, asignar ejercicios y gestionar sus fechas límite, mientras 
-que el alumno accede únicamente a los ejercicios que le han sido 
-asignados.
+\subsubsection{Catálogo y ruta de lectoescritura}
 
+El catálogo general contiene 120 ejercicios. El archivo \path{BD/catalogo/catalogo_ejercicios.json} define las entradas y las migraciones \texttt{005}, \texttt{006} y \texttt{009} las cargan en SQL Server. Cada ejercicio conserva su descripción, el tipo de evaluación, la respuesta de referencia y datos pedagógicos como el método, la habilidad y la pista.
 
-\subsubsection{Implementación del catálogo}
- 
-El catálogo de ejercicios se implementó como una tabla de solo lectura en la base de datos, donde cada registro contiene atributos como título, descripción y tipo de ejercicio. Los tutores no pueden crear ni modificar ejercicios, únicamente consultarlos y seleccionarlos para asignarlos a sus alumnos.
- 
-El endpoint \texttt{GET api/ejercicios/tutor/\{id\_usuario\}} retorna los ejercicios activos asignados por el tutor autenticado. La consulta realiza un \texttt{JOIN} entre \texttt{Ejercicios\_Tutor} y \texttt{Ejercicios}, filtrando únicamente las asignaciones con \texttt{id\_estatus = 1}. Incorpora una validación de autorización que impide que un tutor consulte los ejercicios de otro, retornando un error \texttt{HTTP 403} cuando el \texttt{id\_usuario} del token no coincide con el parámetro de la ruta.
- 
-En el Código~\ref{lst:ejercicios_asignados} se presenta la consulta SQL de los ejercicios activos asignados por el tutor.
+La interfaz presenta 20 ejercicios en cada etapa de la ruta: vocalización inicial, primer grupo consonántico, segundo grupo, tercer grupo y grupo avanzado. Otros 20 aparecen en ejercicios complementarios. El catálogo del tutor y la lista de ejercicios próximos del alumno utilizan la misma agrupación. La lista del alumno muestra las actividades que su tutor ha activado para su grupo.
 
-\begin{lstlisting}[language=SQL, caption={Consulta de ejercicios asignados por el tutor}, label={lst:ejercicios_asignados}]
-SELECT et.id_ejercicio_tutor, e.id_ejercicio, 
-       e.titulo, e.descripcion, e.tipo
-FROM Ejercicios_Tutor et
-JOIN Ejercicios e ON et.id_ejercicio = e.id_ejercicio
-WHERE et.id_usuario = ? AND et.id_estatus = 1
-\end{lstlisting}
+En los 13 ejercicios con imágenes, cada tarjeta muestra un dibujo y debajo la palabra que el alumno debe escribir. Las tarjetas sirven como modelo en la pantalla del lienzo y en las instrucciones para trabajar en el cuaderno. El lector usa la voz en español disponible en el navegador y permite elegir otra voz compatible. Cuando reconoce una secuencia de sílabas separadas, pronuncia cada sílaba y espera dos segundos antes de continuar. Por ejemplo, lee por separado \textit{ma}, \textit{me} y \textit{mi}.
 
-\subsubsection{Implementación de asignación de ejercicios}
- 
-La asignación de ejercicios se implementó mediante el endpoint \texttt{POST /api/ejercicios/tutor}, el cual permite al tutor seleccionar un ejercicio del catálogo y asignarlo a sus alumnos con una fecha límite de entrega opcional. Antes de registrar la asignación, el endpoint verifica que el tutor no cuente ya con una asignación activa del mismo ejercicio, retornando un error \texttt{HTTP 400} en caso de duplicado. Esta validación complementa la restricción \texttt{UQ\_ET\_activo} definida en el Código~\ref{lst:restricciones_unicidad}, garantizando que el mensaje de error sea descriptivo para el cliente.
- 
-En el Código~\ref{lst:asignacion_ejercicio} se presenta la validación de asignaciones existentes y la inserción de una nueva asignación de ejercicio.
+\subsubsection{Asignación y consulta}
 
-\begin{lstlisting}[language=SQL, caption={Validación e inserción de asignación de ejercicio}, label={lst:asignacion_ejercicio}]
+El tutor consulta el catálogo en \path{/api/tutor/ejercicios} y activa una actividad para su grupo en \path{/api/tutor/ejercicio/activar}. Puede fijar una fecha límite. El servidor comprueba que el tutor autenticado sea el dueño de la asignación y rechaza una activación duplicada. El alumno consulta sus ejercicios próximos, completados y vencidos. Una tarea de APScheduler actualiza cada hora el estado de las asignaciones. En el caso de los dictados, las consultas y el registro de intentos también comprueban el vencimiento directamente.
 
-SELECT id_ejercicio_tutor FROM Ejercicios_Tutor
-WHERE id_ejercicio = ? AND id_usuario = ? AND id_estatus = 1
- 
-INSERT INTO Ejercicios_Tutor 
-    (id_ejercicio, id_usuario, id_estatus, fecha_desactivacion)
-VALUES (?, ?, 1, ?)
-\end{lstlisting}
+\subsubsection{Dictados del tutor}
 
-\subsubsection{Implementación de ejercios para alumnos}
+La ruta \texttt{POST /api/tutor/dictados} guarda el dictado privado y lo activa para el grupo en una sola transacción. El tutor elige palabras del banco o escribe las suyas. El servidor valida que sean palabras formadas por letras, elimina duplicados sin distinguir mayúsculas y conserva los acentos. Cada palabra comienza con mayúscula en la referencia. Si se especifica fecha límite, el servidor la guarda en UTC.
 
-Los alumnos pueden ver los ejercicios pendientes, completados y vencidos, se implemetó esta función mediante los endpoints:
-
-\begin{itemize}
-    \item \texttt{GET api/ejercicios/alumno/\{id\_alumno\}/pendientes}
-    \item \texttt{GET api/ejercicios/alumno/\{id\_alumno\}/completados}
-    \item \texttt{GET api/ejercicios/alumno/\{id\_alumno\}/vencidos}
-\end{itemize}
-    
-
-Los cuales permiten visualizar los ejercicios clasificados y tener mayor control en sus ejercicios, mediante las siguientes consultas SQL:
-
-En el Código~\ref{lst:ejercicios_pendientes} se presenta la consulta de ejercicios activos para los que el alumno aún no ha registrado un intento.
-
-\begin{lstlisting}[language=SQL, caption={Consulta de ejercicios pendientes}, label={lst:ejercicios_pendientes}]
-
-    SELECT 
-        et.id_ejercicio_tutor, e.id_ejercicio, e.titulo, 
-        e.descripcion, e.tipo, e.contenido_base, et.fecha_desactivacion as fecha_fin
-    FROM Ejercicios_Tutor et
-    JOIN Ejercicios e ON et.id_ejercicio = e.id_ejercicio
-    JOIN Usuario a ON a.id_tutor = et.id_usuario AND a.tipo_usuario = 'alumno'
-    WHERE a.id_usuario = ?
-        AND et.id_estatus = 1
-        AND et.id_ejercicio_tutor NOT IN (
-    SELECT id_ejercicio_tutor FROM Intentos WHERE id_usuario = ? )
-
-\end{lstlisting}
-
-
-En el Código~\ref{lst:ejercicios_completados} se presenta la consulta de ejercicios completados a partir del historial del alumno.
-
-\begin{lstlisting}[language=SQL, caption={Consulta de ejercicios completados}, label={lst:ejercicios_completados}]
-
-    SELECT *
-    FROM vw_historial_alumno
-    WHERE id_alumno = ?
-        AND tipo_intento = 'Original'
-    ORDER BY fecha_envio DESC
-
-\end{lstlisting}
-
-Para gestionar automáticamente los ejercicios vencidos, se implementó un proceso programado utilizando la librería \texttt{APScheduler}. Este proceso tiene como objetivo actualizar periódicamente el estado de las asignaciones cuya fecha límite ha expirado, evitando que dicha validación tenga que realizarse manualmente desde el cliente o mediante consultas complejas en tiempo real.
-
-La funcionalidad se implementó mediante dos funciones principales: 
-
-\begin{itemize}
-    \item \texttt{cerrar\_ejercicios\_vencidos()}
-    \item \texttt{iniciar\_scheduler()}.
-\end{itemize}
-
-La función \texttt{cerrar\_ejercicios\_vencidos()} establece una conexión con la base de datos y ejecuta una consulta \texttt{UPDATE} sobre la tabla \texttt{Ejercicios\_Tutor}. La consulta modifica el campo \texttt{id\_estatus} de las asignaciones activas (\texttt{id\_estatus = 1}) cuya fecha de desactivación ya expiró, cambiando su valor a \texttt{2}, correspondiente al estado de ejercicio vencido.
-
-Por otra parte, la función \texttt{iniciar\_scheduler()} registra la tarea automática dentro del programador asíncrono, configurando su ejecución periódica cada hora. De esta manera, el sistema mantiene actualizados los estados de las asignaciones sin intervención manual.
-
-En el Código~\ref{lst:cierre_ejercicios} se presenta el proceso programado que actualiza el estado de las asignaciones cuya fecha de entrega ha vencido.
-
-\begin{lstlisting}[language=Python, caption={Proceso automático para cierre de ejercicios vencidos}, label={lst:cierre_ejercicios}]
-scheduler = AsyncIOScheduler()
-
-def cerrar_ejercicios_vencidos():
-    conn = connect_to_database()
-    if not conn:
-        print("Cron: Error de conexion")
-        return
-
-    cursor = conn.cursor()
-
-    try:
-        cursor.execute("""
-            UPDATE Ejercicios_Tutor
-            SET id_estatus = 2
-            WHERE id_estatus = 1
-            AND fecha_desactivacion IS NOT NULL
-            AND fecha_desactivacion < GETDATE()
-        """)
-
-        conn.commit()
-        print(f"Cron: {cursor.rowcount} ejercicios cerrados")
-
-    except Exception as e:
-        print("Cron error:", e)
-
-    finally:
-        cursor.close()
-        conn.close()
-
-def iniciar_scheduler():
-    scheduler.add_job(
-        cerrar_ejercicios_vencidos,
-        'interval',
-        hours=1
-    )
-    scheduler.start()
-\end{lstlisting}
-
-La implementación de este proceso automático permite optimizar las consultas realizadas por el sistema, mantener consistencia en los estados de las asignaciones y garantizar que los alumnos visualicen correctamente los ejercicios vencidos en tiempo real.
+El alumno escucha una palabra a la vez y puede repetirla o volver a la anterior. La pantalla le pide escribir en orden, con mayúscula inicial y sin numerar. En la revisión de intentos previos de dictado todavía pendientes, el servidor actualiza la comparación preliminar cuando la referencia anterior estaba en minúscula y hay una transcripción disponible.

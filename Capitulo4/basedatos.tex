@@ -79,4 +79,4 @@ Recomendacion & Vincula el intento con un tipo de práctica. Guarda el contenido
 \end{table}
 La migración \texttt{007\_retroalimentacion.sql} agrega \texttt{detalle\_json}, un índice por intento y los tipos de actividad que utiliza el servicio. El JSON guarda, entre otros datos, el motivo de la recomendación, el promedio consultado, las instrucciones y el modelo que se imprime. Así, el panel del alumno, el detalle del tutor y la descarga recuperan la misma actividad.
 
-La migración \texttt{008\_seguimiento\_practicas.sql} agrega la imagen, las fechas de entrega y validación y el identificador del tutor que validó la actividad. Al volver a calificar, la aplicación puede reemplazar o retirar la recomendación si todavía está sin entregar. Una vez recibida la foto, se conservan la ficha y su seguimiento.
+Al volver a calificar, la aplicación puede reemplazar o retirar la recomendación según los promedios confirmados. El almacenamiento de evidencias y su validación docente forman parte del seguimiento previsto en el RF-31.

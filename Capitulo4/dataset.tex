@@ -1,12 +1,22 @@
 \subsection{Diseño de la validación del reconocimiento y de CLS}
 \label{sec:validacion-vision}
 
-El corpus descrito en la Sección~\ref{sec:datos-validacion} se empleará para validar el reconocimiento, contrastar el CLS sugerido con la revisión manual y calibrar las medidas de legibilidad implementadas. La configuración del reconocimiento se realiza mediante las opciones de la API y la preparación de las imágenes, sin entrenamiento local del modelo. Las pruebas del código comprueban reglas de cálculo; no sustituyen la evaluación con escritura de alumnos.
+El conjunto reservado de escritura de alumnos de primer grado se empleará para validar el reconocimiento, contrastar el CLS sugerido con la revisión manual y calibrar las medidas de legibilidad implementadas. La configuración del reconocimiento se realiza mediante las opciones de la API y la preparación de las imágenes, sin entrenamiento local del modelo. Las pruebas del código comprueban reglas de cálculo; no sustituyen la evaluación con escritura de alumnos.
+
+\subsubsection{Selección de muestras}
+El conjunto de evaluación deberá incluir muestras de letra de molde en español, obtenidas tanto del lienzo digital como de fotografías de trabajos en papel. Se buscará diversidad de alumnos, dispositivos, iluminación, tamaño de letra y separación entre palabras, así como presencia de mayúsculas, minúsculas, ñ, vocales acentuadas y puntuación. Cada imagen tendrá una transcripción manual que conserve exactamente lo escrito, incluidos los errores ortográficos del alumno.
+
+Las muestras deberán contar con autorización para su uso académico y con un identificador seudónimo. Se registrarán el origen de captura, las dimensiones de la imagen, el ejercicio, la transcripción de referencia y las observaciones del revisor. Los desacuerdos de lectura se resolverán mediante revisión humana; las regiones ilegibles se identificarán explícitamente para no convertir una interpretación incierta en referencia de evaluación.
+
+\subsubsection{Uso de conjuntos públicos y muestras del piloto}
+EMNIST e IAM se revisaron como antecedentes del reconocimiento manuscrito \cite{cohen2017emnist,marti2002iam}. Para la prueba técnica preliminar se usaron muestras de OpenHand-Synth, UJI Pen Characters y Ticha, con los resultados que se presentan en la Sección~\ref{sec:resultados-cer}. La evaluación con escritura infantil en español requiere las muestras del contexto escolar descritas en esta sección.
+
+La prueba piloto prevista con 25 alumnos permitirá reunir muestras del contexto de uso. Se separarán los alumnos utilizados para elegir parámetros de preprocesamiento y umbrales de aquellos utilizados para la evaluación final, evitando que imágenes del mismo alumno aparezcan en ambos grupos. El volumen definitivo y la distribución de muestras se documentarán al realizar el piloto; no se presentan como datos ya recopilados.
 
 \subsubsection{Preparación y trazabilidad de las muestras}
 Cada caso conservará la imagen original, la imagen efectivamente enviada al servicio, su transcripción manual y el resultado completo de reconocimiento. Se registrarán la fecha, la versión de la aplicación, la biblioteca cliente y las opciones de idioma utilizadas. Las coordenadas devueltas se interpretarán sobre la imagen enviada; cualquier transformación posterior deberá conservar su correspondencia geométrica.
 
-La preparación verifica PNG o JPEG, decodifica Base64 y exige un lado largo de al menos 1024 píxeles y un lado corto de 768. También limita la entrada a 10 MB y 20 millones de píxeles y compone las transparencias sobre fondo blanco antes de generar un PNG RGB. Estos límites corresponden a la aplicación. El análisis de legibilidad usa las cajas del OCR y un umbral local de intensidad para estimar la inclinación.
+La preparación verifica PNG o JPEG, decodifica Base64 y limita la imagen a 10 MB y 20 millones de píxeles. Compone las transparencias sobre fondo blanco antes de generar un PNG RGB. El análisis de legibilidad usa las cajas del OCR y un umbral local de intensidad para estimar la inclinación.
 
 \subsubsection{Protocolo de evaluación del reconocimiento}
 Se ejecutará el mismo flujo usado por la aplicación sobre un conjunto reservado. Las referencias conservarán acentos, mayúsculas y puntuación. Se fijará y documentará una política de espacios, saltos de línea y normalización Unicode antes de comparar resultados. La distancia de edición \cite{levenshtein1966binary} permitirá contar sustituciones ($S$), eliminaciones ($D$) e inserciones ($I$):
@@ -16,7 +26,7 @@ Se ejecutará el mismo flujo usado por la aplicación sobre un conjunto reservad
 \end{equation}
 Los subíndices $c$ y $p$ indican caracteres y palabras, respectivamente; $N$ corresponde al número de unidades de la referencia \cite{neudecker2021ocreval}. Se acumularán los errores y las unidades del conjunto para obtener la tasa global. Las referencias vacías se analizarán por separado y los casos sin reconocimiento se contabilizarán como eliminaciones cuando exista texto de referencia.
 
-El objetivo OE-03 se operacionaliza como $CER\leq 0.15$ en el conjunto reservado, acompañado de WER y resultados desglosados por tipo de captura. Esta es una meta por verificar, no una precisión alcanzada. Se informarán además fallos de autenticación, indisponibilidad y tiempos de respuesta para no ocultar problemas operativos al calcular la calidad del reconocimiento.
+El objetivo OE-03 fija una meta de $CER\leq 0.15$ en el conjunto reservado de escritura de alumnos de primer grado. La evaluación escolar incluirá el WER y el desglose por tipo de captura. También se registrarán fallos de autenticación, indisponibilidad y tiempos de respuesta. La Sección~\ref{sec:resultados-cer} recoge los resultados preliminares con conjuntos públicos.
 
 \subsubsection{Validación específica de CLS}
 Para cada imagen se conservarán la respuesta esperada del ejercicio, la transcripción manual de lo que efectivamente escribió el alumno y la transcripción del OCR. La respuesta esperada y la transcripción manual cumplen funciones distintas: la primera es el objetivo del ejercicio y la segunda permite identificar errores del reconocimiento sin atribuirlos al estudiante.
@@ -30,9 +40,9 @@ Para cada métrica se prepararán ejemplos con mediciones verificadas manualment
 
 Se reportará por separado el desempeño del reconocimiento y el de las métricas. Un texto correctamente transcrito puede presentar trazos irregulares, mientras que un error del OCR puede deberse a la captura. Ninguno de estos resultados demuestra por sí solo una mejora pedagógica, la cual se evaluará mediante el piloto previsto.
 
-\subsubsection{Sesión de pruebas del análisis caligráfico}
+\subsubsection{Protocolo de validación del análisis caligráfico}
 \label{sec:sesion-validacion-legibilidad}
-La sesión de pruebas se realizó el 18 de noviembre de 2026. Su propósito es contrastar las sugerencias de alineación, tamaño, espaciado e inclinación con la revisión docente y comprobar el flujo de confirmación y consulta del progreso. Las encuestas de percepción aplicadas a alumnos y docentes durante esa sesión se reportan en el Capítulo~\ref{sec:pruebas-resultados}. Esta evaluación puntual se distingue del seguimiento de un mes previsto para el piloto.
+Las encuestas aplicadas a alumnos y docentes el 18 de noviembre de 2026 se presentan en la Sección~\ref{sec:pruebas-resultados}. Para contrastar las sugerencias de alineación, tamaño, espaciado e inclinación con la revisión docente y comprobar el flujo de confirmación y consulta del progreso, se seguirá el protocolo que se describe a continuación.
 
 \begin{enumerate}
     \item \textbf{Preparación.} Registrar la versión del sistema, los cuatro pares de umbrales y las condiciones de captura. Identificar las muestras mediante códigos y separar por alumno los casos de calibración de los reservados para evaluación, cuando se utilicen muestras de alumnos. Una misma imagen o sus variantes no podrán formar parte de ambos grupos.

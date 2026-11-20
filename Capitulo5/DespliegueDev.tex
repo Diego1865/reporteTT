@@ -132,9 +132,9 @@ for archivo in sorted((carpeta / "migraciones").glob("*.sql")):
         archivo.name)
 \end{lstlisting}
 
-La Tabla~\ref{tab:migraciones} resume las migraciones incorporadas al sistema. Todas pueden ejecutarse más de una vez sin duplicar información, ya que verifican la existencia de cada columna, índice, tabla o registro antes de crearlo o eliminarlo.
+La Tabla~\ref{tab:migraciones} resume las migraciones de la versión revisada. El inicializador registra cada archivo aplicado para evitar ejecutar de nuevo el mismo lote.
 
-\begin{longtable}{|p{5.2cm}|p{8.4cm}|}
+\begin{longtable}{|p{5.5cm}|p{8.1cm}|}
 \caption{Migraciones de la base de datos}
 \label{tab:migraciones} \\
 
@@ -154,7 +154,7 @@ La Tabla~\ref{tab:migraciones} resume las migraciones incorporadas al sistema. T
 \hline
 \texttt{003\_dictados} & Agrega \texttt{id\_tutor\_creador} a \texttt{Ejercicios} para los dictados creados por cada tutor. \\
 \hline
-\texttt{004\_progreso\_vista} & Crea índices sobre \texttt{Intentos} y sustituye las tablas \texttt{Progreso\_Alumno} e \texttt{Historial\_Alumno} por la vista \texttt{vw\_Progreso\_Alumno}, que calcula el progreso a partir de los intentos calificados. \\
+\texttt{004\_progreso\_vista} & Crea índices sobre \texttt{Intentos}, incorpora la vista de progreso calculada a partir de las revisiones docentes y retira las tablas anteriores de progreso e historial. \\
 \hline
 \texttt{005\_catalogo\_ejercicios} & Reemplaza el catálogo de ejemplo por el catálogo organizado por método de enseñanza y error ortográfico. Desactiva los ejercicios anteriores sin borrarlos, porque existen intentos que los referencian. \\
 \hline
@@ -162,7 +162,7 @@ La Tabla~\ref{tab:migraciones} resume las migraciones incorporadas al sistema. T
 \hline
 \texttt{007\_retroalimentacion} & Agrega el detalle JSON y un índice por intento en \texttt{Recomendacion}. Registra los tipos de actividad que usa el servicio de recomendaciones. \\
 \hline
-\texttt{008\_seguimiento\_practicas} & Agrega la imagen de la práctica, las fechas de entrega y de validación y el tutor que la validó. \\
+\texttt{009\_ruta\_lectoescritura} & Amplía la ruta de lectoescritura y actualiza los ejercicios de imagen publicados para mostrar el dibujo junto a la palabra. \\
 \hline
 
 \end{longtable}
@@ -342,21 +342,15 @@ Para la exportación, la cuenta de servicio de la máquina virtual tiene un rol 
 \subsubsection{Actualización del sistema}
 % ------------------------------------------------------------
 
-Para publicar una nueva versión se sigue este procedimiento:
+El flujo de GitHub Actions ejecuta las pruebas del servidor, compila la interfaz y comprueba la configuración de despliegue. Cuando la publicación automática está habilitada, el flujo de la rama \texttt{main} se conecta por IAP a la máquina de demostración. El script prepara las imágenes y solicita un respaldo de la base antes de aplicar las migraciones pendientes y actualizar los contenedores.
 
-\begin{enumerate}
-    \item Se genera un respaldo bajo demanda con \texttt{deploy/backup.sh}.
-    \item Se obtiene el código actualizado con \texttt{git pull}.
-    \item Se reconstruyen y reinician los contenedores con \texttt{docker compose up -d --build}.
-\end{enumerate}
-
-Al reiniciarse, \texttt{db-init} aplica las migraciones pendientes antes de que el \textit{backend} vuelva a atender peticiones. Por ejemplo, la migración \texttt{005} instala el nuevo catálogo de ejercicios durante la actualización. Después, cada tutor debe activar los nuevos ejercicios para sus alumnos, porque las asignaciones del catálogo anterior se desactivan.
+La migración \texttt{005} sustituyó el catálogo de ejemplo y desactivó sus asignaciones. Las ampliaciones \texttt{006} y \texttt{009} conservan las asignaciones activas del catálogo anterior. El tutor decide cuáles de las nuevas actividades activa para su grupo.
 
 % ------------------------------------------------------------
 \subsubsection{Verificación del despliegue}
 % ------------------------------------------------------------
 
-Después de cada despliegue se ejecuta la siguiente prueba de aceptación:
+La comprobación manual del entorno de demostración comprende estos pasos.
 
 \begin{enumerate}
     \item Abrir la aplicación en el navegador y verificar que el certificado sea válido y que se solicite el permiso de cámara.

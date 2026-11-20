@@ -87,7 +87,6 @@ POST & \texttt{/intento} & Registrar imagen y sugerencias. \\
 GET & \texttt{/progreso} & Resumir CLS confirmado. \\
 GET & \texttt{/retroalimentacion} & Consultar recomendaciones propias. \\
 GET & \texttt{/retroalimentacion/}\newline\texttt{\{id\_intento\}/pdf} & Descargar la ficha de un intento propio. \\
-PUT & \texttt{/retroalimentacion/}\newline\texttt{\{id\_intento\}/practica/\{id\_recomendacion\}} & Registrar la foto de la práctica. \\
 GET & \texttt{/ejercicios/proximos} & Consultar pendientes. \\
 GET & \texttt{/ejercicios/completados} & Consultar entregas y resultados. \\
 GET & \texttt{/ejercicios/vencidos} & Consultar ejercicios vencidos. \\
@@ -105,8 +104,6 @@ GET & \texttt{/alumnos/\{id\_alumno\}/intentos} & Intentos de un alumno. \\
 GET & \texttt{/intentos/\{id\_intento\}/imagen} & Imagen para la revisión. \\
 PUT & \texttt{/calificar/\{id\_intento\}} & Guardar nota, comentarios y confirmaciones. \\
 GET & \texttt{/intentos/\{id\_intento\}/}\newline\texttt{retroalimentacion/pdf} & Descargar la ficha de un alumno a su cargo. \\
-GET & \texttt{/intentos/\{id\_intento\}/}\newline\texttt{retroalimentacion/practica} & Consultar el estado y solicitar la foto. \\
-PUT & \texttt{/intentos/\{id\_intento\}/}\newline\texttt{retroalimentacion/practica/}\newline\texttt{\{id\_recomendacion\}} & Validar la práctica entregada. \\
 GET & \texttt{/resumen-progreso} & Promedios de alumnos activos. \\
 GET & \texttt{/progreso/\{id\_tutor\}} & Conteos por categoría. \\
 GET & \texttt{/riesgo/\{id\_tutor\}} & Promedio general menor que 6. \\

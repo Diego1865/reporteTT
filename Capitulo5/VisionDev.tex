@@ -1,6 +1,6 @@
 \subsection{Implementación del reconocimiento con Google Cloud Vision}
 \label{sec:vision-implementacion}
-La integración se distribuye entre \texttt{Servicios/ocr.py}, \texttt{Servicios/evaluacion.py}, \texttt{Modelo/dao\_alumno.py} y \texttt{Control/alumno.py}. El flujo de captura existente se conserva: tanto el lienzo como la fotografía envían una imagen codificada al mismo endpoint. El servicio de reconocimiento se carga de forma diferida para permitir que la aplicación inicie con el OCR desactivado.
+El registro usa \texttt{Servicios/ocr.py} para preparar la fotografía o el dibujo y solicitar la transcripción. El servicio envía un PNG RGB con fondo blanco, usa español como sugerencia de idioma por defecto y conserva las regiones de texto devueltas por Cloud Vision. Las coordenadas corresponden a la imagen que recibió el servicio. El cliente de Vision se inicializa únicamente cuando el reconocimiento está habilitado.
 
 El Código~\ref{lst:vision-call} reproduce la llamada central implementada, omitiendo la validación y el manejo de excepciones que la rodean:
 \begin{lstlisting}[language=Python, caption={Llamada implementada al servicio de reconocimiento}, label={lst:vision-call}]
@@ -20,9 +20,9 @@ anotacion = vision.TextAnnotation.to_dict(
 texto = anotacion.get("text", "")
 \end{lstlisting}
 
-La migración \texttt{001\_google\_vision.sql} incorpora \texttt{resultado\_ocr\_json} y el almacenamiento Unicode de la transcripción. El DAO guarda el objeto de reconocimiento con \texttt{json.dumps(..., ensure\_ascii=False)} y añade la comparación textual preliminar antes de insertar el intento. La migración \texttt{002\_evaluacion\_preliminar.sql} configura referencias de ejercicios conocidos; las bases existentes requieren aplicar las migraciones de manera explícita.
+El servidor guarda la transcripción en Unicode y añade al objeto de reconocimiento la comparación preliminar con la respuesta esperada. El servicio de evaluación propone un conteo de secuencias correctas de letras (CLS) y señala diferencias para revisión. Los ejercicios con varias respuestas aceptadas se comparan con la referencia que más se aproxima al texto reconocido.
 
-En el panel del tutor, el detalle de intentos muestra la imagen, la transcripción y la evaluación preliminar. El docente puede revisar las diferencias y redactar su retroalimentación antes de guardar la calificación. El resultado automático no reemplaza esa decisión.
+En el panel del tutor, el docente puede consultar la imagen, la transcripción y las sugerencias antes de guardar la calificación. Las diferencias del OCR se revisan contra la entrega para evitar atribuirle al alumno errores de transcripción.
 
 \subsubsection{Implementación del análisis de legibilidad}
 El servicio \texttt{Servicios/legibilidad.py} implementa el cálculo de alineación, tamaño, espaciado e inclinación. Utiliza las regiones de letras y palabras devueltas por Cloud Vision para agrupar renglones y obtener medidas geométricas. Para estimar la inclinación también utiliza los píxeles de tinta de la imagen. La inclinación mide la desviación respecto a la vertical, no la uniformidad del grosor del trazo.
@@ -50,7 +50,4 @@ Inclinación respecto a la vertical & $10^{\circ}$ & $40^{\circ}$ \\
 \end{tabular}
 \end{table}
 
-El 17 de noviembre de 2026 se ejecutaron las nueve pruebas unitarias de \texttt{tests/test\_legibilidad.py}, con nueve resultados satisfactorios. Los casos utilizan anotaciones geométricas e imágenes sintéticas y comprueban la regularidad y variación del tamaño, la alineación, la separación de renglones, el espaciado irregular, la ausencia de letras y la estimación de inclinación. En particular, se verifica una inclinación sintética de $30^{\circ}$ con tolerancia de $4^{\circ}$. Esta evidencia verifica el comportamiento del cálculo en los casos ensayados; no mide su concordancia con una valoración docente de escritura infantil.
-
-\subsubsection{Prueba exploratoria de uso}
-El equipo realizó una prueba exploratoria de la aplicación con un participante del entorno familiar de uno de sus integrantes. Esta experiencia se registra como un antecedente de uso previo a la sesión del 18 de noviembre de 2026. Por su alcance, no constituye el piloto de 25 alumnos ni permite estimar la precisión del reconocimiento o la concordancia de las medidas con una evaluación docente. No se atribuyen a esta prueba ajustes de umbrales ni resultados cuantitativos que no estén documentados.
+Las nueve pruebas de \texttt{tests/test\_legibilidad.py} utilizan anotaciones geométricas e imágenes sintéticas. Comprueban el cálculo de tamaño, alineación y espaciado, incluidas entradas sin letras. En una imagen con una inclinación de $30^{\circ}$, la prueba permite una diferencia de hasta $4^{\circ}$. Para evaluar la concordancia con la revisión docente se necesitan muestras de escritura infantil.

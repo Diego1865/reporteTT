@@ -1,0 +1,14 @@
+\subsection{Pruebas y resultados}
+\label{sec:pruebas-resultados}
+
+La verificación del sistema incluyó pruebas automatizadas, una sesión con alumnos de primer grado y docentes, y una medición del error de transcripción en tres conjuntos públicos.
+
+\subsubsection{Verificación automatizada}
+
+Se ejecutaron 102 pruebas unitarias de la versión revisada sin llamar a Google Cloud Vision. Todas pasaron. Se comprobaron, entre otras funciones, la consistencia del catálogo y sus migraciones, la evaluación de dictados y la conservación de mayúsculas y acentos en el cálculo del CER. También se verificaron las reglas de legibilidad y los datos que alimentan el progreso. La precisión del OCR se midió aparte, con las imágenes de la Sección~\ref{sec:resultados-cer}.
+
+\input{Capitulo5/disenoPruebas}
+\input{Capitulo5/resultadosAlumnos}
+\input{Capitulo5/resultadosDocentes}
+\input{Capitulo5/resultadosCER}
+\input{Capitulo5/discusionPruebas}
