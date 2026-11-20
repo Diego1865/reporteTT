@@ -33,7 +33,7 @@ Se ejecutará el mismo flujo usado por la aplicación sobre un conjunto reservad
 \end{equation}
 Los subíndices $c$ y $p$ indican caracteres y palabras, respectivamente; $N$ corresponde al número de unidades de la referencia \cite{neudecker2021ocreval}. Se acumularán los errores y las unidades del conjunto para obtener la tasa global. Las referencias vacías se analizarán por separado y los casos sin reconocimiento se contabilizarán como eliminaciones cuando exista texto de referencia.
 
-El objetivo OE-03 fija una meta de $CER\leq 0.15$ en el conjunto reservado de escritura de alumnos de primer grado. La evaluación escolar incluirá el WER y el desglose por tipo de captura. También se registrarán fallos de autenticación, indisponibilidad y tiempos de respuesta. La Sección~\ref{sec:resultados-cer} recoge los resultados preliminares con conjuntos públicos.
+El objetivo OE-03 fija una meta de $CER\leq 0.15$ en el conjunto reservado de escritura de alumnos de primer grado. La evaluación escolar incluirá la tasa de error de palabras (\textit{Word Error Rate}, WER por sus siglas en inglés) y el desglose por tipo de captura. También se registrarán fallos de autenticación, indisponibilidad y tiempos de respuesta. La Sección~\ref{sec:resultados-cer} recoge los resultados preliminares con conjuntos públicos.
 
 \subsubsection{Validación específica de CLS}
 Para cada imagen se conservarán la respuesta esperada del ejercicio, la transcripción manual de lo que efectivamente escribió el alumno y la transcripción del OCR. La respuesta esperada y la transcripción manual cumplen funciones distintas: la primera es el objetivo del ejercicio y la segunda permite identificar errores del reconocimiento sin atribuirlos al estudiante.
