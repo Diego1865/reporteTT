@@ -17,7 +17,7 @@ papel como desarrollador, alguna de las responsabilidades siguientes:
 
 \begin{itemize}
     \item \textbf{\textit{Product Owner}.} Mantiene y prioriza el \textit{product
-    backlog}, traduce las observaciones de los directores del TT y de los docentes en
+    backlog}, traduce las observaciones de los sinodales y directores del TT y de la docentes en
     elementos de trabajo y decide si un incremento cumple con lo esperado.
 
     \item \textbf{\textit{Scrum Master}.} Facilita los eventos de Scrum, da seguimiento al
@@ -29,9 +29,9 @@ papel como desarrollador, alguna de las responsabilidades siguientes:
     integración de OCR y CLS, base de datos y pruebas.
 \end{itemize}
 
-Como partes interesadas (\textit{stakeholders}) participan los directores del TT, que
-revisan los incrementos y aportan retroalimentación, y los docentes de primer grado, que
-validan la pertinencia pedagógica de los ejercicios y de los resultados.
+Como partes interesadas (\textit{stakeholders}) participan los sinodales y directores del TT, que
+revisan los incrementos y aportan retroalimentación, y la docente de primer grado, que
+validan la pertinencia pedagógica de los ejercicios.
 
 \subsubsection{Eventos}
 
@@ -47,9 +47,9 @@ disponibilidad de un equipo académico:
     descompone en tareas.
 
     \item \textbf{\textit{Daily Scrum} adaptada.} Reuniones breves, presenciales o
-    virtuales, varias veces por semana, para revisar el avance y los impedimentos.
+    virtuales, dos veces por semana, para revisar el avance y los impedimentos.
 
-    \item \textbf{\textit{Sprint review}.} Presentación del incremento a los directores del
+    \item \textbf{\textit{Sprint review}.} Presentación del incremento a los sinodales y profesor de seguimiento del
     TT para recibir retroalimentación y ajustar el \textit{product backlog}.
 
     \item \textbf{\textit{Sprint retrospective}.} Revisión interna del equipo sobre la
@@ -91,9 +91,8 @@ Scrum es adecuado para este proyecto por las siguientes razones:
     adaptar esas decisiones con frecuencia.
 
     \item \textbf{Retroalimentación continua.} El sistema atiende a un público con
-    necesidades pedagógicas específicas. Las \textit{sprint reviews} con los directores y
-    las validaciones con docentes permiten ajustar los requisitos funcionales y de
-    usabilidad de manera progresiva.
+    necesidades pedagógicas. Las \textit{sprint reviews} con los sinodales y
+    las validaciones con la docente permiten ajustar los requisitos funcionales de manera progresiva.
 
     \item \textbf{Equipo pequeño y desarrollo por módulos.} Scrum está pensado para equipos
     pequeños y autoorganizados \cite{schwaber2020scrum}. La arquitectura contempla
@@ -111,8 +110,7 @@ El desarrollo se planeó en aproximadamente veinte \textit{sprints} de dos seman
 correspondientes al periodo de enero a octubre de 2026 (Tabla~\ref{tab:dias}).
 Los \textit{sprints} se agruparon en cuatro \textit{releases} distribuidos en las dos
 etapas del Trabajo Terminal (TT). Los \textit{releases} 1 y 2 (correspondientes a TT I)
-se enfocaron en la construcción de la infraestructura web, la recolección del dataset y
-el preprocesamiento de imágenes, atendiendo tempranamente los riesgos asociados a la
+se enfocaron en la construcción de la infraestructura web y el diseño del sistema, atendiendo tempranamente los riesgos asociados a la
 calidad de la entrada. Los \textit{releases} 3 y 4 (correspondientes a TT II) contemplan
 la validación de Cloud Vision, el análisis caligráfico y ortográfico y las pruebas
 finales con usuarios. En la versión actual ya están implementados el cálculo de
@@ -124,8 +122,7 @@ de 2026, descrita en la Sección~\ref{sec:sesion-validacion-legibilidad}.
 
 \paragraph{Etapa 1 — TT I: Fundamentos y Procesamiento Visual}
 
-El objetivo de esta etapa fue establecer la infraestructura tecnológica, recolectar el
-corpus de datos necesario y validar los algoritmos de preprocesamiento de imágenes.
+El objetivo de esta etapa fue establecer la infraestructura tecnológica, realizar el diseño del sistema incluyendo las estructura del catalogo de ejercicios.
 
 \textbf{\textit{Release} 1 (\textit{sprints} 1–5): Infraestructura Web y Módulo de Captura}
 
@@ -147,16 +144,25 @@ Backend) y el módulo de digitalización de escritura.
     y normalización básica de imágenes al momento de la subida o permitir subir por el lienzo digital.
 \end{itemize}
 
-\textbf{\textit{Release} 2 (\textit{sprints} 6–10): Conformación del Conjunto de Datos y Preprocesamiento}
+\textbf{\textit{Release} 2 (\textit{sprints} 6--10): Conformación del catálogo de ejercicios y preprocesamiento de imágenes}
 
-\textit{Objetivo:} Seleccionar y adaptar datasets existentes de escritura manuscrita
-con letra de molde e incorporar muestras adicionales, incluyendo caracteres con tilde,
-para completar la variabilidad necesaria en la validación del servicio
-de reconocimiento.
+\textit{Objetivo:} Conformar el catálogo de ejercicios de escritura para primer grado,
+seleccionando y adaptando ejercicios existentes alineados con los contenidos de
+Lenguajes del Plan de Estudio 2022, de modo que cada ejercicio cuente con una respuesta
+esperada que permita su evaluación mediante CLS, así como preparar el preprocesamiento
+de las imágenes capturadas.
 
 \textit{Elementos principales del backlog:}
 \begin{itemize}
-    \item Recolección y etiquetado de muestras de escritura manuscrita de primer grado.
+    \item Selección y adaptación de ejercicios de escritura en letra de molde (dictado
+    de palabras, completar palabras y enunciados breves) a partir de materiales
+    educativos de primer grado.
+    \item Definición de la estructura del catálogo: tipo de ejercicio, error ortográfico
+    o grafía que se trabaja, nivel de dificultad y respuestas aceptadas para el cálculo
+    de CLS (Sección~\ref{sec:cls}).
+    \item Revisión de la pertinencia pedagógica de los ejercicios con docentes de primer
+    grado.
+    \item Registro del catálogo en la base de datos (Sección~\ref{sec:diseno-bd}).
     \item Implementación de algoritmos de binarización, eliminación de ruido y
     corrección de perspectiva.
     \item Desarrollo de algoritmos de segmentación para identificar renglones y palabras
@@ -165,11 +171,10 @@ de reconocimiento.
 
 \textit{Riesgo atendido:}
 \begin{itemize}
-    \item \textbf{Riesgo:} Insuficiencia de datos públicos en español para la
-    validación del servicio de reconocimiento.
-    \item \textbf{Mitigación:} Creación de un dataset propio validado para integrarlo
-    con un conjunto existente, asegurando la diversidad caligráfica necesaria para el
-    siguiente \textit{release}.
+    \item \textbf{Riesgo:} Ejercicios no adecuados al nivel de primer grado o sin una
+    respuesta esperada única, lo que impediría calcular el puntaje CLS de forma confiable.
+    \item \textbf{Mitigación:} Validación del catálogo con docentes y definición explícita
+    de las respuestas aceptadas de cada ejercicio antes de su publicación.
 \end{itemize}
 
 \paragraph{Etapa 2 — TT II: Inteligencia Artificial e Integración}
@@ -185,7 +190,7 @@ de retroalimentación mediante ejercicios correctivos.
 \textit{Elementos principales del backlog:}
 \begin{itemize}
     \item Integración y validación de Google Cloud Vision
-    utilizando el corpus de evaluación del \textit{Release} 2.
+    utilizando los conjuntos de datos OpenHand-Synth Español y Ticha.
     \item Programación de métricas geométricas para evaluar alineación, tamaño,
     espaciado e inclinación del trazo.
     \item Validación técnica de la precisión de la transcripción.
@@ -223,24 +228,3 @@ letras (\textit{Correct Letter Sequence}, CLS), descrita en la Sección~\ref{sec
     comparación con la puntuación CLS manual (meta de concordancia del OE-05).
 \end{itemize}
 
-La Tabla~\ref{tab:releases-scrum} resume la correspondencia entre cada \textit{release},
-su etapa del TT, los \textit{sprints} que abarca y los entregables principales asociados.
-
-\begin{table}[H]
-\centering
-\caption{Correspondencia entre \textit{releases} de Scrum y entregables del proyecto.}
-\label{tab:releases-scrum}
-\begin{tabular}{|p{1.4cm}|p{1.3cm}|p{1.5cm}|p{3.2cm}|p{5cm}|}
-\hline
-\textbf{Release} & \textbf{Etapa} & \textbf{Sprints} & \textbf{Objetivo} & \textbf{Entregables principales} \\
-\hline
-1 & TT I & 1--5 & Infraestructura web y captura & Base de datos, autenticación, módulo de captura de imágenes \\
-\hline
-2 & TT I & 6--10 & Dataset y preprocesamiento & Corpus etiquetado, algoritmos de binarización y segmentación \\
-\hline
-3 & TT II & 11--15 & OCR y métricas caligráficas & Servicio Cloud Vision validado, métricas geométricas, módulo de retroalimentación \\
-\hline
-4 & TT II & 16--20 & CLS, integración y despliegue & Evaluación ortográfica CLS, reportes de progreso, sistema integrado desplegado \\
-\hline
-\end{tabular}
-\end{table}
