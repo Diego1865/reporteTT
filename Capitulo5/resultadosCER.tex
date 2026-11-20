@@ -22,3 +22,60 @@ Ticha & 80 & 3\,631 & 1\,095 & 0 & 30.16\,\% \\
 \end{table}
 
 Sobre las 80 imágenes sintéticas en español, el OCR obtuvo un CER de 13.75\,\%. El filtro de calidad de OpenHand-Synth limita la variedad de casos difíciles de ese conjunto \cite{openhandSynthDataset}. En UJI, cada imagen contiene una sola letra y el OCR devolvió 32 transcripciones vacías. Las muestras de Ticha son renglones de documentos históricos. La Tabla~\ref{tab:resultados-cer} presenta una tasa por conjunto para conservar el contexto de cada medición.
+
+\subsubsection{Reconocimiento de la escritura de los alumnos}
+\label{sec:resultados-cer-alumnos}
+
+Para medir el reconocimiento con escritura real de primer grado se utilizaron las entregas de los ejercicios de la sesión escolar registradas en la base de datos. No se repitió ninguna solicitud a Google Cloud Vision: cada entrega conserva la imagen enviada y la transcripción que el servicio devolvió en ese momento (\texttt{texto\_detectado\_ocr}).
+
+\paragraph{Muestra}
+Se revisaron todas las entregas registradas entre el 17 y el 20 de noviembre y se conservaron 24, de 17 alumnos:
+\begin{itemize}
+    \item 12 se enviaron durante la sesión del 18 de noviembre: 9 escritas en el lienzo y 3 fotografías del cuaderno.
+    \item 12 son fotografías del cuaderno que se subieron la noche del 19 de noviembre, porque no se alcanzaron a enviar durante la sesión. La fecha escrita en las hojas confirma que corresponden a los ejercicios del 18 de noviembre.
+\end{itemize}
+Se excluyeron las entregas enviadas desde las cuentas que el equipo utiliza para pruebas y una entrega idéntica a otra del mismo alumno, enviada dos veces. Las entregas corresponden a los dos ejercicios descritos en la Sección~\ref{sec:diseno-pruebas}; en algunas fotografías aparecen ambos en la misma hoja.
+
+\paragraph{Procedimiento}
+Para cada imagen se elaboró una transcripción manual fiel de lo que el alumno escribió, no de la respuesta esperada. Por ejemplo, si un alumno escribió \textit{dodó} o \textit{hube}, la referencia es \textit{dodó} o \textit{hube}; así, los errores ortográficos del alumno no se atribuyen al OCR. En las hojas con dos columnas, la referencia sigue el orden de lectura por columna.
+
+En 13 de las 15 fotografías el OCR transcribió también texto ajeno al ejercicio: encabezados del cuaderno, la fecha y, en algunos casos, el nombre del alumno escrito en la hoja. Como la meta del OE-03 se refiere a la escritura del alumno, el CER se calculó sobre la zona del ejercicio: se descartaron del resultado del OCR las líneas que corresponden a esos elementos y se conservaron las marcas que el OCR leyó dentro de la zona, como las cruces que algunos cuadernos tienen en el margen. La presencia de texto ajeno se reporta aparte como un problema de encuadre.
+
+Varios alumnos separaron las palabras con puntos, que el OCR transcribe como signos de puntuación, y en algunos trazos no es claro si una letra es mayúscula o minúscula. Por ello se reportan dos variantes:
+\begin{itemize}
+    \item \textbf{Estricta:} conserva puntuación y mayúsculas, como en los conjuntos públicos.
+    \item \textbf{Sin puntuación ni mayúsculas:} compara solo las letras y los espacios.
+\end{itemize}
+En 13 entregas la transcripción se marcó como dudosa por trazos sobrescritos, borrones, letras ambiguas (\textit{n} o \textit{h}, \textit{u} o \textit{v}) o palabras cortadas por el encuadre.
+
+\begin{table}[htbp]
+\centering
+\caption{CER y WER del OCR sobre las entregas de los alumnos (zona del ejercicio).}
+\label{tab:resultados-cer-alumnos}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+Captura & Entregas & Caracteres & CER estricto & CER sin punt. & WER sin punt. \\
+\midrule
+Lienzo (sesión) & 9 & 139 & 15.65\,\% & 12.95\,\% & 32.26\,\% \\
+Fotografía (sesión) & 3 & 57 & 15.79\,\% & 14.04\,\% & 38.46\,\% \\
+Fotografía (entrega posterior) & 12 & 249 & 16.06\,\% & 14.86\,\% & 36.36\,\% \\
+\midrule
+Total & 24 & 445 & 15.89\,\% & 14.16\,\% & 35.35\,\% \\
+Total sin casos dudosos & 11 & 201 & 10.19\,\% & 8.46\,\% & 27.27\,\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Resultados}
+La Tabla~\ref{tab:resultados-cer-alumnos} resume los resultados. Al comparar solo letras y espacios, el CER global fue de 14.16\,\%, por debajo de la meta de 15\,\% del objetivo OE-03. En el lienzo fue de 12.95\,\% y en el conjunto de las fotografías, de 14.71\,\%. Con la variante estricta, el CER global fue de 15.89\,\%; la diferencia proviene sobre todo de la puntuación y de la confusión entre mayúsculas y minúsculas. Si se excluyen las 13 transcripciones dudosas, el CER sin puntuación baja a 8.46\,\%. Por ello, buena parte del error se concentra en los trazos que también resultan ambiguos para una persona.
+
+Los errores observados fueron de cuatro tipos:
+\begin{itemize}
+    \item \textbf{Confusión de letras de forma parecida:} \textit{u} leída como \textit{y} o como \textit{v}, \textit{b} como \textit{6}, \textit{n} como \textit{h} o \textit{D}, y \textit{c} como \textit{l} o \textit{e}.
+    \item \textbf{Marcas del cuaderno unidas a las palabras:} las cruces del margen se leyeron como letras (\textit{Xvaca}, \textit{Abota}).
+    \item \textbf{División u omisión de palabras:} el OCR separó palabras escritas con letras espaciadas (\textit{bo ta}) y, en algunas fotografías, no reconoció palabras completas.
+    \item \textbf{Encuadre:} en dos fotografías la columna izquierda quedó cortada, y en 13 el OCR incluyó texto ajeno al ejercicio.
+\end{itemize}
+
+Estos valores son preliminares. Provienen de 445 caracteres de dos ejercicios con palabras cortas, y la referencia la elaboró una sola persona. Las transcripciones y el cálculo por entrega se conservaron, sin datos personales, para que el equipo pueda revisarlos.
