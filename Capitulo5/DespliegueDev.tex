@@ -208,52 +208,6 @@ Se eligió SQL Server 2022 en su edición Express porque no tiene costo de licen
 
 Inicialmente, la base de datos se ejecutaba en un contenedor dentro de la misma máquina virtual. Posteriormente se trasladó a Cloud SQL, de modo que los datos ya no dependen del disco de la máquina virtual y esta puede recrearse sin pérdida de información. La migración se realizó con una exportación \texttt{.bak} de la base del contenedor, que después se importó en la instancia de Cloud SQL. Durante el proceso se detuvo el acceso web para evitar escrituras.
 
-En la Figura~\ref{fig:despliegue_gcp} se presenta la distribución de los contenedores y los servicios administrados en el entorno de demostración.
-
-\begin{figure}[H]
-    \centering
-    \resizebox{\textwidth}{!}{%
-    \begin{tikzpicture}[
-      font=\small,
-      comp/.style={rectangle, draw, fill=gray!8, rounded corners=1pt, minimum height=0.9cm, minimum width=4.2cm, align=center},
-      serv/.style={rectangle, draw, fill=blue!5, rounded corners=1pt, minimum height=0.9cm, minimum width=4.4cm, align=center},
-      zona/.style={rectangle, draw, thick, rounded corners=3pt, inner xsep=12pt, inner ysep=14pt},
-      flecha/.style={-{Stealth[length=2.2mm]}, thick}]
-
-    % Usuario
-    \node[comp] (nav) at (0,3.9) {\guillemotleft device\guillemotright\\Navegador del tutor o alumno};
-
-    % Contenedores en la VM
-    \node[comp] (web) at (0,0) {\guillemotleft container\guillemotright\\\texttt{web} (Caddy)\\puertos 80 / 443};
-    \node[comp] (front) at (-2.7,-2.6) {\guillemotleft container\guillemotright\\\texttt{frontend} (Next.js)\\puerto 3000};
-    \node[comp] (back) at (2.7,-2.6) {\guillemotleft container\guillemotright\\\texttt{backend} (FastAPI)\\puerto 8000};
-    \node[comp] (init) at (2.7,-5.0) {\guillemotleft container\guillemotright\\\texttt{db-init}\\migraciones};
-
-    % Servicios administrados
-    \node[serv] (sql) at (10,-3.8) {\guillemotleft service\guillemotright\\Cloud SQL\\SQL Server 2022 Express};
-    \node[serv] (vision) at (10,-1.2) {\guillemotleft service\guillemotright\\Cloud Vision};
-    \node[serv] (secret) at (10,1.6) {\guillemotleft service\guillemotright\\Secret Manager};
-    \node[serv] (gcs) at (10,-6.6) {\guillemotleft service\guillemotright\\Cloud Storage\\respaldos \texttt{.bak}};
-
-    \begin{scope}[on background layer]
-    \node[zona, fill=gray!3, fit=(web)(front)(back)(init)] (vm) {};
-    \node[anchor=south west, font=\small\bfseries] at (vm.north west) {VM \texttt{grafia-demo} (Docker Compose)};
-    \node[zona, dashed, fill=blue!2, fit=(secret)(vision)(sql)(gcs)] (gcp) {};
-    \node[anchor=south west, font=\small\bfseries] at (gcp.north west) {Servicios de Google Cloud};
-    \end{scope}
-
-    \draw[flecha] (nav) -- node[right, pos=0.3]{HTTPS} (web);
-    \draw[flecha] (web) -- node[left, pos=0.4]{\texttt{/*}} (front);
-    \draw[flecha] (web) -- node[right, pos=0.4]{\texttt{/api/*}} (back);
-    \draw[flecha] (back.east) -- node[above, sloped]{IP privada} (sql.west);
-    \draw[flecha, dashed] (init.east) -- (sql.west);
-    \draw[flecha] (back.north east) -- node[above, sloped]{HTTPS} (vision.west);
-    \draw[flecha, dashed] (vm.north east) -- node[above, sloped]{secretos} (secret.west);
-    \draw[flecha, dashed] (sql) -- node[right]{exportación diaria} (gcs);
-    \end{tikzpicture}}
-    \caption{Despliegue del sistema en Google Cloud Platform}
-    \label{fig:despliegue_gcp}
-\end{figure}
 
 % ------------------------------------------------------------
 \subsubsection{Orquestación en el entorno de demostración}
