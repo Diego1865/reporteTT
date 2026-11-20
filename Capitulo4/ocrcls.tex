@@ -1,7 +1,7 @@
 \subsection{Diseño del reconocimiento y de la evaluación mediante CLS}
 \label{sec:vision-metricas}
 
-La evaluación ortográfica se basa en la secuencia correcta de letras (\textit{Correct Letter Sequence}, CLS), presentada en la Sección~\ref{sec:cls}. El diseño separa tres responsabilidades: obtener una transcripción con Google Cloud Vision, compararla con las respuestas aceptadas del ejercicio y someter el resultado a revisión del tutor. El cálculo CLS es determinista y se ejecuta en el servidor; no requiere entrenar un modelo lingüístico ni interpretar el significado de la respuesta.
+La evaluación ortográfica se basa en CLS, presentada en la Sección~\ref{sec:cls}. El diseño separa tres responsabilidades: obtener una transcripción con Google Cloud Vision, compararla con las respuestas aceptadas del ejercicio y someter el resultado a revisión del tutor. El cálculo CLS es determinista y se ejecuta en el servidor; no requiere entrenar un modelo lingüístico ni interpretar el significado de la respuesta.
 
 \subsubsection{Flujo de registro del intento}
 \begin{enumerate}

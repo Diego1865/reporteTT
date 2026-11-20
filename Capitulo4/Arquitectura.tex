@@ -1,7 +1,7 @@
 \subsection{Arquitectura del sistema basada en MVC}
 \label{sec:arquitectura-mvc}
 
-La arquitectura de la plataforma se basa en el patrón Modelo--Vista--Controlador (MVC), que organiza el sistema según tres responsabilidades: representar los datos y las reglas de la aplicación, presentar la información al usuario y atender sus solicitudes. En este proyecto, la Vista se implementa con Next.js y componentes React; el Controlador, con las rutas y dependencias de FastAPI; y el Modelo, con los módulos de datos, acceso a persistencia y servicios de evaluación del Back-End. SQL Server proporciona el almacenamiento del Modelo.
+La arquitectura de la plataforma se basa en el patrón MVC, que organiza el sistema según tres responsabilidades: representar los datos y las reglas de la aplicación, presentar la información al usuario y atender sus solicitudes. En este proyecto, la Vista se implementa con Next.js y componentes React; el Controlador, con las rutas y dependencias de FastAPI; y el Modelo, con los módulos de datos, acceso a persistencia y servicios de evaluación del Back-End. SQL Server proporciona el almacenamiento del Modelo.
 
 MVC se aplica en una organización web con el Front-End separado de la API. La Vista envía solicitudes HTTP al Controlador y actualiza sus componentes con las respuestas JSON. El Controlador valida la solicitud, verifica permisos y delega las operaciones al Modelo. El cambio de la evaluación ortográfica a CLS modifica las reglas de evaluación dentro del Modelo y los datos mostrados en la Vista, manteniendo esta organización MVC.
 
@@ -12,7 +12,7 @@ MVC se aplica en una organización web con el Front-End separado de la API. La V
     \item \textbf{Controlador (C):} corresponde a \texttt{Control/auth.py}, \texttt{Control/alumno.py} y \texttt{Control/tutor.py}. Sus rutas reciben las acciones de la Vista, utilizan los esquemas de validación, verifican autenticación y permisos mediante las dependencias de \texttt{Control/dependencies.py} y las comprobaciones de propiedad, llaman a las operaciones del Modelo y construyen las respuestas HTTP.
 \end{itemize}
 
-El patrón de acceso a datos DAO es una decisión interna del Modelo dentro de MVC. En la implementación actual, el DAO del alumno coordina el reconocimiento, el cálculo preliminar y el registro del intento; el DAO del tutor coordina la persistencia de la confirmación. Por ello, el Modelo comprende tanto las operaciones de negocio como su persistencia, y no se limita a las tablas de la base de datos. Los servicios de cálculo son módulos del Back-End que apoyan esas operaciones.
+El patrón de acceso a datos (\textit{Data Access Object}, DAO por sus siglas en inglés) es una decisión interna del Modelo dentro de MVC. En la implementación actual, el DAO del alumno coordina el reconocimiento, el cálculo preliminar y el registro del intento; el DAO del tutor coordina la persistencia de la confirmación. Por ello, el Modelo comprende tanto las operaciones de negocio como su persistencia, y no se limita a las tablas de la base de datos. Los servicios de cálculo son módulos del Back-End que apoyan esas operaciones.
 
 \subsubsection{Interacción MVC durante la evaluación CLS}
 \begin{enumerate}
@@ -30,25 +30,42 @@ La Figura~\ref{fig:arquitectura_completa} identifica explícitamente la Vista, e
 \centering
 \begingroup
 \setstretch{1}
+\definecolor{mvcVista}{HTML}{28639D}
+\definecolor{mvcControl}{HTML}{18736A}
+\definecolor{mvcModelo}{HTML}{65449A}
+\definecolor{mvcExterno}{HTML}{9A5D1A}
+\definecolor{mvcEnlace}{HTML}{425366}
 \begin{tikzpicture}[
-  bloque/.style={draw, rounded corners, fill=gray!8, text width=5.2cm, minimum height=1cm, align=center, font=\small},
-  enlace/.style={-{Stealth},thick}, font=\small]
-\node[bloque] (fe) at (0,0) {\textbf{Vista (V)}\\Next.js / React\\Interfaz de alumno y tutor};
-\node[bloque] (api) at (0,-2.8) {\textbf{Controlador (C)}\\FastAPI: rutas de \texttt{Control}\\Validación, permisos y respuestas};
-\node[font=\small\bfseries, minimum height=0.6cm] (modelo) at (0,-5.2) {Modelo (M)};
-\node[bloque] (dao) at (0,-6.6) {Datos y operaciones DAO\\Contratos, consultas y transacciones};
-\node[bloque] (db) at (7,-6.6) {SQL Server\\Persistencia del Modelo};
-\node[bloque] (serv) at (0,-8.8) {Servicios del Modelo\\OCR, CLS, legibilidad y progreso};
-\node[bloque] (google) at (7,-8.8) {Google Cloud Vision\\Reconocimiento externo};
+  bloque/.style={rounded corners=5pt, line width=0.7pt, text width=6.4cm,
+    inner xsep=9pt, inner ysep=8pt, align=center, text=black!88},
+  capa/.style={bloque, draw=#1!75, fill=#1!9},
+  externo/.style={capa=mvcExterno, text width=4.2cm},
+  enlace/.style={<->, >=Stealth, draw=mvcEnlace, line width=0.75pt},
+  rotulo/.style={font=\footnotesize, text=mvcEnlace, inner sep=3pt},
+  font=\small]
+\node[capa=mvcVista] (fe) {\textcolor{mvcVista}{\textbf{Vista (V)}}\\
+  Next.js / React\\Interfaz de alumno y tutor};
+\node[capa=mvcControl, below=11mm of fe] (api) {\textcolor{mvcControl}{\textbf{Controlador (C)}}\\
+  Rutas de \texttt{Control} en FastAPI\\Validación, permisos y respuestas};
+\node[below=15mm of api, text=mvcModelo, font=\small\bfseries] (modelo) {Modelo (M)};
+\node[capa=mvcModelo, below=6mm of modelo] (dao) {\textcolor{mvcModelo}{\textbf{Datos y operaciones DAO}}\\
+  Contratos, consultas y transacciones};
+\node[capa=mvcModelo, below=10mm of dao] (serv) {\textcolor{mvcModelo}{\textbf{Servicios del Modelo}}\\
+  OCR, CLS, legibilidad y progreso};
+\node[externo, right=25mm of dao] (db) {\textcolor{mvcExterno}{\textbf{SQL Server}}\\
+  Persistencia del Modelo};
+\node[externo, right=25mm of serv] (google) {\textcolor{mvcExterno}{\textbf{Google Cloud Vision}}\\
+  Reconocimiento externo};
 \begin{scope}[on background layer]
-\node[draw, thick, rounded corners, fit=(modelo)(dao)(serv), inner sep=10pt] {};
+\node[draw=mvcModelo!65, fill=mvcModelo!3, rounded corners=7pt,
+  fit=(modelo)(dao)(serv), inner sep=10pt] {};
 \end{scope}
-\draw[enlace,<->] (fe) -- node[right]{HTTP / JSON + JWT} (api);
-\draw[enlace,<->] (api) -- node[right]{Operaciones y resultados} (modelo);
-\draw[enlace,<->] (modelo) -- (dao);
-\draw[enlace,<->] (dao) -- node[above]{SQL} (db);
-\draw[enlace,<->] (dao) -- (serv);
-\draw[enlace,<->] (serv) -- node[above]{OCR} (google);
+\draw[enlace] (fe) -- node[rotulo, right=3pt]{HTTP / JSON + JWT} (api);
+\draw[enlace] (api) -- node[rotulo, pos=0.38, right=3pt]{Operaciones y resultados} (modelo);
+\draw[enlace] (modelo) -- (dao);
+\draw[enlace] (dao) -- node[rotulo, above=1pt]{SQL} (db);
+\draw[enlace] (dao) -- (serv);
+\draw[enlace] (serv) -- node[rotulo, above=1pt]{OCR} (google);
 \end{tikzpicture}
 \endgroup
 \caption{Arquitectura MVC de la plataforma con evaluación mediante CLS}

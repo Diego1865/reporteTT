@@ -1,13 +1,13 @@
 \subsection{Factibilidad}
  
-El estudio de factibilidad es un instrumento que sirve para orientar la toma de decisiones en la evaluación de un proyecto. Se formula con base en información que tiene la menor incertidumbre posible para medir las posibilidades de éxito o fracaso, apoyándose en él se tomará la decisión de proceder o no con su implementación.
- 
+El estudio de factibilidad es un instrumento que sirve para orientar la toma de decisiones en la evaluación de un proyecto. Se formula con base en información que tiene la menor incertidumbre posible para medir las posibilidades de éxito o fracaso, apoyándose en él se tomará la decisión de proceder o no con su implementación.\cite{miranda2005gestion}
+
 % ─────────────────────────────────────────────
 \subsubsection{Factibilidad Técnica}
 % ─────────────────────────────────────────────
  
-La factibilidad técnica estudia la posibilidad tecnológica para que el proyecto pueda llevarse a cabo satisfactoriamente con el menor riesgo posible. Las herramientas tecnológicas se dividen en software y hardware.
- 
+La factibilidad técnica estudia la posibilidad tecnológica para que el proyecto pueda llevarse a cabo satisfactoriamente con el menor riesgo posible. Las herramientas tecnológicas se dividen en software y hardware. \cite[pp.~63--64]{kendall2011analisis}
+
 \paragraph{Software y entornos de ejecución}
 
 El desarrollo local utiliza React/Next.js para la interfaz, FastAPI para el servidor y SQL Server para la persistencia. El presupuesto considera el uso de las herramientas de la Tabla~\ref{tab:software} sin gasto incremental de licencias para el equipo. Los servicios de nube y el reconocimiento OCR se presupuestan por separado, según su consumo.
@@ -65,8 +65,8 @@ Los equipos disponibles permiten ejecutar la aplicación local y las pruebas de 
 \subsubsection{Factibilidad Operativa}
 % ─────────────────────────────────────────────
  
-La factibilidad operativa comprende una determinación de la probabilidad para que un proyecto se realice o funcione como se supone, considerando si se cuenta con el personal capacitado y los recursos humanos necesarios. Al realizar el análisis se calcula tanto el tiempo de esfuerzo como las horas dedicadas al sistema.
- 
+La factibilidad operativa comprende una determinación de la probabilidad para que un proyecto se realice o funcione como se supone, considerando si se cuenta con el personal capacitado y los recursos humanos necesarios. Al realizar el análisis se calcula tanto el tiempo de esfuerzo como las horas dedicadas al sistema. \cite{kendall2011analisis}
+
 En la Tabla~\ref{tab:dias} se presentan los días hábiles considerados para planificar el desarrollo del proyecto.
 
 \begin{table}[H]
@@ -176,11 +176,11 @@ Herramientas de desarrollo en las condiciones de uso previstas & \$0 \\ \hline
 \end{tabularx}
 \end{table}
 
-El costo de nube depende de las horas de ejecución, el almacenamiento, el tráfico y las solicitudes de reconocimiento. La Tabla~\ref{tab:rubros-nube} delimita los rubros de la demo configurada. Las referencias de los proveedores permiten consultar sus tarifas, pero no acreditan el gasto de esta aplicación \cite{gcpComputeEngine,googlevisionPricing}.
+El costo de nube depende de las horas de ejecución, el almacenamiento, el tráfico y las solicitudes de reconocimiento. La Tabla~\ref{tab:rubros-nube} presenta los rubros de consumo de la demo. Las tarifas publicadas pueden utilizarse para estimar el costo de operación después del periodo de prueba \cite{gcpComputeEngine,googlevisionPricing}.
 
 \begin{table}[H]
 \centering
-\caption{Rubros que deben medirse para presupuestar la demo}
+\caption{Rubros de consumo de la demo en Google Cloud}
 \label{tab:rubros-nube}
 \begin{tabular}{|p{3.6cm}|p{11cm}|}
 \hline
@@ -195,7 +195,7 @@ Otros servicios & Consumo facturable de Secret Manager y de los servicios auxili
 \end{tabular}
 \end{table}
 
-Se define $C_{\mathrm{nube}}$ como el costo total en MXN durante los dos meses previstos para las pruebas. Para obtenerlo deben sumarse los rubros anteriores con sus tarifas y consumos, documentar la moneda y, si corresponde, el tipo de cambio y los impuestos. Los créditos de prueba deben registrarse por separado del costo del servicio. En ausencia de una cotización fechada y de registros de consumo, este componente queda pendiente de cuantificación.
+Al 20 de noviembre de 2026, el saldo reportado del crédito de prueba de Google Cloud era de \$4{,}168.92 MXN, de un total inicial de \$5{,}000.00 MXN. La diferencia, \$831.08 MXN (16.62\% del crédito inicial), corresponde al crédito utilizado al corte. Este importe se toma como estimación del costo acumulado de nube cubierto por el crédito durante las pruebas y se incorpora a las tablas de costos. El importe de cierre dependerá del consumo adicional hasta el fin de las pruebas.
 
 \begin{table}[H]
 \centering
@@ -203,10 +203,10 @@ Se define $C_{\mathrm{nube}}$ como el costo total en MXN durante los dos meses p
 \label{tab:servicios}
 \begin{tabularx}{\textwidth}{|X|r|}
 \hline
-\textbf{Servicio} & \textbf{Total previsto (MXN)} \\ \hline
+\textbf{Servicio} & \textbf{Importe (MXN)} \\ \hline
 Electricidad e internet: 3 integrantes por \$800 mensuales, durante 10 meses & \$24{,}000 \\ \hline
-Servicios de nube durante el periodo de pruebas & $C_{\mathrm{nube}}$ \\ \hline
-\textbf{Total de operación} & $24{,}000 + C_{\mathrm{nube}}$ \\ \hline
+Servicios de nube durante las pruebas, estimación al corte & \$831.08 \\ \hline
+\textbf{Total de operación estimado} & \textbf{\$24{,}831.08} \\ \hline
 \end{tabularx}
 \end{table}
 
@@ -224,9 +224,9 @@ Equipo de cómputo y dispositivos de prueba disponibles & \$81{,}000 \\ \hline
 Electricidad e internet durante 10 meses & \$24{,}000 \\ \hline
 Licencias de herramientas de desarrollo previstas & \$0 \\ \hline
 \textbf{Subtotal con los supuestos documentados} & \textbf{\$705{,}000} \\ \hline
-Servicios de nube, incluido OCR & $C_{\mathrm{nube}}$ \\ \hline
-\textbf{Total de referencia} & $705{,}000 + C_{\mathrm{nube}}$ \\ \hline
+Servicios de nube, incluido OCR, estimación al corte & \$831.08 \\ \hline
+\textbf{Total de referencia estimado} & \textbf{\$705{,}831.08} \\ \hline
 \end{tabularx}
 \end{table}
 
-El gasto de operación previsto es de $24{,}000 + C_{\mathrm{nube}}$ MXN, sujeto a los consumos efectivos. Los sueldos equivalentes y el valor del equipo aportado no representan desembolsos del proyecto. Para cerrar la factibilidad económica de la demo se requiere completar el costo de nube y contrastarlo con el presupuesto disponible; los archivos de despliegue, por sí solos, no permiten afirmar un gasto real.
+Al corte, el crédito de prueba cubrió los \$831.08 MXN estimados de consumo de nube y conservó el 83.38\% de su saldo inicial. El total de operación combina el presupuesto de electricidad e internet para diez meses con la estimación de nube al corte. El total de referencia incorpora además el valor asignado al trabajo académico y al equipo aportado.
