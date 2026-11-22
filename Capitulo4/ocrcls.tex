@@ -33,6 +33,7 @@ La comparación también produce observaciones de omisión, adición, sustituci�
 El algoritmo extrae secuencias de letras después de normalizar a NFC. Conserva la distinción entre mayúsculas, acentos y la letra ñ, y excluye números y signos de puntuación. Del manual de \textit{aimswebPlus} se toma el criterio de contar los pares adyacentes e incluir los límites de cada palabra \cite[pp.~62--63]{aimswebplus2025manual}. Para una palabra esperada $w$, hay $|w|-1$ pares interiores y dos pares en los extremos, por lo que el total es $|w|+1$. Por ejemplo, \texttt{casa} aporta los pares inicio--c, c--a, a--s, s--a y a--fin.
 
 Para automatizar el criterio, Graf-IA registra las ocurrencias de cada par en dos multiconjuntos, $B(w)$ para la palabra esperada y $B(v)$ para la escrita. Cada coincidencia consume una ocurrencia en ambos, de modo que el número de veces que puede acreditarse un par $b$ es la menor de sus dos frecuencias. La Ecuación~\eqref{eq:cls-pares} suma esas coincidencias y describe el cálculo implementado en \texttt{Servicios/cls.py}.
+\cite{aimswebplus2025manual}.
 \begin{equation}
  C(w,v)=\sum_b \min\bigl(\operatorname{freq}_{B(w)}(b),
                             \operatorname{freq}_{B(v)}(b)\bigr).
@@ -41,6 +42,7 @@ Para automatizar el criterio, Graf-IA registra las ocurrencias de cada par en do
 La coincidencia exige adyacencia y orden dentro del par. El conteo por frecuencias admite coincidencias en distintas posiciones de la palabra.
 
 Las listas de palabras se alinean mediante \texttt{SequenceMatcher}. En los segmentos de sustitución se emparejan en orden. Una palabra esperada sin correspondencia aporta cero secuencias correctas y las palabras añadidas quedan fuera del cálculo. En la Ecuación~\eqref{eq:cls-implementado}, $C$ suma los aciertos y $P$ suma los pares posibles de las $m$ palabras esperadas. El cociente pondera cada palabra según su número de pares posibles y se convierte mediante la regla de la Ecuación~\eqref{eq:cls-escala}.
+\cite{aimswebplus2025manual}.
 \begin{equation}
  C=\sum_{i=1}^{m}C(w_i,v_i),\qquad
  P=\sum_{i=1}^{m}(|w_i|+1),\qquad

@@ -1,71 +1,105 @@
-\subsection{Diagrama de clases del sistema}
+\subsection{Diagrama de clases del backend}
 
-Con el objetivo de definir la estructura estática del sistema, en la Figura~\ref{fig:diagrama_clases} se presenta el diagrama de clases, el cual describe las principales entidades, sus atributos y las relaciones existentes entre ellas.
+La Figura~\ref{fig:diagrama_clases} muestra las clases de los módulos \texttt{usuarios.py} y \texttt{escritura.py} del Modelo, con sus principales atributos y operaciones. FastAPI construye un \texttt{Alumno} o un \texttt{Tutor} según el rol de la sesión autenticada. Ambas clases heredan de la clase abstracta \texttt{Usuario}.
 
 \begin{figure}[H]
     \centering
-    \resizebox{0.85\textwidth}{!}{%
-    \renewcommand{\umldrawcolor}{black}\renewcommand{\umlfillcolor}{gray!8}\renewcommand{\umltextcolor}{black}
-    \begin{tikzpicture}[font=\small]
-    \begin{class}[text width=4.2cm]{Usuario}{3,0}
-      \attribute{-id: int}
-      \attribute{-nombre: string}
-      \attribute{-username: string}
-      \attribute{-password: string}
-      \operation{+login()}
-    \end{class}
-    \begin{class}[text width=4.2cm]{Tutor}{-1.5,-4.2}
-      \inherit{Usuario}
-      \operation{+registrarAlumno()}
-      \operation{+verResultados()}
-      \operation{+modificarResultados()}
-      \operation{+confirmarPuntaje()}
-    \end{class}
-    \begin{class}[text width=4.2cm]{Alumno}{4,-4.2}
-      \inherit{Usuario}
-      \attribute{-grado: int}
-      \attribute{-grupo: string}
-      \operation{+realizarEjercicio()}
-      \operation{+verResultados()}
-    \end{class}
-    \begin{class}[text width=5.4cm]{Ejercicio}{10,-4.2}
-      \attribute{-id: int}
-      \attribute{-descripcion: string}
-      \attribute{-respuestasAceptadas: list}
-      \attribute{-fechaLimite: date}
-    \end{class}
-    \begin{class}[text width=4.2cm]{Intento}{6.5,-9}
-      \attribute{-id: int}
-      \attribute{-fecha: date}
-      \attribute{-imagen: string}
-      \attribute{-textoProcesado: string}
-    \end{class}
-    \begin{class}[text width=4.2cm]{Resultado}{2,-13.5}
-      \attribute{-id: int}
-      \attribute{-clsObtenidas: int}
-      \attribute{-clsPosibles: int}
-      \attribute{-calificacion: float}
-      \attribute{-confirmadoTutor: bool}
-    \end{class}
-    \begin{class}[text width=4.2cm]{AnalisisOCR}{9.5,-13.5}
-      \operation{+procesarImagen()}
-    \end{class}
-    \begin{class}[text width=6cm]{EvaluacionCLS}{2,-18.2}
-      \operation{+calcularCLS(texto, respuestas)}
-      \operation{+calcularPuntaje()}
-    \end{class}
-    \association{Tutor}{registra}{1}{Alumno}{}{*}
-    \association{Alumno}{realiza}{1}{Intento}{}{*}
-    \association{Ejercicio}{}{1}{Intento}{}{*}
-    \association{Intento}{}{1}{Resultado}{}{0..1}
-    \unidirectionalAssociation{Intento}{}{}{AnalisisOCR}
-    \unidirectionalAssociation{Resultado}{}{}{EvaluacionCLS}
+    \shorthandoff{<>}
+    \resizebox{0.97\textwidth}{!}{%
+    \renewcommand{\umldrawcolor}{black}
+    \renewcommand{\umlfillcolor}{gray!8}
+    \renewcommand{\umltextcolor}{black}
+    \begin{tikzpicture}[font={\small\setstretch{1}}, uml enlace/.style={>=angle 90}]
+        \begin{abstractclass}[text width=6.7cm]{Usuario}{0,0}
+            \attribute{+id\_usuario: int}
+            \attribute{+nombre: str [0..1]}
+            \operation{\underline{+autenticar(username, contrasena): dict}}
+            \operation[0]{+obtener\_perfil()}
+            \operation{+cambiar\_contrasena(\ldots)}
+        \end{abstractclass}
+
+        \coordinate (filaRoles) at ([yshift=-1.15cm]Usuario.south);
+        \coordinate (posAlumno) at ([xshift=-4.2cm]filaRoles);
+        \coordinate (posTutor) at ([xshift=4.2cm]filaRoles);
+        \begin{class}[text width=6.7cm]{Alumno}{posAlumno}
+            \attribute{\underline{+rol: str = alumno}}
+            \operation{+registrar\_intento(\ldots)}
+            \operation{+obtener\_ejercicios\_proximos()}
+            \operation{+obtener\_progreso()}
+            \operation{+entregar\_practica(\ldots)}
+        \end{class}
+
+        \begin{class}[text width=6.7cm]{Tutor}{posTutor}
+            \attribute{\underline{+rol: str = tutor}}
+            \operation{+registrar\_alumno(datos)}
+            \operation{+crear\_dictado(datos)}
+            \operation{+activar\_ejercicio(id\_ejercicio, fecha\_fin)}
+            \operation{+calificar\_intento(\ldots)}
+        \end{class}
+
+        \coordinate (filaEscritura) at ([yshift=-.85cm]Alumno.south);
+        \coordinate (posEjercicio) at ([xshift=8.4cm]filaEscritura);
+        \begin{class}[text width=6.7cm]{AsignacionEjercicio}{filaEscritura}
+            \attribute{+id\_asignacion: int}
+            \attribute{+id\_estatus: int}
+            \attribute{+vencida: bool}
+            \operation{+validar\_entrega()}
+        \end{class}
+
+        \begin{class}[text width=6.7cm]{Ejercicio}{posEjercicio}
+            \attribute{+contenido: dict [0..1]}
+            \attribute{+tipo: str [0..1]}
+            \attribute{+descripcion: str [0..1]}
+            \operation{\underline{+crear\_dictado(palabras): Ejercicio}}
+            \operation{+fecha\_de\_activacion(fecha)}
+            \operation{+evaluar\_transcripcion(ocr): dict}
+        \end{class}
+
+        \coordinate (filaIntento) at ([yshift=-1.03cm]Ejercicio.south);
+        \coordinate (posResultado) at ([xshift=-8.4cm]filaIntento);
+        \begin{class}[text width=6.7cm]{ResultadoOrtografico}{posResultado}
+            \attribute{+correctas: int}
+            \attribute{+posibles: int}
+            \attribute{+sugerido: dict}
+            \attribute{+/puntaje: float}
+            \attribute{+/errores: int}
+            \operation{+detalle(): dict}
+        \end{class}
+
+        \begin{class}[text width=6.7cm]{Intento}{filaIntento}
+            \attribute{+texto\_detectado: str [0..1]}
+            \attribute{+ocr: dict}
+            \operation{\underline{+desde\_entrega(ejercicio, ocr): Intento}}
+            \operation{+evaluacion\_preliminar(confirmado)}
+            \operation{+sugerir\_cls(evaluacion)}
+            \operation{+confirmar\_cls(correctas)}
+            \operation{+legibilidad\_sugerida()}
+        \end{class}
+
+        \coordinate (herencia) at ([yshift=.55cm]filaRoles);
+        \draw (Alumno.north) |- (herencia) -| (Tutor.north);
+        \draw[umlcd style inherit line] (Usuario.south) -- (herencia);
+
+        \draw[uml enlace,->] ([yshift=-1cm]AsignacionEjercicio.north east)
+            -- node[above, font=\footnotesize] {ejercicio}
+               node[pos=.86, below, font=\footnotesize] {1}
+               ([yshift=-1cm]Ejercicio.north west);
+        \draw[uml enlace,->] (Intento.north)
+            -- node[midway, right, font=\footnotesize] {ejercicio}
+               node[pos=.82, left, font=\footnotesize] {1}
+               (Ejercicio.south);
+
+        \draw[umlcd style dashed line,->] ([yshift=-1cm]Intento.north west)
+            -- node[above, font=\footnotesize] {crea}
+               ([yshift=-1cm]ResultadoOrtografico.north east);
     \end{tikzpicture}}
-    \caption{Diagrama de clases del sistema}
+    \caption{Diagrama de clases del backend}
     \label{fig:diagrama_clases}
 \end{figure}
 
-El diagrama es un modelo conceptual de responsabilidades, no una declaración de clases Python ni una copia de las tablas SQL. Representa la estructura estática del sistema, mostrando las principales entidades, sus atributos y las relaciones entre ellas. Se observa una jerarquía de herencia donde la clase \textit{Usuario} es la base para los actores \textit{Tutor} y \textit{Alumno}. Asimismo, se modelan los elementos centrales del sistema como \textit{Ejercicio}, \textit{Intento} y \textit{Resultado}, los cuales permiten gestionar el proceso de captura, análisis y retroalimentación de la escritura. Finalmente, se integran los módulos de procesamiento \textit{AnalisisOCR} y \textit{EvaluacionCLS}, responsables de la conversión de imágenes a texto y del cálculo del puntaje ortográfico mediante la secuencia correcta de letras, respectivamente. La clase \textit{Resultado} conserva las secuencias correctas obtenidas y posibles, la calificación y si el tutor ya confirmó el puntaje.
+\texttt{AsignacionEjercicio} e \texttt{Intento} mantienen una referencia a \texttt{Ejercicio}. Al confirmar el CLS, \texttt{Intento.confirmar\_cls()} crea y devuelve un \texttt{ResultadoOrtografico}, que valida el conteo y calcula el puntaje y las secuencias no acreditadas. La flecha discontinua indica esa dependencia de creación. El cálculo preliminar utiliza las funciones de \texttt{Servicios/cls.py} a través de \texttt{Servicios/evaluacion.py}.
+
+Los controladores llaman a los métodos de \texttt{Alumno} o \texttt{Tutor} y los DAO gestionan la persistencia. FastAPI utiliza esquemas Pydantic, como \texttt{IntentoCreate} e \texttt{IntentoTutorResponse}, para validar las solicitudes y definir la estructura de las respuestas.
 
 %------------------------------------------------
 
