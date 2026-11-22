@@ -3,7 +3,7 @@
 
 El 19 de noviembre de 2026 se procesaron 292 imágenes con el módulo de reconocimiento de Graf-IA, que utiliza Google Cloud Vision en el modo \texttt{DOCUMENT\_TEXT\_DETECTION} con la sugerencia de idioma \texttt{es}. La prueba utilizó muestras de las particiones de prueba de tres conjuntos públicos. De OpenHand-Synth se seleccionaron 80 imágenes sintéticas con referencias en español. De UJI Pen Characters se tomaron dos muestras por cada una de 66 clases de letras y se convirtieron los trazos a imágenes. De Ticha se seleccionaron 80 renglones manuscritos en español procedentes de siete documentos históricos de Oaxaca. La selección usó la semilla 20261119 \cite{openhandSynthDataset,ujiPenCharactersV2,tichaManuscriptLines}.
 
-El CER de cada conjunto se calculó dividiendo la suma de las distancias de edición entre el total de caracteres de referencia, según el protocolo de la Sección~\ref{sec:validacion-vision}. Antes de la comparación se normalizó el texto a Unicode NFC y se sustituyeron las secuencias de espacios y saltos de línea por un solo espacio, sin espacios al inicio ni al final. Se conservaron las mayúsculas, los acentos, la ñ y los signos de puntuación. Las respuestas sin texto se contabilizaron como eliminaciones. Una solicitud de OpenHand-Synth requirió un reintento y se incluyó una sola vez en el cálculo final.
+El CER de cada conjunto se calculó dividiendo la suma de las distancias de edición entre el total de caracteres de referencia, según la Ecuación~\eqref{eq:cer-wer}. Antes de la comparación se normalizó el texto a Unicode NFC y se sustituyeron las secuencias de espacios y saltos de línea por un solo espacio, sin espacios al inicio ni al final. Se conservaron las mayúsculas, los acentos, la ñ y los signos de puntuación. Las respuestas sin texto se contabilizaron como eliminaciones. Una solicitud de OpenHand-Synth requirió un reintento y se incluyó una sola vez en el cálculo final. La Tabla~\ref{tab:resultados-cer} presenta los conteos y la tasa de error por conjunto.
 
 \begin{table}[htbp]
 \centering
@@ -21,7 +21,7 @@ Ticha & 80 & 3\,631 & 1\,095 & 0 & 30.16\,\% \\
 \end{tabular}
 \end{table}
 
-Sobre las 80 imágenes sintéticas en español, el OCR obtuvo un CER de 13.75\,\%. El filtro de calidad de OpenHand-Synth limita la variedad de casos difíciles de ese conjunto \cite{openhandSynthDataset}. En UJI, cada imagen contiene una sola letra y el OCR devolvió 32 transcripciones vacías. Las muestras de Ticha son renglones de documentos históricos. La Tabla~\ref{tab:resultados-cer} presenta una tasa por conjunto para conservar el contexto de cada medición.
+Sobre las 80 imágenes sintéticas en español, el OCR obtuvo un CER de 13.75\,\%. El filtro de calidad de OpenHand-Synth limita la variedad de casos difíciles de ese conjunto \cite{openhandSynthDataset}. En UJI, cada imagen contiene una sola letra y el OCR devolvió 32 transcripciones vacías. Las muestras de Ticha son renglones de documentos históricos.
 
 \subsubsection{Reconocimiento de la escritura de los alumnos}
 \label{sec:resultados-cer-alumnos}
@@ -53,6 +53,7 @@ En 13 entregas la transcripción se marcó como dudosa por trazos sobrescritos, 
 \caption{CER y WER del OCR sobre las entregas de los alumnos (zona del ejercicio).}
 \label{tab:resultados-cer-alumnos}
 \renewcommand{\arraystretch}{1.2}
+\setlength{\tabcolsep}{3.5pt}
 \begin{tabular}{@{}lrrrrr@{}}
 \toprule
 Captura & Entregas & Caracteres & CER estricto & CER sin punt. & WER sin punt. \\

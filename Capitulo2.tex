@@ -119,16 +119,16 @@ Brecha digital & Puede generar desigualdades de acceso \\
 
 El análisis de estos factores permite comprender que la tecnología, cuando se implementa como herramienta complementaria y supervisada, puede contribuir significativamente al fortalecimiento de competencias académicas fundamentales, favoreciendo tanto el aprendizaje individual como el desarrollo de habilidades digitales necesarias en el contexto actual.
 
-\subsection{Secuencia correcta de letras (CLS)}
+\subsection{CLS}
 \label{sec:cls}
 
-La secuencia correcta de letras (CLS) es un método de puntuación de la ortografía que se basa únicamente en la corrección ortográfica de la palabra, es decir, en
+El CLS es un método de puntuación de la ortografía que se basa únicamente en la corrección ortográfica de la palabra, es decir, en
 las letras convencionales y no en la plausibilidad fonológica de lo escrito \cite{treiman2016measures}. En la literatura se describe como una medida letter sequence: otorga un punto por la primera letra correcta, uno por
 la última letra correcta y uno por cada par de letras consecutivas escrito en el orden correcto \cite{treiman2016measures}.
 
 En \textit{aimswebPlus}, una CLS es un par de letras correctamente ordenadas dentro de una sílaba o palabra; por tanto, no equivale a contar letras
 correctas de forma aislada. Además, se consideran los espacios antes y después de la sílaba o palabra, de modo que cada letra extra al inicio o al final se
-penaliza. Cada CLS vale un punto, y una palabra de $n$ letras escrita correctamente obtiene $n+1$ puntos \cite{aimswebplus2025manual}. Como podemos observar en la siguiente tabla \ref{tab:cls_ejemplos} adaptada de \cite{aimswebplus2025manual}, los ejemplos de como se realiza la puntuación de CLS para distintas palabras.
+penaliza. Cada CLS vale un punto, y una palabra de $n$ letras escrita correctamente obtiene $n+1$ puntos \cite{aimswebplus2025manual}. La Tabla~\ref{tab:cls_ejemplos}, adaptada del manual de \textit{aimswebPlus} \cite{aimswebplus2025manual}, muestra cómo se asigna la puntuación CLS a distintas palabras.
 
 
 % --- Tabla ---
@@ -244,7 +244,7 @@ La escritura infantil presenta variaciones de forma, tamaño y separación que p
 El análisis local de inclinación utiliza una copia de la imagen en escala de grises y un umbral fijo de intensidad para identificar tinta dentro de los recortes de letras reconocidas. La binarización de Otsu y los umbrales adaptativos son alternativas que podrían evaluarse según las condiciones de captura \cite{otsu1979threshold,opencvMetricas}; no forman parte del procesamiento actual ni se presentan como etapas internas conocidas del servicio de Google.
 
 \subsection{Arquitectura de la aplicación web}
-El desarrollo de aplicaciones web modernas suele estructurarse bajo patrones de diseño que permiten organizar de manera eficiente los componentes del sistema. Uno de los modelos más utilizados es la arquitectura Modelo Vista Controlador (\textit{Model-View-Controller}, MVC por sus siglas en inglés), la cual divide la aplicación en tres capas principales: modelo, vista y controlador \cite{sommerville2015software}.
+El desarrollo de aplicaciones web modernas suele estructurarse bajo patrones de diseño que permiten organizar de manera eficiente los componentes del sistema. El patrón arquitectónico Modelo-Vista-Controlador (\textit{Model-View-Controller}, MVC por sus siglas en inglés) organiza la aplicación en tres componentes principales, el modelo, la vista y el controlador \cite{sommerville2015software}.
 
 En la Figura \ref{fig:MVC} se presenta el esquema general del patrón arquitectónico MVC aplicado al sistema propuesto.
 
@@ -261,7 +261,7 @@ El modelo es responsable del almacenamiento de información, incluyendo usuarios
 
 Posteriormente, el controlador recibe la información procesada y genera una respuesta que es enviada a la vista, encargada de mostrar al usuario la retroalimentación correspondiente. Esta estructura modular favorece la mantenibilidad, escalabilidad y claridad del sistema \cite{sommerville2015software}.
 
-Además, el despliegue del sistema en un servidor web funcional permite su acceso mediante navegador, garantizando un entorno controlado para la prueba piloto y la centralización de datos. La adopción del modelo MVC facilita la integración coherente de los módulos de OCR, evaluación ortográfica mediante CLS y evaluación del trazo dentro de una arquitectura estructurada.
+Además, el despliegue del sistema en un servidor web funcional permite su acceso mediante navegador, garantizando un entorno controlado para la prueba piloto y la centralización de datos. La adopción del patrón MVC facilita la integración coherente de los módulos de OCR, evaluación ortográfica mediante CLS y evaluación del trazo dentro de una arquitectura estructurada.
 
 \subsection{Experiencia de Usuario y Diseño de Interfaces Educativas}
 
@@ -272,7 +272,7 @@ El diseño de interfaces para aplicaciones educativas destinadas a niños de ent
 A diferencia de los usuarios adultos, los estudiantes de primer grado poseen una capacidad limitada para procesar múltiples estímulos simultáneos, por lo que la interfaz debe minimizar la carga cognitiva mediante un diseño limpio y el uso de metáforas visuales claras \cite{nngroup2019children}. Esto implica la utilización de áreas de interacción amplias, botones de gran tamaño y tipografías legibles que cumplan con índices de lecturabilidad específicos para su nivel escolar, como el de Fernández-Huerta \cite{fernandez1959lecturabilidad}. Un diseño visualmente ordenado permite que el alumno mantenga la atención en el objetivo principal: la práctica de la escritura manuscrita \cite{gelman2014design}.
 
 \subsubsection{Arquitectura de Información y Navegación}
-La navegación en sistemas educativos infantiles debe ser sencilla y preferiblemente plana, ya que las estructuras jerárquicas profundas suelen confundir a los usuarios jóvenes \cite{gelman2014design}. Es recomendable que las funcionalidades principales sean accesibles con un mínimo de interacciones y que el uso de íconos representativos esté acompañado de etiquetas de texto sencillas que refuercen la autonomía del estudiante dentro de la plataforma \cite{nngroup2019children}. Además, la interfaz de captura debe ser lo suficientemente robusta para generar imágenes de alta calidad que permitan un procesamiento eficiente por parte de el servicio de reconocimiento Google Cloud Vision.
+La navegación en sistemas educativos infantiles debe ser sencilla y preferiblemente plana, ya que las estructuras jerárquicas profundas suelen confundir a los usuarios jóvenes \cite{gelman2014design}. Es recomendable que las funcionalidades principales sean accesibles con un mínimo de interacciones y que el uso de íconos representativos esté acompañado de etiquetas de texto sencillas que refuercen la autonomía del estudiante dentro de la plataforma \cite{nngroup2019children}. Además, la interfaz de captura debe ser lo suficientemente robusta para generar imágenes de alta calidad que permitan un procesamiento eficiente por parte del servicio de reconocimiento Google Cloud Vision.
 
 \subsubsection{Retroalimentación y Sistemas de Respuesta}
 La retroalimentación inmediata es un componente crítico para el aprendizaje guiado, especialmente en la detección de errores ortográficos y la evaluación de la calidad del trazo \cite{gelman2014design}. El sistema debe proporcionar respuestas multisensoriales que informen al niño sobre sus aciertos y áreas de mejora de manera constructiva, reduciendo la ansiedad ante el error y promoviendo la persistencia en la actividad académica \cite{gelman2014design}. Esta respuesta constante ayuda a consolidar las conexiones neuronales necesarias para el dominio de la escritura \cite{james2012effects}.

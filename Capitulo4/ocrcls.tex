@@ -30,23 +30,24 @@ La comparación también produce observaciones de omisión, adición, sustituci�
 
 \subsubsection{Reglas del cálculo CLS implementado}
 \label{sec:diseno-cls}
-El algoritmo extrae secuencias de letras después de normalizar a NFC. Conserva la distinción entre mayúsculas, acentos y la letra ñ; excluye números y signos de puntuación. Cada palabra esperada $w$ se delimita con marcadores de inicio y fin y aporta $|w|+1$ pares adyacentes. Por ejemplo, \texttt{casa} aporta los pares inicio--c, c--a, a--s, s--a y a--fin.
+El algoritmo extrae secuencias de letras después de normalizar a NFC. Conserva la distinción entre mayúsculas, acentos y la letra ñ, y excluye números y signos de puntuación. Del manual de \textit{aimswebPlus} se toma el criterio de contar los pares adyacentes e incluir los límites de cada palabra \cite[pp.~62--63]{aimswebplus2025manual}. Para una palabra esperada $w$, hay $|w|-1$ pares interiores y dos pares en los extremos, por lo que el total es $|w|+1$. Por ejemplo, \texttt{casa} aporta los pares inicio--c, c--a, a--s, s--a y a--fin.
 
-Sean $B(w)$ y $B(v)$ los multiconjuntos de pares de una palabra esperada y su correspondencia escrita. El conteo se define como:
+Para automatizar el criterio, Graf-IA registra las ocurrencias de cada par en dos multiconjuntos, $B(w)$ para la palabra esperada y $B(v)$ para la escrita. Cada coincidencia consume una ocurrencia en ambos, de modo que el número de veces que puede acreditarse un par $b$ es la menor de sus dos frecuencias. La Ecuación~\eqref{eq:cls-pares} suma esas coincidencias y describe el cálculo implementado en \texttt{Servicios/cls.py}.
 \begin{equation}
  C(w,v)=\sum_b \min\bigl(\operatorname{freq}_{B(w)}(b),
                             \operatorname{freq}_{B(v)}(b)\bigr).
+ \label{eq:cls-pares}
 \end{equation}
-Se conserva la multiplicidad de cada par: una repetición adicional no puede aportar más ocurrencias que las presentes en la referencia. La coincidencia exige adyacencia y orden dentro del par, pero no la misma posición absoluta dentro de la palabra.
+La coincidencia exige adyacencia y orden dentro del par. El conteo por frecuencias admite coincidencias en distintas posiciones de la palabra.
 
-Las listas de palabras se alinean mediante \texttt{SequenceMatcher}. En los segmentos de sustitución se emparejan en orden; una palabra esperada sin correspondencia aporta cero secuencias correctas. Los segmentos de inserción se omiten: las palabras adicionales no aumentan el denominador ni descuentan puntos. Para las $m$ palabras de la referencia:
+Las listas de palabras se alinean mediante \texttt{SequenceMatcher}. En los segmentos de sustitución se emparejan en orden. Una palabra esperada sin correspondencia aporta cero secuencias correctas y las palabras añadidas quedan fuera del cálculo. En la Ecuación~\eqref{eq:cls-implementado}, $C$ suma los aciertos y $P$ suma los pares posibles de las $m$ palabras esperadas. El cociente pondera cada palabra según su número de pares posibles y se convierte mediante la regla de la Ecuación~\eqref{eq:cls-escala}.
 \begin{equation}
  C=\sum_{i=1}^{m}C(w_i,v_i),\qquad
  P=\sum_{i=1}^{m}(|w_i|+1),\qquad
  S_{\mathrm{CLS}}=10\frac{C}{P}\quad(P>0).
  \label{eq:cls-implementado}
 \end{equation}
-El servicio redondea el puntaje sugerido a dos decimales y retorna \texttt{correctas}, \texttt{posibles}, \texttt{puntaje\_sugerido} y el detalle \texttt{por\_palabra}. Si no hay secuencias posibles, el puntaje es \texttt{null}.
+El servicio redondea el puntaje sugerido a dos decimales y retorna \texttt{correctas}, \texttt{posibles}, \texttt{puntaje\_sugerido} y el detalle \texttt{por\_palabra}. Si no hay secuencias posibles, el puntaje es \texttt{null}. La Tabla~\ref{tab:ejemplos-cls-diseno} muestra ejemplos de transcripciones y sus puntajes CLS.
 
 \begin{table}[H]
 \centering
@@ -98,17 +99,18 @@ Los conteos y la confirmación son claves de \texttt{sugerencias\_json}, no colu
 \texttt{Servicios/legibilidad.py} ya propone cuatro medidas independientes del CLS: alineación, tamaño, espaciado e inclinación. Agrupa palabras en renglones por solapamiento vertical de sus cajas y utiliza las letras reconocidas como apoyo geométrico. La implementación no mide uniformidad del grosor.
 
 \begin{itemize}
-    \item \textbf{Alineación:} ajusta una recta por mínimos cuadrados a la base de letras sin descendentes, con al menos tres puntos por renglón. Calcula el error cuadrático medio de los residuos, lo divide entre la altura mediana y combina los renglones ponderando sus puntos.
+    \item \textbf{Alineación:} ajusta una recta por mínimos cuadrados a la base de letras sin descendentes, con al menos tres puntos por renglón. Calcula la raíz de la media de los residuos al cuadrado, la divide entre la altura mediana y combina los renglones ponderándolos por su número de puntos.
     \item \textbf{Tamaño:} calcula el coeficiente de variación de alturas de al menos tres minúsculas del conjunto de letras comparables definido en el servicio.
     \item \textbf{Espaciado:} calcula el coeficiente de variación de los huecos entre palabras; si hay menos de dos, utiliza los huecos entre letras. Si la media de los huecos es no positiva, propone cero.
     \item \textbf{Inclinación:} analiza píxeles con intensidad menor que 128 dentro de las cajas de letras y estima un ángulo respecto a la vertical mediante momentos de la tinta. Promedia los ángulos absolutos ponderados por la cantidad de tinta.
 \end{itemize}
 
-Las desviaciones se convierten a una sugerencia entre 0 y 10 mediante:
+La conversión a un puntaje de legibilidad es una regla de elaboración propia, implementada en \texttt{Servicios/legibilidad.py}. Para cada desviación $d$, se fija un puntaje de 10 en el umbral $t_{\mathrm{bueno}}$ y uno de 0 en $t_{\mathrm{malo}}$, con $t_{\mathrm{bueno}}<t_{\mathrm{malo}}$. La interpolación lineal mide la distancia de $d$ al umbral de cero, $t_{\mathrm{malo}}-d$, como fracción del intervalo entre los dos umbrales. La Ecuación~\eqref{eq:legibilidad-lineal} limita esa fracción al intervalo de 0 a 1 y la multiplica por 10.
 \begin{equation}
  Q(d)=10\max\left(0,\min\left(1,
  \frac{t_{\mathrm{malo}}-d}{t_{\mathrm{malo}}-t_{\mathrm{bueno}}}\right)\right).
+ \label{eq:legibilidad-lineal}
 \end{equation}
-Los pares de tolerancias iniciales $(t_{\mathrm{bueno}},t_{\mathrm{malo}})$ son $(0.05,0.35)$ para alineación, $(0.10,0.50)$ para tamaño, $(0.15,0.80)$ para espaciado y $(10,40)$ grados para inclinación. Son parámetros del código pendientes de calibración pedagógica, no resultados de una validación con alumnos.
+El servicio redondea la sugerencia a un decimal. El intervalo entre umbrales va de $0.05$ a $0.35$ en alineación, de $0.10$ a $0.50$ en tamaño, de $0.15$ a $0.80$ en espaciado y de $10$ a $40$ grados en inclinación. Estos parámetros del código están pendientes de calibración pedagógica.
 
 Una medida sin información suficiente se representa con \texttt{null}. La sugerencia global promedia solo las medidas disponibles y conserva los valores crudos en \texttt{detalle}. Para confirmar legibilidad, el contrato exige las cuatro medidas entre 0 y 10; el DAO las almacena en \texttt{Analisis\_Caligrafico}, con el contexto sugerido en \texttt{observaciones}. El OCR, CLS y la legibilidad deben validarse por separado según la Sección~\ref{sec:validacion-vision}.

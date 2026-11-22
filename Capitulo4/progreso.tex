@@ -7,12 +7,12 @@ El promedio ortográfico es la media aritmética de \texttt{ortografia\_score} d
 
 La legibilidad usa las medidas confirmadas de alineación, tamaño, espaciado e inclinación. La vista \texttt{vw\_Progreso\_Alumno} promedia cada medida por alumno y calcula la media de las cuatro. El contrato de confirmación exige las cuatro medidas completas, lo que evita que una nueva evaluación parcial anule el promedio.
 
-En el resumen grupal, cuando existen ambas dimensiones se utiliza:
+Para el resumen grupal se adoptó una ponderación igual de los promedios de ortografía ($O$) y legibilidad ($L$), ambos en la escala de 0 a 10. Cuando existen los dos, la Ecuación~\eqref{eq:promedio-general} asigna la mitad del peso a cada uno. Esta regla se muestra en el Código~\ref{lst:calculo_progreso}.
 \begin{equation}
- G=\frac{O+L}{2},
+ G=\frac{O+L}{2}.
  \label{eq:promedio-general}
 \end{equation}
-donde $O$ es el promedio ortográfico y $L$ el promedio de legibilidad. Si solo existe una dimensión, la vista usa su valor como promedio general. Si no existe ninguna, retorna \texttt{null}; la ausencia de datos no equivale a una puntuación de cero.
+Si solo existe una dimensión, la vista \texttt{vw\_Progreso\_Alumno} usa su valor como promedio general. Si no existe ninguna, retorna \texttt{null}. La Tabla~\ref{tab:categorias-progreso} resume las categorías operativas del seguimiento grupal, que se usan para priorizar la revisión del tutor.
 
 \begin{table}[H]
 \centering
@@ -45,7 +45,7 @@ La corrección de un análisis reemplaza sus valores anteriores. El historial co
 \subsubsection{Resumen individual del alumno}
 \texttt{GET /api/alumno/progreso} consulta los intentos del usuario autenticado y llama a \texttt{resumir\_progreso}. Su campo \texttt{promedio\_general} representa exclusivamente el promedio CLS confirmado, aunque el resumen grupal del tutor utiliza ese nombre para combinar ortografía y legibilidad. Esta diferencia debe mantenerse visible al interpretar ambas pantallas.
 
-El resultado incluye total de intentos, cantidad con CLS registrado, promedio, mejor puntuación, distribución por tipo de ejercicio y los ocho intentos más recientes. Un intento sin CLS aporta al total y al historial, pero no al promedio ni a la mejor puntuación. La racha cuenta días consecutivos con entregas, terminando hoy o ayer; no requiere que esas entregas ya estén evaluadas.
+El resultado incluye total de intentos, cantidad con CLS registrado, promedio, mejor puntuación, distribución por tipo de ejercicio y los ocho intentos más recientes. Un intento sin CLS aporta al total y al historial, pero no al promedio ni a la mejor puntuación. La racha cuenta días consecutivos con entregas, terminando hoy o ayer; no requiere que esas entregas ya estén evaluadas. El Código~\ref{lst:progreso-response} muestra un ejemplo de la respuesta con dos intentos calificados y uno pendiente de revisión.
 
 \noindent\begin{minipage}{\linewidth}
 \begin{lstlisting}[language=JSON, caption={Ejemplo ilustrativo del resumen individual}, label={lst:progreso-response}]

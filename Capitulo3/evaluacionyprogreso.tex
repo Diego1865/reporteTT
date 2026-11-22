@@ -10,12 +10,13 @@ La evaluación sigue el criterio de secuencias de letras expuesto en la Sección
 Cuando el ejercicio admite varias respuestas, la comparación preliminar selecciona la más cercana a la transcripción y calcula el CLS respecto a ella. La implementación conserva las diferencias entre mayúsculas, tildes y ñ; para el conteo extrae palabras y omite números y signos de puntuación. Los guiones entre letras separan unidades, como ocurre en ejercicios de sílabas. Una palabra esperada que falta aporta cero secuencias correctas. Las palabras adicionales se señalan en la comparación preliminar, aunque el cálculo actual de CLS no les asigna una penalización adicional.
 
 \begin{samepage}
-Si $C$ es el número de secuencias correctas y $P$ el de secuencias posibles, el puntaje sugerido se obtiene mediante:
-\[
+Si $C$ es el número de secuencias correctas y $P$ el de secuencias posibles, el cociente $C/P$ expresa la proporción de aciertos entre 0 y 1. Graf-IA multiplica esa proporción por 10 para reportar el puntaje en la escala de la aplicación. La regla queda expresada en la Ecuación~\eqref{eq:cls-escala}.
+\begin{equation}
     S_{\mathrm{CLS}} = 10\frac{C}{P}, \qquad P>0.
-\]
+    \label{eq:cls-escala}
+\end{equation}
 \end{samepage}
-La conversión a la escala de 0 a 10 es una decisión de la aplicación. El tutor puede corregir $C$ tras revisar la imagen; $P$ se obtiene de la referencia del ejercicio. Por ejemplo, escribir \textit{pato} frente a \textit{plato} conserva 4 de 6 secuencias y produce una sugerencia de 6.67. Esta medida expresa coincidencias ortográficas, sin medir por sí misma la legibilidad ni la gravedad pedagógica de un error.
+El tutor puede corregir $C$ tras revisar la imagen. El denominador $P$ se obtiene de la referencia del ejercicio y, si es cero, el puntaje queda sin valor. Por ejemplo, escribir \textit{pato} frente a \textit{plato} conserva cuatro de seis secuencias y da una sugerencia de 6.67. Esta medida expresa coincidencias ortográficas, sin medir por sí misma la legibilidad ni la gravedad pedagógica de un error.
 
 \subsubsection{Sugerencias de legibilidad}
 

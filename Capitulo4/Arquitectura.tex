@@ -3,7 +3,7 @@
 
 La arquitectura de la plataforma se basa en el patrón MVC, que organiza el sistema según tres responsabilidades: representar los datos y las reglas de la aplicación, presentar la información al usuario y atender sus solicitudes. En este proyecto, la Vista se implementa con Next.js y componentes React; el Controlador, con las rutas y dependencias de FastAPI; y el Modelo, con los módulos de datos, acceso a persistencia y servicios de evaluación del Back-End. SQL Server proporciona el almacenamiento del Modelo.
 
-MVC se aplica en una organización web con el Front-End separado de la API. La Vista envía solicitudes HTTP al Controlador y actualiza sus componentes con las respuestas JSON. El Controlador valida la solicitud, verifica permisos y delega las operaciones al Modelo. El cambio de la evaluación ortográfica a CLS modifica las reglas de evaluación dentro del Modelo y los datos mostrados en la Vista, manteniendo esta organización MVC.
+MVC se aplica en una organización web con el Front-End separado de la API. La Vista envía al Controlador solicitudes mediante el protocolo de transferencia de hipertexto (\textit{Hypertext Transfer Protocol}, HTTP) y actualiza sus componentes con las respuestas JSON. El Controlador valida la solicitud, verifica permisos y delega las operaciones al Modelo. El cambio de la evaluación ortográfica a CLS modifica las reglas de evaluación dentro del Modelo y los datos mostrados en la Vista, manteniendo esta organización MVC.
 
 \subsubsection{Correspondencia de MVC con el proyecto}
 \begin{itemize}
