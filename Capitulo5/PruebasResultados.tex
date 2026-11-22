@@ -5,7 +5,9 @@ La verificación del sistema incluyó pruebas automatizadas, una sesión con alu
 
 \subsubsection{Verificación automatizada}
 
-Se ejecutaron 102 pruebas unitarias de la versión revisada sin llamar a Google Cloud Vision. Todas pasaron. Se comprobaron, entre otras funciones, la consistencia del catálogo y sus migraciones, la evaluación de dictados y la conservación de mayúsculas y acentos en el cálculo del CER. También se verificaron las reglas de legibilidad y los datos que alimentan el progreso. La precisión del OCR se midió aparte, con las imágenes de la Sección~\ref{sec:resultados-cer}.
+Se ejecutaron 102 pruebas unitarias de la versión revisada sin llamar a Google Cloud Vision. Todas pasaron. Se comprobaron, entre otras funciones, la consistencia del catálogo y sus migraciones, la evaluación de dictados y la conservación de mayúsculas y acentos en el cálculo del CER. También se verificaron las reglas de legibilidad y los datos que alimentan el progreso. La precisión del OCR se midió aparte, con las imágenes de la Sección~\ref{sec:resultados-cer}. Para verificar el cálculo del CLS se compararon los puntajes del sistema con el conteo
+manual de 50 casos con resultado conocido, incluidos los ejemplos de la Sección~\ref{sec:cls}, palabras con omisiones, sustituciones y uniones de palabras.
+En todos los casos el puntaje calculado coincidió con el conteo manual.
 
 \input{Capitulo5/disenoPruebas}
 \input{Capitulo5/resultadosAlumnos}

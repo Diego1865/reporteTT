@@ -3,20 +3,28 @@
 \addcontentsline{toc}{section}{Conclusiones}
 \section*{Conclusiones}
 
-Graf-IA integró la práctica, la entrega y la revisión de escritura manuscrita para primer grado. El alumno puede escribir en el lienzo o entregar una fotografía. El tutor contrasta la entrega con la transcripción y las sugerencias de ortografía y legibilidad. El sistema calcula el progreso y propone actividades de refuerzo a partir de los puntajes confirmados.
+La aplicación web integró la práctica, la entrega y la revisión de escritura manuscrita para primer grado. El alumno puede escribir en el lienzo o entregar una fotografía. El tutor contrasta la entrega con la transcripción y las sugerencias de ortografía y legibilidad. El sistema calcula el progreso y propone actividades de refuerzo a partir de los puntajes confirmados.
 
 En la sesión escolar, 16 de 17 alumnos dijeron que volverían a practicar y 10 de 17 consideraron fácil escribir en pantalla. Ambos docentes dieron la valoración máxima a la claridad de la calificación sugerida, a la posibilidad de revisarla y a la utilidad de la vista de progreso. Para valorar cambios en la escritura hace falta un seguimiento con mediciones antes y después.
 
-La prueba técnica obtuvo un CER de 13.75\,\% en 80 imágenes sintéticas en español de OpenHand-Synth. Los resultados de UJI y Ticha corresponden a letras aisladas y a renglones históricos, respectivamente. Con 24 entregas de 17 alumnos de primer grado, el CER fue de 14.16\,\% al comparar solo letras y espacios: 12.95\,\% en el lienzo y 14.71\,\% en fotografías del cuaderno. La meta de CER de 15\,\% o menos se cumple de forma preliminar con esta muestra; su confirmación requiere un conjunto más amplio. También resta medir la concordancia del CLS con la revisión manual y calibrar las cuatro medidas de legibilidad con valoraciones docentes.
+La prueba técnica obtuvo un CER de 13.75\,\% en 80 imágenes sintéticas en español de OpenHand-Synth. Los otros conjuntos evaluados corresponden a letras aisladas y a renglones históricos, respectivamente. El cumplimiento de la meta de CER de 15\,\% o menos en escritura de primer grado queda pendiente. El cálculo del CLS coincidió en todos los casos de prueba con el conteo
+manual realizado sobre el mismo texto, lo que verifica su implementación; sin embargo,
+la concordancia con la revisión del tutor (OE-05) depende de la precisión del texto
+reconocido por el OCR, por lo que su medición se realizará junto con la evaluación del
+CER en escritura de primer grado. También queda pendiente calibrar las cuatro medidas de
+legibilidad con valoraciones docentes.
 
 \phantomsection
 \addcontentsline{toc}{section}{Trabajo a futuro}
 \section*{Trabajo a futuro}
 
-Reunir entregas de alumnos de primer grado desde el lienzo y en fotografías. Identificar las imágenes mediante códigos y transcribir fielmente lo escrito, incluidas las faltas de ortografía. Separar las muestras por alumno entre calibración y evaluación permitirá reportar CER y WER por tipo de captura.
+Como parte de las posibles mejoras y extensiones del sistema, se contempla ampliar las capacidades de evaluación ortográfica mediante la incorporación de técnicas de NLP que permitan analizar textos de escritura libre. Actualmente, la evaluación mediante el método CLS requiere que cada ejercicio cuente con una respuesta esperada, por lo que integrar mecanismos capaces de identificar errores y sugerir correcciones en textos redactados por los propios alumnos permitiría extender su aplicación a actividades de redacción de enunciados y textos breves.
 
-Comparar el CLS sugerido con el conteo manual del tutor y documentar el criterio de concordancia para evaluar la meta del 85\,\%. Acordar una rúbrica para alineación, tamaño, espaciado e inclinación. Con esa rúbrica se podrán ajustar los umbrales en el conjunto de calibración y medir las diferencias con la revisión docente en el conjunto reservado.
+Asimismo, se considera importante fortalecer las características de accesibilidad de la aplicación, particularmente para aquellos alumnos que todavía no cuentan con una lectura fluida. Para ello, podrían incorporarse recursos como instrucciones y retroalimentación mediante audio, así como opciones para ajustar el tamaño de los textos y mejorar la identificación de los elementos visuales mediante íconos. Estas mejoras permitirían ofrecer una experiencia de uso más adecuada a las diferentes necesidades de los alumnos.
 
-Probar los controles y el lienzo en pantallas de distintos tamaños. Comprobar si un ejemplo inicial facilita la comprensión de las actividades. Preparar una guía docente para asignar ejercicios y revisar las sugerencias. El piloto de un mes permitirá observar el uso repetido y registrar cambios en la escritura.
+Otra posibilidad de crecimiento consiste en ampliar el alcance del sistema hacia otros grados escolares y estilos de escritura. En particular, podría extenderse el catálogo de ejercicios a segundo grado de primaria e incorporar actividades de escritura en letra cursiva, considerando que este estilo requiere criterios y métricas de legibilidad específicos para evaluar adecuadamente sus características.
 
-Completar el envío de evidencias de las prácticas de refuerzo y su revisión por el tutor. Incorporar la comprobación de resolución mínima y verificarla en los dispositivos que se utilicen en el piloto.
+Por otra parte, con la disponibilidad de un historial de interacciones más amplio, sería posible desarrollar un mecanismo de recomendaciones adaptativas que considere el desempeño y la evolución individual de cada alumno. De esta manera, la aplicación podría ajustar progresivamente la dificultad de los ejercicios y seleccionar actividades de refuerzo de acuerdo con las necesidades de aprendizaje identificadas durante su utilización.
+
+Finalmente, se considera pertinente realizar un estudio que permita evaluar el impacto pedagógico de la aplicación en el desarrollo de las habilidades de escritura de los alumnos. Para ello, sería conveniente realizar mediciones antes y después de un periodo de utilización del sistema, así como establecer un grupo de comparación. Esto permitiría obtener evidencia sobre los posibles beneficios de la herramienta y valorar su contribución al proceso de enseñanza y aprendizaje de la escritura.
+
